@@ -1,0 +1,4 @@
+// Copy this file to ios/Flutter/Signing.xcconfig for local signing only.
+// Choose a bundle identifier that is unique in your Apple Developer account.
+APP_BUNDLE_IDENTIFIER = com.cw.kiddo.play
+APP_DEVELOPMENT_TEAM = YOUR_TEAM_ID

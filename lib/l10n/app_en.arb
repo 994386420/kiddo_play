@@ -1,0 +1,309 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kiddo Play",
+  "homeTitle": "Kiddo Playland",
+  "homeSubtitle": "Let's learn and play together today!",
+  "homeStartGame": "Start Game",
+  "homeChooseGame": "Choose Game",
+  "homeParentEntry": "Parent Center",
+  "homeParentComingSoon": "Parent entry is coming soon.",
+  "homeWelcomeSubtitle": "Let's discover something new today!",
+  "homeGreeting": "{name}, let's learn carefully today!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWelcomeTitle": "Hello, {name}! 👋",
+  "@homeWelcomeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeParentProtected": "PIN Protected",
+  "splashSubtitle": "Bright minds, happy growth",
+  "gameSelectTitle": "Choose a Game",
+  "gameSelectSubtitle": "Finish the previous game to unlock the next one!",
+  "gameSelectUnlocked": "Unlocked",
+  "gameSelectUnlockSoon": "Unlocking Soon",
+  "gameSelectLocked": "Locked",
+  "gameSelectLockedDescription": "Finish the previous game to unlock this one!",
+  "gameSelectLockedHint": "Complete the previous game first to unlock this stage!",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "difficultyHard": "Hard",
+  "difficultyEasySummary": "2 choices · 3 rounds",
+  "difficultyMediumSummary": "4 choices · 5 rounds",
+  "difficultyHardSummary": "4 choices · 7 rounds",
+  "difficultyEasyDescription": "Gentle and fun for new learners!",
+  "difficultyMediumDescription": "A balanced challenge for today!",
+  "difficultyHardDescription": "A bigger challenge for little masters!",
+  "difficultySelectTitle": "Choose Difficulty",
+  "difficultySelectSubtitle": "Pick the challenge that fits best!",
+  "difficultySelectHint": "Every first-try correct answer earns 1 star. Higher difficulty gives more chances to shine!",
+  "difficultySelectLockedDescription": "Finish the previous difficulty to unlock this one!",
+  "difficultySelectLockedHint": "Complete the previous difficulty first, then come back for this challenge!",
+  "difficultyOptionCountSuffix": " choices",
+  "difficultyRoundCountSuffix": " rounds",
+  "gameColorMatchTitle": "Color Match",
+  "gameColorMatchDescription": "Learn colors and find the matching one!",
+  "gameNumberTitle": "Number Fun",
+  "gameNumberDescription": "Count carefully and choose the right number!",
+  "gameShapeTitle": "Shape Match",
+  "gameShapeDescription": "Spot circles, triangles, stars and more!",
+  "gameAnimalTitle": "Animal Sounds",
+  "gameAnimalDescription": "Listen carefully and guess the animal!",
+  "gamePuzzleTitle": "Simple Puzzle",
+  "gamePuzzleDescription": "Place the pieces in the right spot to finish the picture!",
+  "roundCounter": "Round {round} / {total}",
+  "@roundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleRoundCounter": "Level {round} / {total}",
+  "@puzzleRoundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "colorMatchPrompt": "Can you find this color?",
+  "feedbackCorrect": "Amazing! You got it!",
+  "feedbackTryAgain": "Try again, you can do it!",
+  "pauseStatus": "Game paused",
+  "pauseContinue": "Continue Game",
+  "pauseRestart": "Restart",
+  "pauseQuit": "Quit to Game List",
+  "pauseTapOutsideHint": "Tap outside the dialog to continue",
+  "soundOnTooltip": "Turn sound on",
+  "soundOffTooltip": "Turn sound off",
+  "numberPrompt": "How many do you see?",
+  "numberCorrect": "Great counting! That's right!",
+  "numberWrong": "Count again carefully!",
+  "shapePrompt": "What shape is this?",
+  "shapePromptHard": "Can you name this shape without a hint?",
+  "shapeCorrect": "You found the shape! Great job!",
+  "shapeWrong": "Almost there, try another one!",
+  "shapeHardModeHint": "no name hint",
+  "animalPrompt": "Listen to the sound. Who is it?",
+  "animalPromptHard": "Listen once and guess the animal!",
+  "animalPlaySound": "Play Sound",
+  "animalReplay": "Play Again",
+  "animalReplayBlocked": "Hard mode: you can only hear it once!",
+  "animalCorrect": "You guessed it right! Brilliant!",
+  "animalWrong": "Listen again in your mind and try once more!",
+  "animalHardModeHint": "one listen only",
+  "puzzleReference": "Reference",
+  "puzzlePrompt": "Place each piece where it belongs.",
+  "puzzlePromptHard": "Match the reference picture without position hints.",
+  "puzzlePieceSelected": "Piece selected, tap a slot to place it",
+  "puzzleSlotLabel": "Slot {slot}",
+  "@puzzleSlotLabel": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleTrayTitle": "Piece tray — tap a piece, then tap a slot:",
+  "puzzleHardModeHint": "no slot hints",
+  "puzzleCorrect": "Puzzle complete! Fantastic!",
+  "puzzleWrong": "That piece doesn't fit there. Try another spot!",
+  "puzzleSelectHint": "Pick a piece first, then tap a slot.",
+  "puzzleTapSlotHint": "Great, now tap the matching slot.",
+  "rewardEncouragement1": "Amazing work!",
+  "rewardEncouragement2": "You were awesome!",
+  "rewardEncouragement3": "Super star performance!",
+  "rewardEncouragement4": "Little genius at work!",
+  "rewardEncouragement5": "You are doing great!",
+  "rewardCompleted": "You finished {gameName}!",
+  "@rewardCompleted": {
+    "placeholders": {
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardDifficultyLabel": "Difficulty: {difficulty}",
+  "@rewardDifficultyLabel": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardStarsResult": "You earned {earned} / {total} stars!",
+  "@rewardStarsResult": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardUnlockedTitle": "New game unlocked!",
+  "rewardUnlockedDescription": "{emoji} {gameName} is ready for your next challenge!",
+  "@rewardUnlockedDescription": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardPlayAgain": "Play Again",
+  "rewardTryOtherDifficulty": "Try Another Difficulty",
+  "rewardChooseOtherGame": "Choose Another Game",
+  "rewardBackHome": "Back Home",
+  "parentDashboardHeaderTag": "PARENT CENTER",
+  "parentDashboardTitle": "Parent Center 👨‍👩‍👧",
+  "parentTabOverview": "Overview",
+  "parentTabProgress": "Progress",
+  "parentTabSettings": "Settings",
+  "parentOverviewStars": "Total Stars",
+  "parentOverviewUnlockedGames": "Unlocked Games",
+  "parentOverviewPlayed": "Total Plays",
+  "parentOverviewTodayStars": "Stars Today",
+  "parentOverviewProfileTitle": "Your Little Learner",
+  "parentOverviewTotalStars": "{count} stars earned in total",
+  "@parentOverviewTotalStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentOverviewRecentTitle": "📋 Recent Activity",
+  "parentOverviewNoActivity": "No play history yet",
+  "parentProgressSummary": "{unlocked} of {total} games unlocked",
+  "@parentProgressSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "unlocked": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressUnlocked": "🔓 Unlocked",
+  "parentProgressLocked": "🔒 Locked",
+  "parentProgressNotStarted": "Not played yet",
+  "parentProgressLockedHint": "Finish the previous game to unlock this one",
+  "parentProgressPlayedCount": "Played {count} times",
+  "@parentProgressPlayedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressDifficultyTag": "Recent: {difficulty}",
+  "@parentProgressDifficultyTag": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "parentProgressUnknownDifficulty": "Unknown",
+  "parentProgressBestRate": "Best star rate",
+  "parentProgressLastPlayed": "📅 Last played: {time}",
+  "@parentProgressLastPlayed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentSettingsProfileSection": "👶 Child Profile",
+  "parentSettingsAvatarTitle": "Avatar",
+  "parentSettingsAvatarSubtitle": "Tap to change the avatar",
+  "parentSettingsNameHint": "Child nickname",
+  "parentSettingsSave": "Save",
+  "parentSettingsAppSection": "⚙️ App Settings",
+  "parentSettingsSoundTitle": "Game Sound",
+  "parentSettingsSoundOn": "Enabled",
+  "parentSettingsSoundOff": "Disabled",
+  "parentSettingsSecuritySection": "🔒 Security",
+  "parentSettingsChangePinTitle": "Change PIN",
+  "parentSettingsChangePinSubtitle": "Update the 4-digit parent PIN",
+  "parentSettingsDangerSection": "⚠️ Danger Zone",
+  "parentSettingsResetWarning": "Resetting will clear all stars, play records, and unlock progress. This cannot be undone.",
+  "parentSettingsResetButton": "Reset All Learning Progress",
+  "parentSettingsResetDone": "Reset completed!",
+  "parentSettingsResetConfirmTitle": "Reset everything?",
+  "parentSettingsResetConfirmBody": "This will remove all stars, play history, and unlocked game progress. This action cannot be undone.",
+  "parentSettingsCancel": "Cancel",
+  "parentSettingsConfirmReset": "Confirm Reset",
+  "parentTimeToday": "Today {time}",
+  "@parentTimeToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeYesterday": "Yesterday {time}",
+  "@parentTimeYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeDate": "{month}/{day} {time}",
+  "@parentTimeDate": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinErrorWrong": "Incorrect PIN. Please try again.",
+  "parentPinErrorMismatch": "The two PIN entries did not match. Please set it again.",
+  "parentPinTitleVerify": "Parent Verification",
+  "parentPinTitleSetup": "Set a PIN",
+  "parentPinTitleConfirm": "Confirm PIN",
+  "parentPinTitleChange": "Set New PIN",
+  "parentPinTitleChangeConfirm": "Confirm New PIN",
+  "parentPinSubtitleVerify": "Enter the 4-digit PIN to open the parent center",
+  "parentPinSubtitleSetup": "Create a 4-digit PIN for the parent center",
+  "parentPinSubtitleConfirm": "Enter the same 4-digit PIN again",
+  "parentPinSubtitleChange": "Enter your new 4-digit PIN",
+  "parentPinSubtitleChangeConfirm": "Enter the same new PIN again",
+  "parentPinSuccess": "✅ Verified. Opening the parent center…",
+  "parentPinDefaultHint": "Forgot it? The default PIN is {pin}",
+  "@parentPinDefaultHint": {
+    "placeholders": {
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinSetupHint": "💡 This PIN helps prevent children from entering the parent center by mistake. It is meant as a simple protection step."
+}

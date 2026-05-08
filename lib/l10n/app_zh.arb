@@ -1,0 +1,309 @@
+{
+  "@@locale": "zh",
+  "appTitle": "儿童益智乐园",
+  "homeTitle": "儿童益智乐园",
+  "homeSubtitle": "今天也要认真学习哦！",
+  "homeStartGame": "开始游戏",
+  "homeChooseGame": "选择游戏",
+  "homeParentEntry": "家长中心",
+  "homeParentComingSoon": "家长入口即将上线。",
+  "homeWelcomeSubtitle": "今天一起来学习新知识吧！",
+  "homeGreeting": "{name}，今天也要认真学习哦！",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWelcomeTitle": "{name}，你好！👋",
+  "@homeWelcomeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeParentProtected": "密码保护",
+  "splashSubtitle": "智慧启航 · 快乐成长",
+  "gameSelectTitle": "选择游戏",
+  "gameSelectSubtitle": "通关前一个游戏来解锁新关卡！",
+  "gameSelectUnlocked": "已解锁",
+  "gameSelectUnlockSoon": "即将解锁",
+  "gameSelectLocked": "未解锁",
+  "gameSelectLockedDescription": "通关上一个游戏来解锁！",
+  "gameSelectLockedHint": "先完成上一个游戏来解锁这一关吧！",
+  "difficultyEasy": "简单",
+  "difficultyMedium": "中等",
+  "difficultyHard": "困难",
+  "difficultyEasySummary": "2个选项 · 3道题",
+  "difficultyMediumSummary": "4个选项 · 5道题",
+  "difficultyHardSummary": "4个选项 · 7道题",
+  "difficultyEasyDescription": "轻松有趣，适合初学小朋友！",
+  "difficultyMediumDescription": "标准难度，正常挑战等你！",
+  "difficultyHardDescription": "加油，你是最强小天才！",
+  "difficultySelectTitle": "选择难度",
+  "difficultySelectSubtitle": "选一个适合你的挑战等级吧！",
+  "difficultySelectHint": "每道题第一次答对得 1 颗星星，难度越高、获得星星越多！",
+  "difficultySelectLockedDescription": "通关上一个难度来解锁！",
+  "difficultySelectLockedHint": "先完成上一个难度，再来挑战这里吧！",
+  "difficultyOptionCountSuffix": "个选项",
+  "difficultyRoundCountSuffix": "道题",
+  "gameColorMatchTitle": "颜色配对",
+  "gameColorMatchDescription": "认识各种颜色，找到正确的颜色吧！",
+  "gameNumberTitle": "数字认知",
+  "gameNumberDescription": "数一数有几个，挑战数数游戏！",
+  "gameShapeTitle": "形状匹配",
+  "gameShapeDescription": "认识圆形、三角形、五角星等形状！",
+  "gameAnimalTitle": "动物声音",
+  "gameAnimalDescription": "听声音猜动物，认识可爱的小动物！",
+  "gamePuzzleTitle": "简单拼图",
+  "gamePuzzleDescription": "把拼图碎片放到正确位置，还原图案！",
+  "roundCounter": "第 {round} / {total} 题",
+  "@roundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleRoundCounter": "第 {round} / {total} 关",
+  "@puzzleRoundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "colorMatchPrompt": "请找到这个颜色",
+  "feedbackCorrect": "太棒了！答对啦！",
+  "feedbackTryAgain": "再试试，你可以的！",
+  "pauseStatus": "游戏暂停中",
+  "pauseContinue": "继续游戏",
+  "pauseRestart": "重新开始",
+  "pauseQuit": "退出到游戏列表",
+  "pauseTapOutsideHint": "点击空白处也可继续游戏",
+  "soundOnTooltip": "开启音效",
+  "soundOffTooltip": "关闭音效",
+  "numberPrompt": "数一数，一共有几个？",
+  "numberCorrect": "数对了！太棒了！",
+  "numberWrong": "再数一数，你可以的！",
+  "shapePrompt": "这是什么形状？",
+  "shapePromptHard": "不用提示，猜猜这是什么形状？",
+  "shapeCorrect": "形状找到了！棒棒哒！",
+  "shapeWrong": "再试试，你可以的！",
+  "shapeHardModeHint": "无名称提示",
+  "animalPrompt": "听声音，猜猜我是谁？",
+  "animalPromptHard": "听一次声音，猜猜我是谁？",
+  "animalPlaySound": "播放声音",
+  "animalReplay": "再听一次",
+  "animalReplayBlocked": "困难模式：仅可听一次，加油！",
+  "animalCorrect": "猜对了！真聪明！",
+  "animalWrong": "再听听，你可以的！",
+  "animalHardModeHint": "仅听一次",
+  "puzzleReference": "参考图",
+  "puzzlePrompt": "按参考图，把碎片放到正确位置！",
+  "puzzlePromptHard": "按参考图拼好，没有位置提示哦！",
+  "puzzlePieceSelected": "已选中碎片，点格子放入",
+  "puzzleSlotLabel": "位置 {slot}",
+  "@puzzleSlotLabel": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleTrayTitle": "碎片区 — 点击选中，再点格子放入：",
+  "puzzleHardModeHint": "无位置提示",
+  "puzzleCorrect": "拼好了！太厉害了！",
+  "puzzleWrong": "放错啦，再试试其他位置！",
+  "puzzleSelectHint": "先点选碎片，再点格子放入",
+  "puzzleTapSlotHint": "很好，接着点一个正确位置吧",
+  "rewardEncouragement1": "太厉害了！",
+  "rewardEncouragement2": "你真的太棒了！",
+  "rewardEncouragement3": "超级无敌棒！",
+  "rewardEncouragement4": "小天才！",
+  "rewardEncouragement5": "你是最棒的！",
+  "rewardCompleted": "你完成了 {gameName} 挑战！",
+  "@rewardCompleted": {
+    "placeholders": {
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardDifficultyLabel": "难度：{difficulty}",
+  "@rewardDifficultyLabel": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardStarsResult": "获得 {earned} / {total} 颗星星！",
+  "@rewardStarsResult": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardUnlockedTitle": "新游戏已解锁！",
+  "rewardUnlockedDescription": "{emoji} {gameName} — 快去挑战吧！",
+  "@rewardUnlockedDescription": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardPlayAgain": "再玩一次",
+  "rewardTryOtherDifficulty": "换个难度再挑战",
+  "rewardChooseOtherGame": "选其他游戏",
+  "rewardBackHome": "返回首页",
+  "parentDashboardHeaderTag": "PARENT CENTER",
+  "parentDashboardTitle": "家长中心 👨‍👩‍👧",
+  "parentTabOverview": "概览",
+  "parentTabProgress": "进度",
+  "parentTabSettings": "设置",
+  "parentOverviewStars": "累计星星",
+  "parentOverviewUnlockedGames": "已解锁游戏",
+  "parentOverviewPlayed": "总游玩次数",
+  "parentOverviewTodayStars": "今日获星",
+  "parentOverviewProfileTitle": "你的小宝贝",
+  "parentOverviewTotalStars": "共获得 {count} 颗星星",
+  "@parentOverviewTotalStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentOverviewRecentTitle": "📋 近期游玩记录",
+  "parentOverviewNoActivity": "还没有游玩记录哦",
+  "parentProgressSummary": "共 {total} 个游戏 · 已解锁 {unlocked} 个",
+  "@parentProgressSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "unlocked": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressUnlocked": "🔓 已解锁",
+  "parentProgressLocked": "🔒 未解锁",
+  "parentProgressNotStarted": "还未开始游玩",
+  "parentProgressLockedHint": "通关前一个游戏来解锁",
+  "parentProgressPlayedCount": "已游玩 {count} 次",
+  "@parentProgressPlayedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressDifficultyTag": "最近：{difficulty}",
+  "@parentProgressDifficultyTag": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "parentProgressUnknownDifficulty": "未知",
+  "parentProgressBestRate": "最佳得星率",
+  "parentProgressLastPlayed": "📅 最后游玩：{time}",
+  "@parentProgressLastPlayed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentSettingsProfileSection": "👶 宝宝档案",
+  "parentSettingsAvatarTitle": "宝宝头像",
+  "parentSettingsAvatarSubtitle": "点击头像更换",
+  "parentSettingsNameHint": "宝宝的昵称",
+  "parentSettingsSave": "保存",
+  "parentSettingsAppSection": "⚙️ 应用设置",
+  "parentSettingsSoundTitle": "游戏音效",
+  "parentSettingsSoundOn": "已开启",
+  "parentSettingsSoundOff": "已关闭",
+  "parentSettingsSecuritySection": "🔒 安全",
+  "parentSettingsChangePinTitle": "修改密码",
+  "parentSettingsChangePinSubtitle": "更改家长中心的4位密码",
+  "parentSettingsDangerSection": "⚠️ 危险区域",
+  "parentSettingsResetWarning": "重置后，宝宝的所有游玩记录、星星、解锁进度将被清除，且无法恢复。",
+  "parentSettingsResetButton": "重置全部学习进度",
+  "parentSettingsResetDone": "已成功重置！",
+  "parentSettingsResetConfirmTitle": "确定要重置吗？",
+  "parentSettingsResetConfirmBody": "这将清除宝宝的所有星星、游玩记录和解锁进度，操作不可撤销。",
+  "parentSettingsCancel": "取消",
+  "parentSettingsConfirmReset": "确认重置",
+  "parentTimeToday": "今天 {time}",
+  "@parentTimeToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeYesterday": "昨天 {time}",
+  "@parentTimeYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeDate": "{month}月{day}日 {time}",
+  "@parentTimeDate": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinErrorWrong": "密码错误，请重试",
+  "parentPinErrorMismatch": "两次输入不一致，请重新设置",
+  "parentPinTitleVerify": "家长验证",
+  "parentPinTitleSetup": "设置密码",
+  "parentPinTitleConfirm": "确认密码",
+  "parentPinTitleChange": "设置新密码",
+  "parentPinTitleChangeConfirm": "确认新密码",
+  "parentPinSubtitleVerify": "请输入4位密码进入家长中心",
+  "parentPinSubtitleSetup": "为家长中心设置一个4位专属密码",
+  "parentPinSubtitleConfirm": "请再次输入相同的4位密码",
+  "parentPinSubtitleChange": "请输入您的新4位密码",
+  "parentPinSubtitleChangeConfirm": "请再次输入相同的新密码",
+  "parentPinSuccess": "✅ 验证成功，正在进入…",
+  "parentPinDefaultHint": "忘记密码？默认密码为 {pin}",
+  "@parentPinDefaultHint": {
+    "placeholders": {
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinSetupHint": "💡 此密码用于防止儿童误入家长中心，仅作简单保护用途。"
+}
