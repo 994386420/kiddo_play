@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 
 import '../../../app/localization.dart';
 import '../../../app/route_args.dart';
 import '../../../app/router.dart';
 import '../../../core/app_controllers.dart';
 import '../../../core/game_models.dart';
+import '../../../core/sound/app_audio_context.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
 import '../../../core/widgets/kid_badges.dart';
@@ -162,13 +166,32 @@ class AnimalQuestion {
 class AnimalSoundViewModel extends ChangeNotifier {
   AnimalSoundViewModel(this.args) {
     _question = _generateQuestion();
-    _tts = FlutterTts();
+    _voicePlayer = AudioPlayer(
+      playerId: 'animal-voice-${args.gameId.name}-${args.difficulty.name}',
+    );
+    _playbackCompleteSubscription = _voicePlayer.onPlayerComplete.listen((_) {
+      soundPlaying = false;
+      notifyListeners();
+    });
   }
+
+  static const _soundAssets = <String, String>{
+    'dog': 'assets/sounds/animals/dog.m4a',
+    'cat': 'assets/sounds/animals/cat.m4a',
+    'cow': 'assets/sounds/animals/cow.m4a',
+    'duck': 'assets/sounds/animals/duck.m4a',
+    'pig': 'assets/sounds/animals/pig.m4a',
+    'sheep': 'assets/sounds/animals/sheep.m4a',
+    'frog': 'assets/sounds/animals/frog.m4a',
+    'chick': 'assets/sounds/animals/chick.m4a',
+  };
 
   final GameRouteArgs args;
   final Random _random = Random();
-  late final FlutterTts _tts;
-  Timer? _timer;
+  late final AudioPlayer _voicePlayer;
+  late final StreamSubscription<void> _playbackCompleteSubscription;
+  final Map<String, Future<String>> _preparedSoundFiles = {};
+  Timer? _roundTimer;
 
   late AnimalQuestion _question;
   int round = 0;
@@ -192,7 +215,36 @@ class AnimalSoundViewModel extends ChangeNotifier {
 
   AnimalQuestion get question => _question;
 
-  Future<void> playSound(String languageCode) async {
+  String get _soundAssetPath =>
+      _soundAssets[question.target.id] ?? 'assets/sounds/animals/dog.m4a';
+
+  Future<String> _getPreparedSoundFile(String assetPath) {
+    final cached = _preparedSoundFiles[assetPath];
+    if (cached != null) {
+      return cached;
+    }
+
+    late final Future<String> futurePath;
+    futurePath = () async {
+      final byteData = await rootBundle.load(assetPath);
+      final tempDir = await getTemporaryDirectory();
+      final fileName = assetPath.split('/').last;
+      final outputDir = Directory('${tempDir.path}/kiddo_animal_sounds');
+      if (!outputDir.existsSync()) {
+        await outputDir.create(recursive: true);
+      }
+
+      final outputFile = File('${outputDir.path}/$fileName');
+      final bytes = byteData.buffer.asUint8List();
+      await outputFile.writeAsBytes(bytes, flush: true);
+      return outputFile.path;
+    }();
+
+    _preparedSoundFiles[assetPath] = futurePath;
+    return futurePath;
+  }
+
+  Future<void> playSound() async {
     if (noReplay && hasPlayedOnce) {
       return;
     }
@@ -200,17 +252,20 @@ class AnimalSoundViewModel extends ChangeNotifier {
     soundPlaying = true;
     notifyListeners();
 
-    await _tts.stop();
-    await _tts.setLanguage(languageCode == 'zh' ? 'zh-CN' : 'en-US');
-    await _tts.setSpeechRate(0.42);
-    await _tts.setPitch(languageCode == 'zh' ? 1.25 : 1.1);
-    await _tts.speak(question.target.sound(languageCode));
-
-    _timer?.cancel();
-    _timer = Timer(const Duration(milliseconds: 1200), () {
+    try {
+      await _voicePlayer.stop();
+      await _voicePlayer.setAudioContext(kiddoAudioContext);
+      await _voicePlayer.setPlayerMode(PlayerMode.mediaPlayer);
+      await _voicePlayer.setReleaseMode(ReleaseMode.stop);
+      await _voicePlayer.setVolume(0.94);
+      final filePath = await _getPreparedSoundFile(_soundAssetPath);
+      await _voicePlayer.play(DeviceFileSource(filePath));
+    } catch (error, stackTrace) {
+      debugPrint('Animal sound play failed for $_soundAssetPath: $error');
+      debugPrintStack(stackTrace: stackTrace);
       soundPlaying = false;
       notifyListeners();
-    });
+    }
   }
 
   void select(AnimalChoice animal) {
@@ -224,8 +279,8 @@ class AnimalSoundViewModel extends ChangeNotifier {
       answerState = AnimalAnswerState.correct;
       correctOptionId = animal.id;
       notifyListeners();
-      _timer?.cancel();
-      _timer = Timer(const Duration(milliseconds: 1000), () {
+      _roundTimer?.cancel();
+      _roundTimer = Timer(const Duration(milliseconds: 1000), () {
         if (round + 1 >= config.rounds) {
           pendingRewardArgs = RewardRouteArgs(
             gameId: args.gameId,
@@ -251,8 +306,8 @@ class AnimalSoundViewModel extends ChangeNotifier {
       answerState = AnimalAnswerState.wrong;
       wrongOptionId = animal.id;
       notifyListeners();
-      _timer?.cancel();
-      _timer = Timer(const Duration(milliseconds: 700), () {
+      _roundTimer?.cancel();
+      _roundTimer = Timer(const Duration(milliseconds: 700), () {
         answerState = AnimalAnswerState.idle;
         wrongOptionId = null;
         locked = false;
@@ -276,17 +331,14 @@ class AnimalSoundViewModel extends ChangeNotifier {
   }
 
   Future<void> stopSound() async {
-    if (!soundPlaying) {
-      return;
-    }
-    await _tts.stop();
+    await _voicePlayer.stop();
     soundPlaying = false;
     notifyListeners();
   }
 
   Future<void> reset() async {
-    _timer?.cancel();
-    await _tts.stop();
+    _roundTimer?.cancel();
+    await _voicePlayer.stop();
     _question = _generateQuestion();
     round = 0;
     stars = 0;
@@ -303,8 +355,10 @@ class AnimalSoundViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _tts.stop();
+    _roundTimer?.cancel();
+    unawaited(_voicePlayer.stop());
+    unawaited(_playbackCompleteSubscription.cancel());
+    unawaited(_voicePlayer.dispose());
     super.dispose();
   }
 }
@@ -611,7 +665,7 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
                                                   .read(
                                                       animalSoundViewModelProvider(
                                                           args))
-                                                  .playSound(languageCode);
+                                                  .playSound();
                                             },
                                       style: ElevatedButton.styleFrom(
                                         elevation: 0,

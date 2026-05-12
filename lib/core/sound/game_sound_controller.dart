@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_controllers.dart';
+import 'app_audio_context.dart';
 
 final gameSoundControllerProvider = Provider<GameSoundController>((ref) {
   final controller = GameSoundController();
@@ -140,11 +141,12 @@ class GameSoundController {
     }
 
     late final Future<AudioPool> poolFuture;
-    poolFuture = AudioPool.createFromAsset(
-      path: effect.assetPath,
+    poolFuture = AudioPool.create(
+      source: AssetSource(effect.assetPath),
       minPlayers: 1,
       maxPlayers: _sfxMaxPlayers,
       playerMode: PlayerMode.mediaPlayer,
+      audioContext: kiddoAudioContext,
     ).catchError((Object error, StackTrace stackTrace) {
       if (identical(_sfxPools[effect], poolFuture)) {
         _sfxPools.remove(effect);
@@ -164,6 +166,7 @@ class GameSoundController {
     _bgmPlaying = true;
 
     try {
+      await _bgmPlayer.setAudioContext(kiddoAudioContext);
       await _bgmPlayer.setPlayerMode(PlayerMode.mediaPlayer);
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
       await _bgmPlayer.setVolume(_bgmVolume);
