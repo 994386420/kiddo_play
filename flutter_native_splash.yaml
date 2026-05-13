@@ -4,7 +4,10 @@ flutter_native_splash:
   ios: true
   web: true
   fullscreen: true
+  ios_content_mode: scaleAspectFit
 
   android_12:
     color: "#BFE9FF"
     image: assets/images/branding/android12_splash_icon.png
+
+  image_ios: assets/images/branding/android12_splash_icon.png
