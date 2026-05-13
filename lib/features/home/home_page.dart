@@ -58,9 +58,11 @@ class HomePage extends ConsumerWidget {
       return context.l10n.homeStartGame;
     }
 
-    final prefix = Localizations.localeOf(context).languageCode == 'zh'
-        ? '继续：'
-        : 'Continue: ';
+    final prefix = switch (Localizations.localeOf(context).languageCode) {
+      'zh' => '继续：',
+      'ko' => '계속: ',
+      _ => 'Continue: ',
+    };
     final gameId = viewModel.quickStartGameId;
     return '$prefix${gameId.emoji} ${gameId.title(context.l10n)}';
   }

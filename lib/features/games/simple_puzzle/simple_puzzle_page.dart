@@ -27,6 +27,7 @@ class PuzzlePiece {
     required this.background,
     required this.color,
     required this.labelZh,
+    required this.labelKo,
     required this.labelEn,
   });
 
@@ -35,36 +36,44 @@ class PuzzlePiece {
   final Color background;
   final Color color;
   final String labelZh;
+  final String labelKo;
   final String labelEn;
 
   String label(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'zh'
-        ? labelZh
-        : labelEn;
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => labelZh,
+      'ko' => labelKo,
+      _ => labelEn,
+    };
   }
 }
 
 class PuzzleConfig {
   const PuzzleConfig({
     required this.nameZh,
+    required this.nameKo,
     required this.nameEn,
     required this.pieces,
   });
 
   final String nameZh;
+  final String nameKo;
   final String nameEn;
   final List<PuzzlePiece> pieces;
 
   String name(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'zh'
-        ? nameZh
-        : nameEn;
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => nameZh,
+      'ko' => nameKo,
+      _ => nameEn,
+    };
   }
 }
 
 const _puzzles = <PuzzleConfig>[
   PuzzleConfig(
     nameZh: '小动物',
+    nameKo: '귀여운 동물들',
     nameEn: 'Cute Animals',
     pieces: [
       PuzzlePiece(
@@ -73,6 +82,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '小狗',
+          labelKo: '강아지',
           labelEn: 'Dog'),
       PuzzlePiece(
           id: 'cat',
@@ -80,6 +90,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFCE4EC),
           color: Color(0xFFE91E63),
           labelZh: '小猫',
+          labelKo: '고양이',
           labelEn: 'Cat'),
       PuzzlePiece(
           id: 'rabbit',
@@ -87,6 +98,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFF8BBD9),
           color: Color(0xFFC2185B),
           labelZh: '小兔',
+          labelKo: '토끼',
           labelEn: 'Rabbit'),
       PuzzlePiece(
           id: 'frog',
@@ -94,11 +106,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFC8E6C9),
           color: Color(0xFF388E3C),
           labelZh: '青蛙',
+          labelKo: '개구리',
           labelEn: 'Frog'),
     ],
   ),
   PuzzleConfig(
     nameZh: '美味水果',
+    nameKo: '달콤한 과일',
     nameEn: 'Sweet Fruits',
     pieces: [
       PuzzlePiece(
@@ -107,6 +121,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFCDD2),
           color: Color(0xFFC62828),
           labelZh: '苹果',
+          labelKo: '사과',
           labelEn: 'Apple'),
       PuzzlePiece(
           id: 'banana',
@@ -114,6 +129,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '香蕉',
+          labelKo: '바나나',
           labelEn: 'Banana'),
       PuzzlePiece(
           id: 'grape',
@@ -121,6 +137,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFE1BEE7),
           color: Color(0xFF6A1B9A),
           labelZh: '葡萄',
+          labelKo: '포도',
           labelEn: 'Grape'),
       PuzzlePiece(
           id: 'orange',
@@ -128,11 +145,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFE0B2),
           color: Color(0xFFE64A19),
           labelZh: '橙子',
+          labelKo: '오렌지',
           labelEn: 'Orange'),
     ],
   ),
   PuzzleConfig(
     nameZh: '天气变化',
+    nameKo: '날씨 놀이',
     nameEn: 'Weather Fun',
     pieces: [
       PuzzlePiece(
@@ -141,6 +160,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '晴天',
+          labelKo: '맑음',
           labelEn: 'Sunny'),
       PuzzlePiece(
           id: 'rain',
@@ -148,6 +168,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFBBDEFB),
           color: Color(0xFF1565C0),
           labelZh: '雨天',
+          labelKo: '비',
           labelEn: 'Rainy'),
       PuzzlePiece(
           id: 'snow',
@@ -155,6 +176,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFE3F2FD),
           color: Color(0xFF0288D1),
           labelZh: '雪天',
+          labelKo: '눈',
           labelEn: 'Snowy'),
       PuzzlePiece(
           id: 'rainbow',
@@ -162,11 +184,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFCE4EC),
           color: Color(0xFFE91E63),
           labelZh: '彩虹',
+          labelKo: '무지개',
           labelEn: 'Rainbow'),
     ],
   ),
   PuzzleConfig(
     nameZh: '星空探险',
+    nameKo: '우주 여행',
     nameEn: 'Space Trip',
     pieces: [
       PuzzlePiece(
@@ -175,6 +199,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFE8EAF6),
           color: Color(0xFF3949AB),
           labelZh: '火箭',
+          labelKo: '로켓',
           labelEn: 'Rocket'),
       PuzzlePiece(
           id: 'star',
@@ -182,6 +207,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '星星',
+          labelKo: '별',
           labelEn: 'Star'),
       PuzzlePiece(
           id: 'moon',
@@ -189,6 +215,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFEDE7F6),
           color: Color(0xFF512DA8),
           labelZh: '月亮',
+          labelKo: '달',
           labelEn: 'Moon'),
       PuzzlePiece(
           id: 'planet',
@@ -196,11 +223,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFE0B2),
           color: Color(0xFFE64A19),
           labelZh: '星球',
+          labelKo: '행성',
           labelEn: 'Planet'),
     ],
   ),
   PuzzleConfig(
     nameZh: '海洋世界',
+    nameKo: '바다 세계',
     nameEn: 'Ocean World',
     pieces: [
       PuzzlePiece(
@@ -209,6 +238,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFE0B2),
           color: Color(0xFFE64A19),
           labelZh: '小鱼',
+          labelKo: '물고기',
           labelEn: 'Fish'),
       PuzzlePiece(
           id: 'octopus',
@@ -216,6 +246,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFE1BEE7),
           color: Color(0xFF6A1B9A),
           labelZh: '章鱼',
+          labelKo: '문어',
           labelEn: 'Octopus'),
       PuzzlePiece(
           id: 'crab',
@@ -223,6 +254,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFCDD2),
           color: Color(0xFFC62828),
           labelZh: '螃蟹',
+          labelKo: '게',
           labelEn: 'Crab'),
       PuzzlePiece(
           id: 'dolphin',
@@ -230,11 +262,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFBBDEFB),
           color: Color(0xFF1565C0),
           labelZh: '海豚',
+          labelKo: '돌고래',
           labelEn: 'Dolphin'),
     ],
   ),
   PuzzleConfig(
     nameZh: '交通工具',
+    nameKo: '탈것',
     nameEn: 'Vehicles',
     pieces: [
       PuzzlePiece(
@@ -243,6 +277,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFCDD2),
           color: Color(0xFFC62828),
           labelZh: '汽车',
+          labelKo: '자동차',
           labelEn: 'Car'),
       PuzzlePiece(
           id: 'bus',
@@ -250,6 +285,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '公交',
+          labelKo: '버스',
           labelEn: 'Bus'),
       PuzzlePiece(
           id: 'plane',
@@ -257,6 +293,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFBBDEFB),
           color: Color(0xFF1565C0),
           labelZh: '飞机',
+          labelKo: '비행기',
           labelEn: 'Plane'),
       PuzzlePiece(
           id: 'ship',
@@ -264,11 +301,13 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFB2EBF2),
           color: Color(0xFF00838F),
           labelZh: '轮船',
+          labelKo: '배',
           labelEn: 'Ship'),
     ],
   ),
   PuzzleConfig(
     nameZh: '蔬菜乐园',
+    nameKo: '채소 나라',
     nameEn: 'Veggie Land',
     pieces: [
       PuzzlePiece(
@@ -277,6 +316,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFE0B2),
           color: Color(0xFFE64A19),
           labelZh: '胡萝卜',
+          labelKo: '당근',
           labelEn: 'Carrot'),
       PuzzlePiece(
           id: 'broccoli',
@@ -284,6 +324,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFC8E6C9),
           color: Color(0xFF388E3C),
           labelZh: '西兰花',
+          labelKo: '브로콜리',
           labelEn: 'Broccoli'),
       PuzzlePiece(
           id: 'corn',
@@ -291,6 +332,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFF9C4),
           color: Color(0xFFF9A825),
           labelZh: '玉米',
+          labelKo: '옥수수',
           labelEn: 'Corn'),
       PuzzlePiece(
           id: 'tomato',
@@ -298,6 +340,7 @@ const _puzzles = <PuzzleConfig>[
           background: Color(0xFFFFCDD2),
           color: Color(0xFFC62828),
           labelZh: '西红柿',
+          labelKo: '토마토',
           labelEn: 'Tomato'),
     ],
   ),
@@ -596,7 +639,7 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
                     const SizedBox(height: 20),
                     KidRoundSwitcher(
                       switchKey:
-                          '${viewModel.round}-${viewModel.puzzle.nameZh}',
+                          '${viewModel.round}-${viewModel.puzzle.name(context)}',
                       child: Column(
                         children: [
                           Container(

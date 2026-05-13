@@ -24,6 +24,7 @@ class ColorChoice {
   const ColorChoice({
     required this.id,
     required this.labelZh,
+    required this.labelKo,
     required this.labelEn,
     required this.color,
     required this.shadow,
@@ -31,14 +32,17 @@ class ColorChoice {
 
   final String id;
   final String labelZh;
+  final String labelKo;
   final String labelEn;
   final Color color;
   final Color shadow;
 
   String label(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'zh'
-        ? labelZh
-        : labelEn;
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => labelZh,
+      'ko' => labelKo,
+      _ => labelEn,
+    };
   }
 }
 
@@ -46,6 +50,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'red',
     labelZh: '红色',
+    labelKo: '빨간색',
     labelEn: 'Red',
     color: Color(0xFFFF4B4B),
     shadow: Color(0xFFC0392B),
@@ -53,6 +58,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'blue',
     labelZh: '蓝色',
+    labelKo: '파란색',
     labelEn: 'Blue',
     color: Color(0xFF4B9FFF),
     shadow: Color(0xFF1976D2),
@@ -60,6 +66,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'yellow',
     labelZh: '黄色',
+    labelKo: '노란색',
     labelEn: 'Yellow',
     color: Color(0xFFFFD93D),
     shadow: Color(0xFFF4A200),
@@ -67,6 +74,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'green',
     labelZh: '绿色',
+    labelKo: '초록색',
     labelEn: 'Green',
     color: Color(0xFF4BC96A),
     shadow: Color(0xFF2E7D32),
@@ -74,6 +82,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'orange',
     labelZh: '橙色',
+    labelKo: '주황색',
     labelEn: 'Orange',
     color: Color(0xFFFF8C42),
     shadow: Color(0xFFE64A19),
@@ -81,6 +90,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'purple',
     labelZh: '紫色',
+    labelKo: '보라색',
     labelEn: 'Purple',
     color: Color(0xFFA855F7),
     shadow: Color(0xFF6A0DAD),
@@ -88,6 +98,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'pink',
     labelZh: '粉色',
+    labelKo: '분홍색',
     labelEn: 'Pink',
     color: Color(0xFFFF70A6),
     shadow: Color(0xFFC2185B),
@@ -95,6 +106,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'cyan',
     labelZh: '青色',
+    labelKo: '하늘색',
     labelEn: 'Cyan',
     color: Color(0xFF26C6DA),
     shadow: Color(0xFF00838F),
@@ -102,6 +114,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'brown',
     labelZh: '棕色',
+    labelKo: '갈색',
     labelEn: 'Brown',
     color: Color(0xFFA98274),
     shadow: Color(0xFF6D4C41),
@@ -109,6 +122,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'lime',
     labelZh: '黄绿色',
+    labelKo: '연두색',
     labelEn: 'Lime',
     color: Color(0xFF9CCC65),
     shadow: Color(0xFF558B2F),
@@ -116,6 +130,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'teal',
     labelZh: '青绿色',
+    labelKo: '청록색',
     labelEn: 'Teal',
     color: Color(0xFF26A69A),
     shadow: Color(0xFF00695C),
@@ -123,6 +138,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'indigo',
     labelZh: '靛蓝色',
+    labelKo: '남색',
     labelEn: 'Indigo',
     color: Color(0xFF5C6BC0),
     shadow: Color(0xFF303F9F),
@@ -130,6 +146,7 @@ const _allColors = <ColorChoice>[
   ColorChoice(
     id: 'mint',
     labelZh: '薄荷色',
+    labelKo: '민트색',
     labelEn: 'Mint',
     color: Color(0xFF66D9B8),
     shadow: Color(0xFF1B9E77),

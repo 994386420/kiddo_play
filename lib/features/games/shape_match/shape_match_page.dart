@@ -24,6 +24,7 @@ class ShapeChoice {
   const ShapeChoice({
     required this.id,
     required this.labelZh,
+    required this.labelKo,
     required this.labelEn,
     required this.color,
     required this.shadow,
@@ -31,14 +32,17 @@ class ShapeChoice {
 
   final String id;
   final String labelZh;
+  final String labelKo;
   final String labelEn;
   final Color color;
   final Color shadow;
 
   String label(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'zh'
-        ? labelZh
-        : labelEn;
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => labelZh,
+      'ko' => labelKo,
+      _ => labelEn,
+    };
   }
 }
 
@@ -46,6 +50,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'circle',
     labelZh: '圆形',
+    labelKo: '원형',
     labelEn: 'Circle',
     color: Color(0xFFFF4B4B),
     shadow: Color(0xFFC0392B),
@@ -53,6 +58,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'square',
     labelZh: '正方形',
+    labelKo: '정사각형',
     labelEn: 'Square',
     color: Color(0xFF4B9FFF),
     shadow: Color(0xFF1976D2),
@@ -60,6 +66,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'triangle',
     labelZh: '三角形',
+    labelKo: '삼각형',
     labelEn: 'Triangle',
     color: Color(0xFF4BC96A),
     shadow: Color(0xFF2E7D32),
@@ -67,6 +74,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'star',
     labelZh: '五角星',
+    labelKo: '별',
     labelEn: 'Star',
     color: Color(0xFFFFD93D),
     shadow: Color(0xFFF4A200),
@@ -74,6 +82,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'heart',
     labelZh: '心形',
+    labelKo: '하트',
     labelEn: 'Heart',
     color: Color(0xFFFF70A6),
     shadow: Color(0xFFC2185B),
@@ -81,6 +90,7 @@ const _allShapes = <ShapeChoice>[
   ShapeChoice(
     id: 'diamond',
     labelZh: '菱形',
+    labelKo: '마름모',
     labelEn: 'Diamond',
     color: Color(0xFFA855F7),
     shadow: Color(0xFF6A0DAD),

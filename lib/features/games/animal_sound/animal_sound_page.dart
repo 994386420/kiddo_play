@@ -31,8 +31,10 @@ class AnimalChoice {
     required this.id,
     required this.emoji,
     required this.nameZh,
+    required this.nameKo,
     required this.nameEn,
     required this.soundZh,
+    required this.soundKo,
     required this.soundEn,
     required this.background,
     required this.color,
@@ -42,21 +44,29 @@ class AnimalChoice {
   final String id;
   final String emoji;
   final String nameZh;
+  final String nameKo;
   final String nameEn;
   final String soundZh;
+  final String soundKo;
   final String soundEn;
   final Color background;
   final Color color;
   final Color shadow;
 
   String name(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'zh'
-        ? nameZh
-        : nameEn;
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => nameZh,
+      'ko' => nameKo,
+      _ => nameEn,
+    };
   }
 
   String sound(String languageCode) {
-    return languageCode == 'zh' ? soundZh : soundEn;
+    return switch (languageCode) {
+      'zh' => soundZh,
+      'ko' => soundKo,
+      _ => soundEn,
+    };
   }
 }
 
@@ -65,8 +75,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'dog',
     emoji: '🐶',
     nameZh: '小狗',
+    nameKo: '강아지',
     nameEn: 'Dog',
     soundZh: '汪汪汪！',
+    soundKo: '멍멍!',
     soundEn: 'Woof woof!',
     background: Color(0xFFFFF9C4),
     color: Color(0xFFF9A825),
@@ -76,8 +88,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'cat',
     emoji: '🐱',
     nameZh: '小猫',
+    nameKo: '고양이',
     nameEn: 'Cat',
     soundZh: '喵喵喵～',
+    soundKo: '야옹~',
     soundEn: 'Meow meow!',
     background: Color(0xFFFCE4EC),
     color: Color(0xFFE91E63),
@@ -87,8 +101,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'cow',
     emoji: '🐮',
     nameZh: '奶牛',
+    nameKo: '소',
     nameEn: 'Cow',
     soundZh: '哞～哞～',
+    soundKo: '음메~',
     soundEn: 'Moo moo!',
     background: Color(0xFFF1F8E9),
     color: Color(0xFF7CB342),
@@ -98,8 +114,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'duck',
     emoji: '🐤',
     nameZh: '小鸭',
+    nameKo: '오리',
     nameEn: 'Duck',
     soundZh: '嘎嘎嘎！',
+    soundKo: '꽥꽥!',
     soundEn: 'Quack quack!',
     background: Color(0xFFFFF8E1),
     color: Color(0xFFFFB300),
@@ -109,8 +127,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'pig',
     emoji: '🐷',
     nameZh: '小猪',
+    nameKo: '돼지',
     nameEn: 'Pig',
     soundZh: '哼哼哼～',
+    soundKo: '꿀꿀~',
     soundEn: 'Oink oink!',
     background: Color(0xFFFCE4EC),
     color: Color(0xFFFF80AB),
@@ -120,8 +140,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'sheep',
     emoji: '🐑',
     nameZh: '小羊',
+    nameKo: '양',
     nameEn: 'Sheep',
     soundZh: '咩咩咩～',
+    soundKo: '메에~',
     soundEn: 'Baa baa!',
     background: Color(0xFFE8F5E9),
     color: Color(0xFF43A047),
@@ -131,8 +153,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'frog',
     emoji: '🐸',
     nameZh: '青蛙',
+    nameKo: '개구리',
     nameEn: 'Frog',
     soundZh: '呱呱呱！',
+    soundKo: '개굴개굴!',
     soundEn: 'Ribbit ribbit!',
     background: Color(0xFFE0F2F1),
     color: Color(0xFF00897B),
@@ -142,8 +166,10 @@ const _allAnimals = <AnimalChoice>[
     id: 'chick',
     emoji: '🐣',
     nameZh: '小鸡',
+    nameKo: '병아리',
     nameEn: 'Chick',
     soundZh: '叽叽叽～',
+    soundKo: '삐약삐약~',
     soundEn: 'Cheep cheep!',
     background: Color(0xFFFFF9C4),
     color: Color(0xFFF9A825),

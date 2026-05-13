@@ -1,0 +1,309 @@
+{
+  "@@locale": "ko",
+  "appTitle": "키드도 플레이",
+  "homeTitle": "키드도 플레이랜드",
+  "homeSubtitle": "오늘도 함께 배우고 놀아요!",
+  "homeStartGame": "게임 시작",
+  "homeChooseGame": "게임 선택",
+  "homeParentEntry": "부모 센터",
+  "homeParentComingSoon": "부모 센터는 곧 만나볼 수 있어요.",
+  "homeWelcomeSubtitle": "오늘 새로운 걸 함께 발견해요!",
+  "homeGreeting": "{name}님, 오늘도 차근차근 배워봐요!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWelcomeTitle": "안녕, {name}님! 👋",
+  "@homeWelcomeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeParentProtected": "PIN 보호",
+  "splashSubtitle": "반짝이는 마음, 행복한 성장",
+  "gameSelectTitle": "게임 선택",
+  "gameSelectSubtitle": "앞 게임을 완료하면 다음 게임이 열려요!",
+  "gameSelectUnlocked": "해제됨",
+  "gameSelectUnlockSoon": "곧 열림",
+  "gameSelectLocked": "잠김",
+  "gameSelectLockedDescription": "앞 게임을 완료하면 이 게임이 열려요!",
+  "gameSelectLockedHint": "먼저 앞 게임을 끝내고 이 스테이지를 열어봐요!",
+  "difficultyEasy": "쉬움",
+  "difficultyMedium": "보통",
+  "difficultyHard": "어려움",
+  "difficultyEasySummary": "2개 선택지 · 3라운드",
+  "difficultyMediumSummary": "4개 선택지 · 5라운드",
+  "difficultyHardSummary": "4개 선택지 · 7라운드",
+  "difficultyEasyDescription": "처음 배우는 친구에게 부드럽고 재미있어요!",
+  "difficultyMediumDescription": "오늘의 적당한 도전이에요!",
+  "difficultyHardDescription": "우리 작은 고수들을 위한 더 큰 도전이에요!",
+  "difficultySelectTitle": "난이도 선택",
+  "difficultySelectSubtitle": "가장 잘 맞는 도전을 골라봐요!",
+  "difficultySelectHint": "처음 시도에 맞추면 별 1개를 받아요. 난이도가 높을수록 더 많이 빛날 기회가 있어요!",
+  "difficultySelectLockedDescription": "앞 난이도를 끝내면 열려요!",
+  "difficultySelectLockedHint": "먼저 앞 난이도를 끝내고 다시 도전해요!",
+  "difficultyOptionCountSuffix": "개 선택지",
+  "difficultyRoundCountSuffix": "라운드",
+  "gameColorMatchTitle": "색깔 맞추기",
+  "gameColorMatchDescription": "색깔을 배우고 같은 색을 찾아봐요!",
+  "gameNumberTitle": "숫자 놀이",
+  "gameNumberDescription": "차근차근 세고 맞는 숫자를 골라봐요!",
+  "gameShapeTitle": "모양 맞추기",
+  "gameShapeDescription": "원, 삼각형, 별 등을 찾아봐요!",
+  "gameAnimalTitle": "동물 소리",
+  "gameAnimalDescription": "소리를 잘 듣고 동물을 맞혀봐요!",
+  "gamePuzzleTitle": "간단 퍼즐",
+  "gamePuzzleDescription": "조각을 제자리에 놓아 그림을 완성해요!",
+  "roundCounter": "{round} / {total} 라운드",
+  "@roundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleRoundCounter": "{round} / {total} 레벨",
+  "@puzzleRoundCounter": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "colorMatchPrompt": "이 색을 찾아볼 수 있나요?",
+  "feedbackCorrect": "대단해요! 맞혔어요!",
+  "feedbackTryAgain": "다시 해봐요, 할 수 있어요!",
+  "pauseStatus": "게임이 일시정지되었어요",
+  "pauseContinue": "계속하기",
+  "pauseRestart": "다시 시작",
+  "pauseQuit": "게임 목록으로 나가기",
+  "pauseTapOutsideHint": "대화상자 바깥을 눌러도 계속할 수 있어요",
+  "soundOnTooltip": "소리 켜기",
+  "soundOffTooltip": "소리 끄기",
+  "numberPrompt": "몇 개가 보이나요?",
+  "numberCorrect": "멋져요! 정답이에요!",
+  "numberWrong": "다시 차근차근 세어봐요!",
+  "shapePrompt": "이건 어떤 모양인가요?",
+  "shapePromptHard": "힌트 없이 이 모양의 이름을 맞혀봐요?",
+  "shapeCorrect": "모양을 찾았어요! 잘했어요!",
+  "shapeWrong": "거의 다 왔어요, 다른 걸 골라봐요!",
+  "shapeHardModeHint": "이름 힌트 없음",
+  "animalPrompt": "소리를 듣고 누군지 맞혀봐요?",
+  "animalPromptHard": "한 번만 듣고 동물을 맞혀봐요?",
+  "animalPlaySound": "소리 듣기",
+  "animalReplay": "다시 듣기",
+  "animalReplayBlocked": "어려움 모드: 한 번만 들을 수 있어요!",
+  "animalCorrect": "맞혔어요! 정말 대단해요!",
+  "animalWrong": "머릿속으로 다시 들어보고 한 번 더 도전해요!",
+  "animalHardModeHint": "한 번만 듣기",
+  "puzzleReference": "참고 그림",
+  "puzzlePrompt": "각 조각을 제자리에 놓아봐요.",
+  "puzzlePromptHard": "위치 힌트 없이 참고 그림과 맞춰봐요.",
+  "puzzlePieceSelected": "조각이 선택되었어요. 칸을 눌러 넣어봐요",
+  "puzzleSlotLabel": "{slot}번 칸",
+  "@puzzleSlotLabel": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "puzzleTrayTitle": "조각 상자 - 조각을 누르고, 그다음 칸을 눌러요:",
+  "puzzleHardModeHint": "위치 힌트 없음",
+  "puzzleCorrect": "퍼즐 완성! 훌륭해요!",
+  "puzzleWrong": "그 조각은 맞지 않아요. 다른 곳을 골라봐요!",
+  "puzzleSelectHint": "먼저 조각을 고르고, 그다음 칸을 눌러요.",
+  "puzzleTapSlotHint": "좋아요, 이제 맞는 칸을 눌러봐요.",
+  "rewardEncouragement1": "정말 잘했어요!",
+  "rewardEncouragement2": "최고였어요!",
+  "rewardEncouragement3": "슈퍼스타 같아요!",
+  "rewardEncouragement4": "작은 천재예요!",
+  "rewardEncouragement5": "정말 잘하고 있어요!",
+  "rewardCompleted": "{gameName}을(를) 완료했어요!",
+  "@rewardCompleted": {
+    "placeholders": {
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardDifficultyLabel": "난이도: {difficulty}",
+  "@rewardDifficultyLabel": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardStarsResult": "별 {earned} / {total}개를 받았어요!",
+  "@rewardStarsResult": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rewardUnlockedTitle": "새 게임이 열렸어요!",
+  "rewardUnlockedDescription": "{emoji} {gameName} 이제 다음 도전을 시작해요!",
+  "@rewardUnlockedDescription": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "gameName": {
+        "type": "String"
+      }
+    }
+  },
+  "rewardPlayAgain": "다시 플레이",
+  "rewardTryOtherDifficulty": "다른 난이도 도전",
+  "rewardChooseOtherGame": "다른 게임 선택",
+  "rewardBackHome": "홈으로",
+  "parentDashboardHeaderTag": "부모 센터",
+  "parentDashboardTitle": "부모 센터 👨‍👩‍👧",
+  "parentTabOverview": "개요",
+  "parentTabProgress": "진행",
+  "parentTabSettings": "설정",
+  "parentOverviewStars": "총 별",
+  "parentOverviewUnlockedGames": "해제된 게임",
+  "parentOverviewPlayed": "총 플레이 횟수",
+  "parentOverviewTodayStars": "오늘의 별",
+  "parentOverviewProfileTitle": "우리 작은 학습자",
+  "parentOverviewTotalStars": "총 {count}개의 별을 받았어요",
+  "@parentOverviewTotalStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentOverviewRecentTitle": "📋 최근 활동",
+  "parentOverviewNoActivity": "아직 플레이 기록이 없어요",
+  "parentProgressSummary": "{total}개 게임 중 {unlocked}개가 열렸어요",
+  "@parentProgressSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "unlocked": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressUnlocked": "🔓 해제됨",
+  "parentProgressLocked": "🔒 잠김",
+  "parentProgressNotStarted": "아직 플레이하지 않았어요",
+  "parentProgressLockedHint": "앞 게임을 완료하면 열려요",
+  "parentProgressPlayedCount": "{count}번 플레이했어요",
+  "@parentProgressPlayedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parentProgressDifficultyTag": "최근: {difficulty}",
+  "@parentProgressDifficultyTag": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "parentProgressUnknownDifficulty": "알 수 없음",
+  "parentProgressBestRate": "최고 별 획득률",
+  "parentProgressLastPlayed": "📅 마지막 플레이: {time}",
+  "@parentProgressLastPlayed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentSettingsProfileSection": "👶 아이 프로필",
+  "parentSettingsAvatarTitle": "아바타",
+  "parentSettingsAvatarSubtitle": "아바타를 눌러 바꿔요",
+  "parentSettingsNameHint": "아이 별명",
+  "parentSettingsSave": "저장",
+  "parentSettingsAppSection": "⚙️ 앱 설정",
+  "parentSettingsSoundTitle": "게임 소리",
+  "parentSettingsSoundOn": "켜짐",
+  "parentSettingsSoundOff": "꺼짐",
+  "parentSettingsSecuritySection": "🔒 보안",
+  "parentSettingsChangePinTitle": "PIN 변경",
+  "parentSettingsChangePinSubtitle": "4자리 부모 PIN을 변경해요",
+  "parentSettingsDangerSection": "⚠️ 위험 구역",
+  "parentSettingsResetWarning": "초기화하면 모든 별, 플레이 기록, 해제 진행이 지워져요. 되돌릴 수 없어요.",
+  "parentSettingsResetButton": "모든 학습 진행 초기화",
+  "parentSettingsResetDone": "초기화가 완료되었어요!",
+  "parentSettingsResetConfirmTitle": "모두 초기화할까요?",
+  "parentSettingsResetConfirmBody": "모든 별, 플레이 기록, 해제된 게임 진행이 삭제돼요. 이 작업은 되돌릴 수 없어요.",
+  "parentSettingsCancel": "취소",
+  "parentSettingsConfirmReset": "초기화 확인",
+  "parentTimeToday": "오늘 {time}",
+  "@parentTimeToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeYesterday": "어제 {time}",
+  "@parentTimeYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentTimeDate": "{month}월 {day}일 {time}",
+  "@parentTimeDate": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinErrorWrong": "PIN이 올바르지 않아요. 다시 시도해요.",
+  "parentPinErrorMismatch": "두 PIN이 일치하지 않아요. 다시 설정해요.",
+  "parentPinTitleVerify": "부모 인증",
+  "parentPinTitleSetup": "PIN 설정",
+  "parentPinTitleConfirm": "PIN 확인",
+  "parentPinTitleChange": "새 PIN 설정",
+  "parentPinTitleChangeConfirm": "새 PIN 확인",
+  "parentPinSubtitleVerify": "4자리 PIN을 입력해 부모 센터를 열어요",
+  "parentPinSubtitleSetup": "부모 센터용 4자리 PIN을 만들어봐요",
+  "parentPinSubtitleConfirm": "같은 4자리 PIN을 다시 입력해요",
+  "parentPinSubtitleChange": "새로운 4자리 PIN을 입력해요",
+  "parentPinSubtitleChangeConfirm": "같은 새 PIN을 다시 입력해요",
+  "parentPinSuccess": "✅ 인증되었어요. 부모 센터를 여는 중…",
+  "parentPinDefaultHint": "잊으셨나요? 기본 PIN은 {pin}이에요",
+  "@parentPinDefaultHint": {
+    "placeholders": {
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "parentPinSetupHint": "💡 이 PIN은 아이가 실수로 부모 센터에 들어가는 걸 막아줘요. 간단한 보호 단계예요."
+}
