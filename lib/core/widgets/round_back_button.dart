@@ -6,6 +6,7 @@ class KidRoundBackButton extends StatelessWidget {
     required this.onTap,
     this.borderColor = const Color(0xFF90CAF9),
     this.icon = Icons.chevron_left_rounded,
+    this.iconWidget,
     super.key,
   });
 
@@ -13,6 +14,7 @@ class KidRoundBackButton extends StatelessWidget {
   final Color borderColor;
   final VoidCallback onTap;
   final IconData icon;
+  final Widget? iconWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +24,8 @@ class KidRoundBackButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         onTap: onTap,
         child: Ink(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(999),
@@ -36,10 +38,13 @@ class KidRoundBackButton extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 24,
+          child: Center(
+            child: iconWidget ??
+                Icon(
+                  icon,
+                  color: iconColor,
+                  size: 24,
+                ),
           ),
         ),
       ),

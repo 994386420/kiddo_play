@@ -10,6 +10,8 @@ class KidDelayedReveal extends StatefulWidget {
     this.duration = const Duration(milliseconds: 420),
     this.beginOffset = const Offset(0, 0.05),
     this.beginScale = 0.96,
+    this.beginRotation = 0,
+    this.alignment = Alignment.center,
     this.curve = Curves.easeOutCubic,
     super.key,
   });
@@ -19,6 +21,8 @@ class KidDelayedReveal extends StatefulWidget {
   final Duration duration;
   final Offset beginOffset;
   final double beginScale;
+  final double beginRotation;
+  final Alignment alignment;
   final Curve curve;
 
   @override
@@ -38,11 +42,15 @@ class _KidDelayedRevealState extends State<KidDelayedReveal>
       duration: widget.duration,
     );
 
-    _timer = Timer(widget.delay, () {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
+    if (widget.delay == Duration.zero) {
+      _controller.forward();
+    } else {
+      _timer = Timer(widget.delay, () {
+        if (mounted) {
+          _controller.forward();
+        }
+      });
+    }
   }
 
   @override
@@ -66,12 +74,19 @@ class _KidDelayedRevealState extends State<KidDelayedReveal>
           begin: widget.beginOffset,
           end: Offset.zero,
         ).animate(animation),
-        child: ScaleTransition(
-          scale: Tween<double>(
-            begin: widget.beginScale,
-            end: 1,
+        child: RotationTransition(
+          turns: Tween<double>(
+            begin: widget.beginRotation / (math.pi * 2),
+            end: 0,
           ).animate(animation),
-          child: widget.child,
+          alignment: widget.alignment,
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: widget.beginScale,
+              end: 1,
+            ).animate(animation),
+            child: widget.child,
+          ),
         ),
       ),
     );

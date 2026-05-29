@@ -10,10 +10,25 @@ import '../../../app/router.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
-import '../../../core/widgets/kid_badges.dart';
+import '../../../core/widgets/figma_game_icons.dart';
+import '../../../core/widgets/figma_game_shell.dart';
+import '../../../core/widgets/figma_home_icons.dart';
 import '../../../core/widgets/kid_motion.dart';
 import '../../../core/widgets/pause_dialog.dart';
-import '../../../core/widgets/round_back_button.dart';
+
+const _shapeMatchPalette = FigmaGamePalette(
+  accent: Color(0xFFFFD56C),
+  accentStrong: Color(0xFFB97B00),
+  accentSoft: Color(0xFFFFFBEB),
+  progressTrack: Color(0xFFFFF0B2),
+  progressBorder: Color(0xFFFFD46B),
+  progressGradient: LinearGradient(
+    colors: [Color(0xFFFFDD7A), Color(0xFFEE9D11)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  ),
+  floaterIcon: FigmaFloatIconType.star,
+);
 
 final shapeMatchViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<ShapeMatchViewModel, GameRouteArgs>((ref, args) {
@@ -235,11 +250,7 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
-    AppRouter.pushBackwardAndRemoveUntil(
-      context,
-      name: AppRoutes.gameSelect,
-      predicate: (route) => route.settings.name == AppRoutes.home,
-    );
+    AppRouter.showGameSelect(context);
   }
 
   @override
@@ -326,361 +337,291 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
           _openPause();
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFFFDE7), Color(0xFFFFF3E0)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    _ShapeHeader(
-                      title: l10n.roundCounter(
-                          viewModel.round + 1, viewModel.config.rounds),
-                      difficulty: args.difficulty,
-                      stars: viewModel.stars,
-                      onBack: _openPause,
-                    ),
-                    const SizedBox(height: 16),
-                    KidAnimatedProgressBar(
-                      value: viewModel.round / viewModel.config.rounds,
-                      backgroundColor: const Color(0xFFFFF59D),
-                      borderColor: const Color(0xFFFFD54F),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFFD54F), Color(0xFFF4A200)],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    KidRoundSwitcher(
-                      switchKey:
-                          '${viewModel.round}-${viewModel.question.target.id}',
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                  color: const Color(0xFFFFD54F), width: 4),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          viewModel.question.target.color
-                                              .withValues(alpha: 0.14),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    Text(
-                                      viewModel.hideNameInQuestion
-                                          ? '${l10n.shapePromptHard} 🤔'
-                                          : '${l10n.shapePrompt} ⬡',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w900,
-                                        color: Color(0xFF7B5800),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 18),
-                                    KidLoopAnimation(
-                                      duration:
-                                          const Duration(milliseconds: 2200),
-                                      builder: (context, value, child) {
-                                        final scale =
-                                            lerpValue(1, 1.06, wave(value));
-                                        return Transform.scale(
-                                          scale: scale,
-                                          child: child,
-                                        );
-                                      },
-                                      child: _ShapePreview(
-                                        shapeId: viewModel.question.target.id,
-                                        color: viewModel.question.target.color,
-                                        size: 120,
-                                      ),
-                                    ),
-                                    if (!viewModel.hideNameInQuestion) ...[
-                                      const SizedBox(height: 16),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 18, vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              viewModel.question.target.color,
-                                          borderRadius:
-                                              BorderRadius.circular(999),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: viewModel
-                                                  .question.target.shadow
-                                                  .withValues(alpha: 0.28),
-                                              blurRadius: 14,
-                                              offset: const Offset(0, 8),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          viewModel.question.target.label(
-                                            context,
-                                          ),
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: viewModel.question.options.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 0.95,
-                            ),
-                            itemBuilder: (context, index) {
-                              final option = viewModel.question.options[index];
-                              final correct =
-                                  viewModel.correctOptionId == option.id;
-                              final wrong =
-                                  viewModel.wrongOptionId == option.id;
-                              return TweenAnimationBuilder<double>(
-                                tween: Tween<double>(
-                                    end: correct || wrong ? 1 : 0),
-                                duration:
-                                    Duration(milliseconds: wrong ? 420 : 260),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, effect, child) {
-                                  final dx = wrong ? shakeOffset(effect) : 0.0;
-                                  final scale =
-                                      correct ? punchScale(effect) : 1.0;
-                                  return Transform.translate(
-                                    offset: Offset(dx, 0),
-                                    child: Transform.scale(
-                                      scale: scale,
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(28),
-                                    onTap: () => ref
-                                        .read(shapeMatchViewModelProvider(args))
-                                        .select(option),
-                                    child: Ink(
-                                      decoration: BoxDecoration(
-                                        color: correct
-                                            ? option.color
-                                            : wrong
-                                                ? const Color(0xFFFFCDD2)
-                                                : Colors.white,
-                                        borderRadius: BorderRadius.circular(28),
-                                        border: Border.all(
-                                          color: correct
-                                              ? const Color(0xFFFFD700)
-                                              : wrong
-                                                  ? const Color(0xFFF44336)
-                                                  : option.color
-                                                      .withValues(alpha: 0.62),
-                                          width: correct || wrong ? 5 : 4,
-                                        ),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              _ShapePreview(
-                                                shapeId: option.id,
-                                                color: correct
-                                                    ? Colors.white
-                                                    : option.color,
-                                                size: 56,
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                option.label(context),
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: correct
-                                                      ? Colors.white
-                                                      : option.color,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: correct ? 1 : 0,
-                                            duration: const Duration(
-                                              milliseconds: 180,
-                                            ),
-                                            child: const Align(
-                                              alignment: Alignment.topRight,
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Text('✅',
-                                                    style: TextStyle(
-                                                        fontSize: 22)),
-                                              ),
-                                            ),
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: wrong ? 1 : 0,
-                                            duration: const Duration(
-                                              milliseconds: 180,
-                                            ),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0x1FFF0000),
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: const Center(
-                                                child: Text('💨',
-                                                    style: TextStyle(
-                                                        fontSize: 34)),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _SimpleShapeFeedbackBanner(
-                      isCorrect:
-                          viewModel.answerState == ShapeAnswerState.correct,
-                      isWrong: viewModel.answerState == ShapeAnswerState.wrong,
-                      correctText: l10n.shapeCorrect,
-                      wrongText: l10n.shapeWrong,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const FloatingSoundToggle(),
-            PauseDialog(
-              isOpen: _isPaused,
-              gameName: args.gameId.title(l10n),
-              gameEmoji: args.gameId.emoji,
-              onContinue: _closePause,
-              onRestart: _restartGame,
-              onQuit: () => _handleBack(context),
-            ),
+      child: FigmaGameScaffold(
+        palette: _shapeMatchPalette,
+        roundLabel:
+            l10n.roundCounter(viewModel.round + 1, viewModel.config.rounds),
+        difficulty: args.difficulty,
+        stars: viewModel.stars,
+        progress: viewModel.round / viewModel.config.rounds,
+        onPause: _openPause,
+        backgroundGradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFFDE7),
+            Color(0xFFFFF3E0),
           ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+        pauseIcon: const FigmaPauseIcon(size: 18, color: Color(0xFFB97B00)),
+        floatingAction: const FloatingSoundToggle(
+          accentColor: Color(0xFFFFD56C),
+          borderColor: Color(0xFFB97B00),
+        ),
+        pauseDialog: PauseDialog(
+          isOpen: _isPaused,
+          gameName: args.gameId.title(l10n),
+          gameEmoji: args.gameId.emoji,
+          onContinue: _closePause,
+          onRestart: _restartGame,
+          onQuit: () => _handleBack(context),
+        ),
+        body: KidRoundSwitcher(
+          switchKey: '${viewModel.round}-${viewModel.question.target.id}',
+          child: Column(
+            children: [
+              _ShapePromptCard(
+                prompt: viewModel.hideNameInQuestion
+                    ? l10n.shapePromptHard
+                    : l10n.shapePrompt,
+                target: viewModel.question.target,
+                hideName: viewModel.hideNameInQuestion,
+              ),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: viewModel.question.options.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.96,
+                ),
+                itemBuilder: (context, index) {
+                  final option = viewModel.question.options[index];
+                  return _ShapeOptionTile(
+                    option: option,
+                    correct: viewModel.correctOptionId == option.id,
+                    wrong: viewModel.wrongOptionId == option.id,
+                    onTap: () => ref
+                        .read(shapeMatchViewModelProvider(args))
+                        .select(option),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              _SimpleShapeFeedbackBanner(
+                isCorrect: viewModel.answerState == ShapeAnswerState.correct,
+                isWrong: viewModel.answerState == ShapeAnswerState.wrong,
+                correctText: l10n.shapeCorrect,
+                wrongText: l10n.shapeWrong,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _ShapeHeader extends StatelessWidget {
-  const _ShapeHeader({
-    required this.title,
-    required this.difficulty,
-    required this.stars,
-    required this.onBack,
+class _ShapePromptCard extends StatelessWidget {
+  const _ShapePromptCard({
+    required this.prompt,
+    required this.target,
+    required this.hideName,
   });
 
-  final String title;
-  final GameDifficulty difficulty;
-  final int stars;
-  final VoidCallback onBack;
+  final String prompt;
+  final ShapeChoice target;
+  final bool hideName;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        KidRoundBackButton(
-          iconColor: const Color(0xFFF4A200),
-          borderColor: const Color(0xFFFFD54F),
-          icon: Icons.pause_rounded,
-          onTap: onBack,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: const Color(0xFFFFD54F), width: 2.5),
-                ),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFFB77B00),
+    return FigmaGamePanel(
+      palette: _shapeMatchPalette,
+      child: Column(
+        children: [
+          Text(
+            prompt,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF805600),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+            decoration: BoxDecoration(
+              color: _shapeMatchPalette.accentSoft,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: target.color.withValues(alpha: 0.18),
+                width: 2.5,
+              ),
+            ),
+            child: Column(
+              children: [
+                KidLoopAnimation(
+                  duration: const Duration(milliseconds: 2200),
+                  builder: (context, value, child) {
+                    final scale = lerpValue(1, 1.06, wave(value));
+                    return Transform.scale(scale: scale, child: child);
+                  },
+                  child: _ShapePreview(
+                    shapeId: target.id,
+                    color: target.color,
+                    size: 130,
                   ),
                 ),
+                if (!hideName) ...[
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: target.color,
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: [
+                        BoxShadow(
+                          color: target.shadow.withValues(alpha: 0.24),
+                          blurRadius: 14,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      target.label(context),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShapeOptionTile extends StatelessWidget {
+  const _ShapeOptionTile({
+    required this.option,
+    required this.correct,
+    required this.wrong,
+    required this.onTap,
+  });
+
+  final ShapeChoice option;
+  final bool correct;
+  final bool wrong;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: correct || wrong ? 1 : 0),
+      duration: Duration(milliseconds: wrong ? 420 : 260),
+      curve: Curves.easeOutCubic,
+      builder: (context, effect, child) {
+        final dx = wrong ? shakeOffset(effect) : 0.0;
+        final scale = correct ? punchScale(effect) : 1.0;
+        return Transform.translate(
+          offset: Offset(dx, 0),
+          child: Transform.scale(scale: scale, child: child),
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: correct
+                  ? option.color
+                  : wrong
+                      ? const Color(0xFFFFD9D9)
+                      : Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: correct
+                    ? const Color(0xFFFFD700)
+                    : wrong
+                        ? const Color(0xFFF44336)
+                        : option.color.withValues(alpha: 0.62),
+                width: correct || wrong ? 5 : 4,
               ),
-              const SizedBox(height: 6),
-              Text(
-                '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)}'
-                '${difficulty == GameDifficulty.hard ? ' · ${context.l10n.shapeHardModeHint}' : ''}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF546E7A),
+              boxShadow: [
+                BoxShadow(
+                  color: option.color.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 10),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        width: 1.6,
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _ShapePreview(
+                      shapeId: option.id,
+                      color: correct ? Colors.white : option.color,
+                      size: 58,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      option.label(context),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: correct ? Colors.white : option.color,
+                      ),
+                    ),
+                  ],
+                ),
+                AnimatedOpacity(
+                  opacity: correct ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: const Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text('✅', style: TextStyle(fontSize: 22)),
+                    ),
+                  ),
+                ),
+                AnimatedOpacity(
+                  opacity: wrong ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0x1FFF0000),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: const Center(
+                      child: Text('💨', style: TextStyle(fontSize: 34)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 12),
-        KidStarCounterBadge(
-          count: stars,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          iconSize: 20,
-          textSize: 18,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -837,57 +778,45 @@ class _SimpleShapeFeedbackBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 68,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutBack,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-                child: child,
+    if (!isCorrect && !isWrong) {
+      return const SizedBox(height: 72);
+    }
+
+    final background =
+        isCorrect ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0);
+    final border =
+        isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF8C42);
+    final textColor =
+        isCorrect ? const Color(0xFF2E7D32) : const Color(0xFFE65100);
+    final emoji = isCorrect ? '🌟' : '💪';
+
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: border, width: 2.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              isCorrect ? correctText : wrongText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                color: textColor,
               ),
             ),
-          );
-        },
-        child: !isCorrect && !isWrong
-            ? const SizedBox.shrink()
-            : Container(
-                key: ValueKey('${isCorrect}_$isWrong'),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: isCorrect
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: isCorrect
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFFFF8C42),
-                    width: 2.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    isCorrect ? correctText : wrongText,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: isCorrect
-                          ? const Color(0xFF2E7D32)
-                          : const Color(0xFFE65100),
-                    ),
-                  ),
-                ),
-              ),
+          ),
+          const SizedBox(width: 12),
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+        ],
       ),
     );
   }

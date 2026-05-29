@@ -10,10 +10,25 @@ import '../../../app/router.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
-import '../../../core/widgets/kid_badges.dart';
+import '../../../core/widgets/figma_game_icons.dart';
+import '../../../core/widgets/figma_game_shell.dart';
+import '../../../core/widgets/figma_home_icons.dart';
 import '../../../core/widgets/kid_motion.dart';
 import '../../../core/widgets/pause_dialog.dart';
-import '../../../core/widgets/round_back_button.dart';
+
+const _colorMatchPalette = FigmaGamePalette(
+  accent: Color(0xFF59C8FF),
+  accentStrong: Color(0xFF1E70D8),
+  accentSoft: Color(0xFFEAF7FF),
+  progressTrack: Color(0xFFD7EEFF),
+  progressBorder: Color(0xFF8FC9FF),
+  progressGradient: LinearGradient(
+    colors: [Color(0xFF6FD7FF), Color(0xFF1E70D8)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  ),
+  floaterIcon: FigmaFloatIconType.heart,
+);
 
 final colorMatchViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<ColorMatchViewModel, GameRouteArgs>((ref, args) {
@@ -305,11 +320,7 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
-    AppRouter.pushBackwardAndRemoveUntil(
-      context,
-      name: AppRoutes.gameSelect,
-      predicate: (route) => route.settings.name == AppRoutes.home,
-    );
+    AppRouter.showGameSelect(context);
   }
 
   @override
@@ -400,288 +411,187 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
           _openPause();
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFE8F5FF), Color(0xFFFFF9E6)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+      child: FigmaGameScaffold(
+        palette: _colorMatchPalette,
+        roundLabel:
+            l10n.roundCounter(viewModel.round + 1, viewModel.config.rounds),
+        difficulty: args.difficulty,
+        stars: viewModel.stars,
+        progress: progress,
+        onPause: _openPause,
+        backgroundColor: const Color(0xFFFFF9F5),
+        showDots: true,
+        contentPadding: const EdgeInsets.fromLTRB(18, 18, 18, 96),
+        pauseIcon: const FigmaPauseIcon(size: 18, color: Color(0xFF1E70D8)),
+        floatingAction: const FloatingSoundToggle(
+          accentColor: Color(0xFF59C8FF),
+          borderColor: Color(0xFF1E70D8),
+        ),
+        pauseDialog: PauseDialog(
+          isOpen: _isPaused,
+          gameName: args.gameId.title(l10n),
+          gameEmoji: args.gameId.emoji,
+          onContinue: _closePause,
+          onRestart: _restartGame,
+          onQuit: () => _handleBack(context),
+        ),
+        body: KidRoundSwitcher(
+          switchKey: '${viewModel.round}-${viewModel.question.target.id}',
+          child: Column(
+            children: [
+              _ColorPromptCard(
+                prompt: l10n.colorMatchPrompt,
+                target: viewModel.question.target,
               ),
-              child: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    _GameHeader(
-                      iconColor: const Color(0xFF1976D2),
-                      progressColor: const Color(0xFF1976D2),
-                      borderColor: const Color(0xFF90CAF9),
-                      title: l10n.roundCounter(
-                          viewModel.round + 1, viewModel.config.rounds),
-                      difficulty: args.difficulty,
-                      stars: viewModel.stars,
-                      onBack: _openPause,
-                    ),
-                    const SizedBox(height: 16),
-                    KidAnimatedProgressBar(
-                      value: progress,
-                      backgroundColor: const Color(0xFFC8E6FB),
-                      borderColor: const Color(0xFF90CAF9),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4FC3F7), Color(0xFF1976D2)],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    KidRoundSwitcher(
-                      switchKey:
-                          '${viewModel.round}-${viewModel.question.target.id}',
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                  color: const Color(0xFF4FC3F7), width: 4),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          viewModel.question.target.color
-                                              .withValues(alpha: 0.16),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    Text(
-                                      '${l10n.colorMatchPrompt} 👇',
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF546E7A),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    KidLoopAnimation(
-                                      duration: const Duration(seconds: 2),
-                                      builder: (context, value, child) {
-                                        final scale =
-                                            lerpValue(1, 1.05, wave(value));
-                                        return Transform.scale(
-                                          scale: scale,
-                                          child: child,
-                                        );
-                                      },
-                                      child: Container(
-                                        width: 120,
-                                        height: 120,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              viewModel.question.target.color,
-                                          borderRadius:
-                                              BorderRadius.circular(28),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: viewModel
-                                                  .question.target.shadow
-                                                  .withValues(alpha: 0.36),
-                                              blurRadius: 20,
-                                              offset: const Offset(0, 10),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              const Alignment(-0.36, -0.5),
-                                          child: Container(
-                                            width: 30,
-                                            height: 16,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.42),
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 10,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: viewModel.question.target.color,
-                                        borderRadius:
-                                            BorderRadius.circular(999),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: viewModel
-                                                .question.target.shadow
-                                                .withValues(alpha: 0.3),
-                                            blurRadius: 14,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Text(
-                                        viewModel.question.target
-                                            .label(context),
-                                        style: const TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: viewModel.question.options.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 1.18,
-                            ),
-                            itemBuilder: (context, index) {
-                              final option = viewModel.question.options[index];
-                              return _ColorOptionTile(
-                                label: option.label(context),
-                                color: option.color,
-                                shadow: option.shadow,
-                                correct: viewModel.correctOptionId == option.id,
-                                wrong: viewModel.wrongOptionId == option.id,
-                                onTap: () => ref
-                                    .read(colorMatchViewModelProvider(args))
-                                    .select(option),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _FeedbackBanner(state: viewModel.answerState),
-                  ],
+              const SizedBox(height: 10),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: viewModel.question.options.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  mainAxisExtent: 124,
                 ),
+                itemBuilder: (context, index) {
+                  final option = viewModel.question.options[index];
+                  return _ColorOptionTile(
+                    label: option.label(context),
+                    color: option.color,
+                    shadow: option.shadow,
+                    correct: viewModel.correctOptionId == option.id,
+                    wrong: viewModel.wrongOptionId == option.id,
+                    onTap: () => ref
+                        .read(colorMatchViewModelProvider(args))
+                        .select(option),
+                  );
+                },
               ),
-            ),
-            const FloatingSoundToggle(),
-            PauseDialog(
-              isOpen: _isPaused,
-              gameName: args.gameId.title(l10n),
-              gameEmoji: args.gameId.emoji,
-              onContinue: _closePause,
-              onRestart: _restartGame,
-              onQuit: () => _handleBack(context),
-            ),
-          ],
+              const SizedBox(height: 8),
+              _FeedbackBanner(
+                state: viewModel.answerState,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _GameHeader extends StatelessWidget {
-  const _GameHeader({
-    required this.iconColor,
-    required this.progressColor,
-    required this.borderColor,
-    required this.title,
-    required this.difficulty,
-    required this.stars,
-    required this.onBack,
+class _ColorPromptCard extends StatelessWidget {
+  const _ColorPromptCard({
+    required this.prompt,
+    required this.target,
   });
 
-  final Color iconColor;
-  final Color progressColor;
-  final Color borderColor;
-  final String title;
-  final GameDifficulty difficulty;
-  final int stars;
-  final VoidCallback onBack;
+  final String prompt;
+  final ColorChoice target;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        KidRoundBackButton(
-          iconColor: iconColor,
-          borderColor: borderColor,
-          icon: Icons.pause_rounded,
-          onTap: onBack,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: borderColor, width: 2.5),
-                ),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: progressColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF546E7A),
-                  ),
-                ),
-              ),
-            ],
+    return FigmaGamePanel(
+      palette: _colorMatchPalette,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      radius: 30,
+      child: Column(
+        children: [
+          Text(
+            prompt,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF47617A),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        KidStarCounterBadge(
-          count: stars,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          iconSize: 20,
-          textSize: 18,
-        ),
-      ],
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: _colorMatchPalette.accentSoft,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: target.color.withValues(alpha: 0.2),
+                width: 2.6,
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+            child: Column(
+              children: [
+                KidLoopAnimation(
+                  duration: const Duration(milliseconds: 1900),
+                  builder: (context, value, child) {
+                    final scale = lerpValue(1, 1.05, wave(value));
+                    return Transform.scale(scale: scale, child: child);
+                  },
+                  child: Container(
+                    width: 132,
+                    height: 132,
+                    decoration: BoxDecoration(
+                      color: target.color,
+                      borderRadius: BorderRadius.circular(36),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.86),
+                        width: 3.6,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: target.shadow.withValues(alpha: 0.26),
+                          blurRadius: 0,
+                          offset: const Offset(4, 4),
+                        ),
+                      ],
+                    ),
+                    child: Align(
+                      alignment: const Alignment(-0.44, -0.6),
+                      child: Container(
+                        width: 44,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.36),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: target.color,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: target.shadow.withValues(alpha: 0.24),
+                        blurRadius: 0,
+                        offset: const Offset(3, 3),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    target.label(context),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -720,36 +630,48 @@ class _ColorOptionTile extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(30),
           onTap: onTap,
           child: Ink(
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(32),
               border: Border.all(
                 color: correct
                     ? const Color(0xFFFFD700)
                     : wrong
                         ? const Color(0xFFF44336)
                         : shadow,
-                width: correct || wrong ? 5 : 4,
+                width: correct || wrong ? 4.8 : 4,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: shadow.withValues(alpha: 0.34),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
+                  color: shadow.withValues(alpha: 0.3),
+                  blurRadius: 0,
+                  offset: const Offset(4, 4),
                 ),
               ],
             ),
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Align(
-                  alignment: const Alignment(-0.6, -0.72),
+                Positioned.fill(
                   child: Container(
-                    width: 36,
-                    height: 18,
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: const Alignment(-0.62, -0.72),
+                  child: Container(
+                    width: 40,
+                    height: 17,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.28),
                       borderRadius: BorderRadius.circular(999),
@@ -760,7 +682,7 @@ class _ColorOptionTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 21,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
@@ -772,7 +694,7 @@ class _ColorOptionTile extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(26),
                     ),
                     child: const Center(
                       child: Text('✅', style: TextStyle(fontSize: 42)),
@@ -785,7 +707,7 @@ class _ColorOptionTile extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: const Color(0x33FF0000),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(26),
                     ),
                     child: const Center(
                       child: Text('💨', style: TextStyle(fontSize: 34)),
@@ -809,61 +731,46 @@ class _FeedbackBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return SizedBox(
-      height: 68,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutBack,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-                child: child,
+    if (state == ColorAnswerState.idle) {
+      return const SizedBox(height: 48);
+    }
+
+    final isCorrect = state == ColorAnswerState.correct;
+    final background =
+        isCorrect ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0);
+    final border =
+        isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF8C42);
+    final textColor =
+        isCorrect ? const Color(0xFF2E7D32) : const Color(0xFFE65100);
+    final emoji = isCorrect ? '🌟' : '💪';
+
+    return Container(
+      height: 64,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: border, width: 2.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              isCorrect ? l10n.feedbackCorrect : l10n.feedbackTryAgain,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+                color: textColor,
               ),
             ),
-          );
-        },
-        child: state == ColorAnswerState.idle
-            ? const SizedBox.shrink()
-            : Container(
-                key: ValueKey(state),
-                margin: const EdgeInsets.only(top: 4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                decoration: BoxDecoration(
-                  color: state == ColorAnswerState.correct
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: state == ColorAnswerState.correct
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFFFF8C42),
-                    width: 2.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    state == ColorAnswerState.correct
-                        ? l10n.feedbackCorrect
-                        : l10n.feedbackTryAgain,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: state == ColorAnswerState.correct
-                          ? const Color(0xFF2E7D32)
-                          : const Color(0xFFE65100),
-                    ),
-                  ),
-                ),
-              ),
+          ),
+          const SizedBox(width: 10),
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+        ],
       ),
     );
   }

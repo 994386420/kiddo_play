@@ -10,10 +10,25 @@ import '../../../app/router.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
-import '../../../core/widgets/kid_badges.dart';
+import '../../../core/widgets/figma_game_icons.dart';
+import '../../../core/widgets/figma_game_shell.dart';
+import '../../../core/widgets/figma_home_icons.dart';
 import '../../../core/widgets/kid_motion.dart';
 import '../../../core/widgets/pause_dialog.dart';
-import '../../../core/widgets/round_back_button.dart';
+
+const _numberGamePalette = FigmaGamePalette(
+  accent: Color(0xFF7EDB8A),
+  accentStrong: Color(0xFF2E8A42),
+  accentSoft: Color(0xFFF1FFF0),
+  progressTrack: Color(0xFFD9F4D8),
+  progressBorder: Color(0xFFA6D6A8),
+  progressGradient: LinearGradient(
+    colors: [Color(0xFF86DB90), Color(0xFF2E8A42)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  ),
+  floaterIcon: FigmaFloatIconType.flower,
+);
 
 final numberGameViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<NumberGameViewModel, GameRouteArgs>((ref, args) {
@@ -21,21 +36,79 @@ final numberGameViewModelProvider = ChangeNotifierProvider.autoDispose
 });
 
 class EmojiSet {
-  const EmojiSet(this.emoji, this.label, this.background);
+  const EmojiSet({
+    required this.emoji,
+    required this.labelZh,
+    required this.labelKo,
+    required this.labelEn,
+    required this.background,
+  });
 
   final String emoji;
-  final String label;
+  final String labelZh;
+  final String labelKo;
+  final String labelEn;
   final Color background;
+
+  String label(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'zh' => labelZh,
+      'ko' => labelKo,
+      _ => labelEn,
+    };
+  }
 }
 
 const _emojiSets = <EmojiSet>[
-  EmojiSet('🍎', 'Apples', Color(0xFFFFE5E5)),
-  EmojiSet('⭐', 'Stars', Color(0xFFFFFDE7)),
-  EmojiSet('🌸', 'Flowers', Color(0xFFFCE4EC)),
-  EmojiSet('🦋', 'Butterflies', Color(0xFFE8F5E9)),
-  EmojiSet('🎈', 'Balloons', Color(0xFFE3F2FD)),
-  EmojiSet('🍭', 'Lollipops', Color(0xFFF3E5F5)),
-  EmojiSet('🐠', 'Fish', Color(0xFFE0F7FA)),
+  EmojiSet(
+    emoji: '🍎',
+    labelZh: '苹果',
+    labelKo: '사과',
+    labelEn: 'apples',
+    background: Color(0xFFFFE5E5),
+  ),
+  EmojiSet(
+    emoji: '⭐',
+    labelZh: '星星',
+    labelKo: '별',
+    labelEn: 'stars',
+    background: Color(0xFFFFFDE7),
+  ),
+  EmojiSet(
+    emoji: '🌸',
+    labelZh: '花朵',
+    labelKo: '꽃',
+    labelEn: 'flowers',
+    background: Color(0xFFFCE4EC),
+  ),
+  EmojiSet(
+    emoji: '🦋',
+    labelZh: '蝴蝶',
+    labelKo: '나비',
+    labelEn: 'butterflies',
+    background: Color(0xFFE8F5E9),
+  ),
+  EmojiSet(
+    emoji: '🎈',
+    labelZh: '气球',
+    labelKo: '풍선',
+    labelEn: 'balloons',
+    background: Color(0xFFE3F2FD),
+  ),
+  EmojiSet(
+    emoji: '🍭',
+    labelZh: '棒棒糖',
+    labelKo: '막대사탕',
+    labelEn: 'lollipops',
+    background: Color(0xFFF3E5F5),
+  ),
+  EmojiSet(
+    emoji: '🐠',
+    labelZh: '小鱼',
+    labelKo: '물고기',
+    labelEn: 'fish',
+    background: Color(0xFFE0F7FA),
+  ),
 ];
 
 enum NumberAnswerState { idle, correct, wrong }
@@ -188,11 +261,7 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
-    AppRouter.pushBackwardAndRemoveUntil(
-      context,
-      name: AppRoutes.gameSelect,
-      predicate: (route) => route.settings.name == AppRoutes.home,
-    );
+    AppRouter.showGameSelect(context);
   }
 
   @override
@@ -279,303 +348,272 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
           _openPause();
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFE8FFE8), Color(0xFFFFF9E6)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    _NumberHeader(
-                      title: l10n.roundCounter(
-                          viewModel.round + 1, viewModel.config.rounds),
-                      difficulty: args.difficulty,
-                      stars: viewModel.stars,
-                      onBack: _openPause,
-                    ),
-                    const SizedBox(height: 16),
-                    KidAnimatedProgressBar(
-                      value: viewModel.round / viewModel.config.rounds,
-                      backgroundColor: const Color(0xFFC8F0C8),
-                      borderColor: const Color(0xFFA5D6A7),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF81C784), Color(0xFF388E3C)],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    KidRoundSwitcher(
-                      switchKey:
-                          '${viewModel.round}-${viewModel.question.count}-${viewModel.question.emojiSet.emoji}',
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(22),
-                            decoration: BoxDecoration(
-                              color: viewModel.question.emojiSet.background,
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                  color: const Color(0xFFA5D6A7), width: 4),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '${l10n.numberPrompt} 🔢',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF2E7D32),
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: List.generate(
-                                    viewModel.question.count,
-                                    (index) => KidDelayedReveal(
-                                      key: ValueKey(
-                                          '${viewModel.round}-${viewModel.question.emojiSet.emoji}-$index'),
-                                      delay: Duration(milliseconds: index * 45),
-                                      beginScale: 0.7,
-                                      beginOffset: const Offset(0, 0.12),
-                                      child: Text(
-                                        viewModel.question.emojiSet.emoji,
-                                        style: TextStyle(
-                                          fontSize: viewModel.question.count > 9
-                                              ? 28
-                                              : viewModel.question.count > 5
-                                                  ? 34
-                                                  : 40,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: viewModel.question.options.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 1.6,
-                            ),
-                            itemBuilder: (context, index) {
-                              final value = viewModel.question.options[index];
-                              final correct = viewModel.correctValue == value;
-                              final wrong = viewModel.wrongValue == value;
-                              return TweenAnimationBuilder<double>(
-                                tween: Tween<double>(
-                                    end: correct || wrong ? 1 : 0),
-                                duration:
-                                    Duration(milliseconds: wrong ? 420 : 260),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, effect, child) {
-                                  final dx = wrong ? shakeOffset(effect) : 0.0;
-                                  final scale =
-                                      correct ? punchScale(effect) : 1.0;
-                                  return Transform.translate(
-                                    offset: Offset(dx, 0),
-                                    child: Transform.scale(
-                                      scale: scale,
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(28),
-                                    onTap: () => ref
-                                        .read(numberGameViewModelProvider(args))
-                                        .select(value),
-                                    child: Ink(
-                                      decoration: BoxDecoration(
-                                        color: correct
-                                            ? const Color(0xFF388E3C)
-                                            : wrong
-                                                ? const Color(0xFFFFCDD2)
-                                                : Colors.white,
-                                        borderRadius: BorderRadius.circular(28),
-                                        border: Border.all(
-                                          color: correct
-                                              ? const Color(0xFFFFD700)
-                                              : wrong
-                                                  ? const Color(0xFFF44336)
-                                                  : const Color(0xFFA5D6A7),
-                                          width: correct || wrong ? 5 : 4,
-                                        ),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Center(
-                                            child: Text(
-                                              '$value',
-                                              style: TextStyle(
-                                                fontSize: 50,
-                                                fontWeight: FontWeight.w900,
-                                                color: correct
-                                                    ? Colors.white
-                                                    : const Color(0xFF2E7D32),
-                                              ),
-                                            ),
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: correct ? 1 : 0,
-                                            duration: const Duration(
-                                                milliseconds: 180),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.25),
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: const Center(
-                                                child: Text('✅',
-                                                    style: TextStyle(
-                                                        fontSize: 42)),
-                                              ),
-                                            ),
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: wrong ? 1 : 0,
-                                            duration: const Duration(
-                                                milliseconds: 180),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0x1FFF0000),
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: const Center(
-                                                child: Text('💨',
-                                                    style: TextStyle(
-                                                        fontSize: 34)),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _SimpleFeedbackBanner(
-                      isCorrect:
-                          viewModel.answerState == NumberAnswerState.correct,
-                      isWrong: viewModel.answerState == NumberAnswerState.wrong,
-                      correctText: l10n.numberCorrect,
-                      wrongText: l10n.numberWrong,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const FloatingSoundToggle(),
-            PauseDialog(
-              isOpen: _isPaused,
-              gameName: args.gameId.title(l10n),
-              gameEmoji: args.gameId.emoji,
-              onContinue: _closePause,
-              onRestart: _restartGame,
-              onQuit: () => _handleBack(context),
-            ),
+      child: FigmaGameScaffold(
+        palette: _numberGamePalette,
+        roundLabel:
+            l10n.roundCounter(viewModel.round + 1, viewModel.config.rounds),
+        difficulty: args.difficulty,
+        stars: viewModel.stars,
+        progress: viewModel.round / viewModel.config.rounds,
+        onPause: _openPause,
+        backgroundGradient: const LinearGradient(
+          colors: [
+            Color(0xFFE8FFE8),
+            Color(0xFFFFF9E6),
           ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+        pauseIcon: const FigmaPauseIcon(size: 18, color: Color(0xFF2E8A42)),
+        floatingAction: const FloatingSoundToggle(
+          accentColor: Color(0xFF7EDB8A),
+          borderColor: Color(0xFF2E8A42),
+        ),
+        pauseDialog: PauseDialog(
+          isOpen: _isPaused,
+          gameName: args.gameId.title(l10n),
+          gameEmoji: args.gameId.emoji,
+          onContinue: _closePause,
+          onRestart: _restartGame,
+          onQuit: () => _handleBack(context),
+        ),
+        body: KidRoundSwitcher(
+          switchKey:
+              '${viewModel.round}-${viewModel.question.count}-${viewModel.question.emojiSet.emoji}',
+          child: Column(
+            children: [
+              _NumberPromptCard(
+                prompt: l10n.numberPrompt,
+                question: viewModel.question,
+                round: viewModel.round,
+              ),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: viewModel.question.options.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 1.26,
+                ),
+                itemBuilder: (context, index) {
+                  final value = viewModel.question.options[index];
+                  final correct = viewModel.correctValue == value;
+                  final wrong = viewModel.wrongValue == value;
+                  return _NumberOptionTile(
+                    value: value,
+                    correct: correct,
+                    wrong: wrong,
+                    onTap: () => ref
+                        .read(numberGameViewModelProvider(args))
+                        .select(value),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              _SimpleFeedbackBanner(
+                isCorrect: viewModel.answerState == NumberAnswerState.correct,
+                isWrong: viewModel.answerState == NumberAnswerState.wrong,
+                correctText: l10n.numberCorrect,
+                wrongText: l10n.numberWrong,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _NumberHeader extends StatelessWidget {
-  const _NumberHeader({
-    required this.title,
-    required this.difficulty,
-    required this.stars,
-    required this.onBack,
+class _NumberPromptCard extends StatelessWidget {
+  const _NumberPromptCard({
+    required this.prompt,
+    required this.question,
+    required this.round,
   });
 
-  final String title;
-  final GameDifficulty difficulty;
-  final int stars;
-  final VoidCallback onBack;
+  final String prompt;
+  final NumberQuestion question;
+  final int round;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        KidRoundBackButton(
-          iconColor: const Color(0xFF388E3C),
-          borderColor: const Color(0xFFA5D6A7),
-          icon: Icons.pause_rounded,
-          onTap: onBack,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: const Color(0xFFA5D6A7), width: 2.5),
-                ),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF388E3C),
+    final emojiSize = question.count > 9
+        ? 28.0
+        : question.count > 5
+            ? 34.0
+            : 40.0;
+    final promptText = switch (Localizations.localeOf(context).languageCode) {
+      'zh' => '数一数，有几个${question.emojiSet.label(context)}？🔢',
+      'ko' => '${question.emojiSet.label(context)}가 몇 개 있을까요? 🔢',
+      _ => '$prompt ${question.emojiSet.label(context)}? 🔢',
+    };
+
+    return FigmaGamePanel(
+      palette: _numberGamePalette,
+      child: Column(
+        children: [
+          Text(
+            promptText,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF327940),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+            decoration: BoxDecoration(
+              color: question.emojiSet.background,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: _numberGamePalette.progressBorder,
+                width: 2.6,
+              ),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 10,
+              runSpacing: 10,
+              children: List.generate(
+                question.count,
+                (index) => KidDelayedReveal(
+                  key: ValueKey('$round-${question.emojiSet.emoji}-$index'),
+                  delay: Duration(milliseconds: index * 45),
+                  beginScale: 0.72,
+                  beginOffset: const Offset(0, 0.12),
+                  child: Text(
+                    question.emojiSet.emoji,
+                    style: TextStyle(fontSize: emojiSize),
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF546E7A),
-                ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NumberOptionTile extends StatelessWidget {
+  const _NumberOptionTile({
+    required this.value,
+    required this.correct,
+    required this.wrong,
+    required this.onTap,
+  });
+
+  final int value;
+  final bool correct;
+  final bool wrong;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: correct || wrong ? 1 : 0),
+      duration: Duration(milliseconds: wrong ? 420 : 260),
+      curve: Curves.easeOutCubic,
+      builder: (context, effect, child) {
+        final dx = wrong ? shakeOffset(effect) : 0.0;
+        final scale = correct ? punchScale(effect) : 1.0;
+        return Transform.translate(
+          offset: Offset(dx, 0),
+          child: Transform.scale(scale: scale, child: child),
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: correct
+                  ? const Color(0xFF2E8A42)
+                  : wrong
+                      ? const Color(0xFFFFD9D9)
+                      : Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: correct
+                    ? const Color(0xFFFFD700)
+                    : wrong
+                        ? const Color(0xFFF44336)
+                        : _numberGamePalette.progressBorder,
+                width: correct || wrong ? 5 : 4,
               ),
-            ],
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2E8A42).withValues(alpha: 0.10),
+                  blurRadius: 16,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        width: 1.6,
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    '$value',
+                    style: TextStyle(
+                      fontSize: 50,
+                      fontWeight: FontWeight.w900,
+                      color: correct ? Colors.white : const Color(0xFF2E8A42),
+                    ),
+                  ),
+                ),
+                AnimatedOpacity(
+                  opacity: correct ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: const Center(
+                      child: Text('✅', style: TextStyle(fontSize: 42)),
+                    ),
+                  ),
+                ),
+                AnimatedOpacity(
+                  opacity: wrong ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0x1FFF0000),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: const Center(
+                      child: Text('💨', style: TextStyle(fontSize: 34)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 12),
-        KidStarCounterBadge(
-          count: stars,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          iconSize: 20,
-          textSize: 18,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -595,57 +633,45 @@ class _SimpleFeedbackBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 68,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutBack,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-                child: child,
+    if (!isCorrect && !isWrong) {
+      return const SizedBox(height: 72);
+    }
+
+    final background =
+        isCorrect ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0);
+    final border =
+        isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF8C42);
+    final textColor =
+        isCorrect ? const Color(0xFF2E7D32) : const Color(0xFFE65100);
+    final emoji = isCorrect ? '🌟' : '💪';
+
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: border, width: 2.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              isCorrect ? correctText : wrongText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                color: textColor,
               ),
             ),
-          );
-        },
-        child: !isCorrect && !isWrong
-            ? const SizedBox.shrink()
-            : Container(
-                key: ValueKey('${isCorrect}_$isWrong'),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: isCorrect
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: isCorrect
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFFFF8C42),
-                    width: 2.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    isCorrect ? correctText : wrongText,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: isCorrect
-                          ? const Color(0xFF2E7D32)
-                          : const Color(0xFFE65100),
-                    ),
-                  ),
-                ),
-              ),
+          ),
+          const SizedBox(width: 12),
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+        ],
       ),
     );
   }

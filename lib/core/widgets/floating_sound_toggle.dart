@@ -4,9 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/localization.dart';
 import '../app_controllers.dart';
 import '../sound/game_sound_controller.dart';
+import 'figma_game_icons.dart';
 
 class FloatingSoundToggle extends ConsumerWidget {
-  const FloatingSoundToggle({super.key});
+  const FloatingSoundToggle({
+    this.accentColor = const Color(0xFF4FC3F7),
+    this.borderColor = const Color(0xFF0D47A1),
+    super.key,
+  });
+
+  final Color accentColor;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,9 +52,9 @@ class FloatingSoundToggle extends ConsumerWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: soundEnabled
-                        ? const [
-                            Color(0xFF4FC3F7),
-                            Color(0xFF1976D2),
+                        ? [
+                            accentColor,
+                            borderColor,
                           ]
                         : const [
                             Color(0xFFBDBDBD),
@@ -57,25 +65,24 @@ class FloatingSoundToggle extends ConsumerWidget {
                   ),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: soundEnabled
-                        ? const Color(0xFF0D47A1)
-                        : const Color(0xFF757575),
+                    color: soundEnabled ? borderColor : const Color(0xFF757575),
                     width: 3,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
+                      color: (soundEnabled ? borderColor : Colors.black)
+                          .withValues(alpha: 0.18),
                       blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
                   ],
                 ),
-                child: Icon(
-                  soundEnabled
-                      ? Icons.volume_up_rounded
-                      : Icons.volume_off_rounded,
-                  color: Colors.white,
-                  size: 20,
+                child: Center(
+                  child: FigmaSpeakerIcon(
+                    size: 20,
+                    color: Colors.white,
+                    muted: !soundEnabled,
+                  ),
                 ),
               ),
             ),

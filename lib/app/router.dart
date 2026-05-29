@@ -39,6 +39,42 @@ abstract final class AppRouter {
     return _route(settings);
   }
 
+  static bool popUntilNamed(BuildContext context, String name) {
+    var found = false;
+    Navigator.of(context).popUntil((route) {
+      final matches = route.settings.name == name;
+      found = found || matches;
+      return matches || route.isFirst;
+    });
+    return found;
+  }
+
+  static void showHome(BuildContext context) {
+    final found = popUntilNamed(context, AppRoutes.home);
+    if (!found) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.home,
+        (_) => false,
+      );
+    }
+  }
+
+  static void showGameSelect(BuildContext context) {
+    final found = popUntilNamed(context, AppRoutes.gameSelect);
+    if (!found) {
+      Navigator.of(context).pushNamed(AppRoutes.gameSelect);
+    }
+  }
+
+  static void popCurrentOrShowHome(BuildContext context) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
+    showHome(context);
+  }
+
   static Future<T?> pushBackwardAndRemoveUntil<T extends Object?>(
     BuildContext context, {
     required String name,
@@ -123,49 +159,12 @@ abstract final class AppRouter {
     Widget child, {
     AppRouteTransitionDirection direction = AppRouteTransitionDirection.forward,
   }) {
-    final isBackward = direction == AppRouteTransitionDirection.backward;
-
     return PageRouteBuilder<void>(
       settings: settings,
-      transitionDuration: Duration(milliseconds: isBackward ? 300 : 380),
-      reverseTransitionDuration: Duration(milliseconds: isBackward ? 260 : 340),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
       pageBuilder: (_, __, ___) => child,
-      transitionsBuilder: (context, animation, secondaryAnimation, pageChild) {
-        final primaryCurve = CurvedAnimation(
-          parent: animation,
-          curve: isBackward ? Curves.easeOutCubic : Curves.easeOutQuart,
-          reverseCurve: Curves.easeOutCubic,
-        );
-        final secondaryCurve = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeOutCubic,
-        );
-
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: isBackward ? const Offset(-0.08, 0) : const Offset(0.14, 0),
-            end: Offset.zero,
-          ).animate(primaryCurve),
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset.zero,
-              end: isBackward ? const Offset(0.04, 0) : const Offset(-0.08, 0),
-            ).animate(secondaryCurve),
-            child: FadeTransition(
-              opacity: Tween<double>(begin: isBackward ? 0.94 : 0.88, end: 1)
-                  .animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOut,
-                  reverseCurve: Curves.easeOut,
-                ),
-              ),
-              child: pageChild,
-            ),
-          ),
-        );
-      },
+      transitionsBuilder: (_, __, ___, pageChild) => pageChild,
     );
   }
 }

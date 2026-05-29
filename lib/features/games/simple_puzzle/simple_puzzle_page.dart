@@ -504,11 +504,7 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
-    AppRouter.pushBackwardAndRemoveUntil(
-      context,
-      name: AppRoutes.gameSelect,
-      predicate: (route) => route.settings.name == AppRoutes.home,
-    );
+    AppRouter.showGameSelect(context);
   }
 
   @override
@@ -603,7 +599,7 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
+            DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -1094,7 +1090,10 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
                 ),
               ),
             ),
-            const FloatingSoundToggle(),
+            const FloatingSoundToggle(
+              accentColor: Color(0xFFCE93D8),
+              borderColor: Color(0xFF7B1FA2),
+            ),
             PauseDialog(
               isOpen: _isPaused,
               gameName: args.gameId.title(l10n),

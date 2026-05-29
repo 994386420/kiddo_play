@@ -57,6 +57,12 @@ ThemeData buildKidTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: colorScheme,
+    fontFamilyFallback: const [
+      'Noto Sans SC',
+      'PingFang SC',
+      'Microsoft YaHei',
+      'Arial Unicode MS',
+    ],
     scaffoldBackgroundColor: KidPalette.sky,
     textTheme: baseTextTheme,
     appBarTheme: const AppBarTheme(

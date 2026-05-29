@@ -16,10 +16,25 @@ import '../../../core/game_models.dart';
 import '../../../core/sound/app_audio_context.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
-import '../../../core/widgets/kid_badges.dart';
+import '../../../core/widgets/figma_game_icons.dart';
+import '../../../core/widgets/figma_game_shell.dart';
+import '../../../core/widgets/figma_home_icons.dart';
 import '../../../core/widgets/kid_motion.dart';
 import '../../../core/widgets/pause_dialog.dart';
-import '../../../core/widgets/round_back_button.dart';
+
+const _animalSoundPalette = FigmaGamePalette(
+  accent: Color(0xFFFFB48E),
+  accentStrong: Color(0xFFD8622A),
+  accentSoft: Color(0xFFFFF3EC),
+  progressTrack: Color(0xFFFFDEC9),
+  progressBorder: Color(0xFFFFB48E),
+  progressGradient: LinearGradient(
+    colors: [Color(0xFFFFB48E), Color(0xFFD8622A)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  ),
+  floaterIcon: FigmaFloatIconType.fire,
+);
 
 final animalSoundViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<AnimalSoundViewModel, GameRouteArgs>((ref, args) {
@@ -404,11 +419,7 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
-    AppRouter.pushBackwardAndRemoveUntil(
-      context,
-      name: AppRoutes.gameSelect,
-      predicate: (route) => route.settings.name == AppRoutes.home,
-    );
+    AppRouter.showGameSelect(context);
   }
 
   void _openPause() {
@@ -492,485 +503,489 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
           _openPause();
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFFF3E0), Color(0xFFFFF9E6)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    _AnimalHeader(
-                      title: l10n.roundCounter(
-                          viewModel.round + 1, viewModel.config.rounds),
-                      difficulty: args.difficulty,
-                      stars: viewModel.stars,
-                      noReplay: viewModel.noReplay,
-                      onBack: _openPause,
-                    ),
-                    const SizedBox(height: 16),
-                    KidAnimatedProgressBar(
-                      value: viewModel.round / viewModel.config.rounds,
-                      backgroundColor: const Color(0xFFFFD0B5),
-                      borderColor: const Color(0xFFFFAB91),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFFAB91), Color(0xFFE64A19)],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    KidRoundSwitcher(
-                      switchKey:
-                          '${viewModel.round}-${viewModel.question.target.id}',
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(22),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                  color: const Color(0xFFFFAB91), width: 4),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  viewModel.noReplay
-                                      ? '${l10n.animalPromptHard} 🎵'
-                                      : '${l10n.animalPrompt} 🎵',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 21,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF7B3A00),
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
-                                Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 18),
-                                      decoration: BoxDecoration(
-                                        color: viewModel
-                                            .question.target.background,
-                                        borderRadius: BorderRadius.circular(28),
-                                        border: Border.all(
-                                          color: viewModel.question.target.color
-                                              .withValues(alpha: 0.56),
-                                          width: 3,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 28,
-                                            child: viewModel.soundPlaying
-                                                ? Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: List.generate(
-                                                      3,
-                                                      (index) =>
-                                                          KidLoopAnimation(
-                                                        delay: Duration(
-                                                            milliseconds:
-                                                                index * 120),
-                                                        duration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                    420),
-                                                        builder: (context,
-                                                            value, child) {
-                                                          final height =
-                                                              lerpValue(
-                                                            10,
-                                                            24,
-                                                            wave(
-                                                              value,
-                                                              min: 0,
-                                                              max: 1,
-                                                            ),
-                                                          );
-                                                          return Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        4),
-                                                            child: Align(
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Container(
-                                                                width: 6,
-                                                                height: height,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: viewModel
-                                                                      .question
-                                                                      .target
-                                                                      .color,
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              999),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  )
-                                                : const Center(
-                                                    child: Text('🔊',
-                                                        style: TextStyle(
-                                                            fontSize: 24)),
-                                                  ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            viewModel.question.target
-                                                .sound(languageCode),
-                                            style: TextStyle(
-                                              fontSize: 30,
-                                              fontWeight: FontWeight.w900,
-                                              color: viewModel
-                                                  .question.target.shadow,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Transform.translate(
-                                      offset: const Offset(0, -4),
-                                      child: Transform.rotate(
-                                        angle: pi / 4,
-                                        child: Container(
-                                          width: 16,
-                                          height: 16,
-                                          color: viewModel
-                                              .question.target.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                if (!viewModel.noReplay ||
-                                    !viewModel.hasPlayedOnce)
-                                  DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: soundEnabled
-                                            ? [
-                                                viewModel.question.target.color,
-                                                viewModel
-                                                    .question.target.shadow,
-                                              ]
-                                            : [
-                                                Colors.grey.shade400,
-                                                Colors.grey.shade500,
-                                              ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: ElevatedButton.icon(
-                                      onPressed: !soundEnabled
-                                          ? null
-                                          : () {
-                                              ref
-                                                  .read(
-                                                      animalSoundViewModelProvider(
-                                                          args))
-                                                  .playSound();
-                                            },
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 0,
-                                        shadowColor: Colors.transparent,
-                                        backgroundColor: Colors.transparent,
-                                        disabledBackgroundColor:
-                                            Colors.transparent,
-                                        foregroundColor: Colors.white,
-                                        disabledForegroundColor: Colors.white70,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 22, vertical: 14),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(999),
-                                        ),
-                                      ),
-                                      icon: const Icon(Icons.volume_up_rounded),
-                                      label: Text(
-                                        viewModel.hasPlayedOnce
-                                            ? l10n.animalReplay
-                                            : l10n.animalPlaySound,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w900),
-                                      ),
-                                    ),
-                                  )
-                                else
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF3E0),
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: const Color(0xFFFFAB91),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '🔥 ${l10n.animalReplayBlocked}',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFFE64A19),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: viewModel.question.options.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 0.95,
-                            ),
-                            itemBuilder: (context, index) {
-                              final animal = viewModel.question.options[index];
-                              final correct =
-                                  viewModel.correctOptionId == animal.id;
-                              final wrong =
-                                  viewModel.wrongOptionId == animal.id;
-                              return TweenAnimationBuilder<double>(
-                                tween: Tween<double>(
-                                    end: correct || wrong ? 1 : 0),
-                                duration:
-                                    Duration(milliseconds: wrong ? 420 : 260),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, effect, child) {
-                                  final dx = wrong ? shakeOffset(effect) : 0.0;
-                                  final scale =
-                                      correct ? punchScale(effect) : 1.0;
-                                  return Transform.translate(
-                                    offset: Offset(dx, 0),
-                                    child: Transform.scale(
-                                      scale: scale,
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(28),
-                                    onTap: () => ref
-                                        .read(
-                                            animalSoundViewModelProvider(args))
-                                        .select(animal),
-                                    child: Ink(
-                                      decoration: BoxDecoration(
-                                        color: correct
-                                            ? animal.color
-                                            : wrong
-                                                ? const Color(0xFFFFCDD2)
-                                                : animal.background,
-                                        borderRadius: BorderRadius.circular(28),
-                                        border: Border.all(
-                                          color: correct
-                                              ? const Color(0xFFFFD700)
-                                              : wrong
-                                                  ? const Color(0xFFF44336)
-                                                  : animal.color
-                                                      .withValues(alpha: 0.56),
-                                          width: correct || wrong ? 5 : 3,
-                                        ),
-                                      ),
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(animal.emoji,
-                                                  style: const TextStyle(
-                                                      fontSize: 46)),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                animal.name(context),
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: correct
-                                                      ? Colors.white
-                                                      : animal.shadow,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ],
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: correct ? 1 : 0,
-                                            duration: const Duration(
-                                                milliseconds: 180),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.25),
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: const Center(
-                                                child: Text('✅',
-                                                    style: TextStyle(
-                                                        fontSize: 42)),
-                                              ),
-                                            ),
-                                          ),
-                                          AnimatedOpacity(
-                                            opacity: wrong ? 1 : 0,
-                                            duration: const Duration(
-                                                milliseconds: 180),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0x1FFF0000),
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                              ),
-                                              child: const Center(
-                                                child: Text('💨',
-                                                    style: TextStyle(
-                                                        fontSize: 34)),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    _AnimalFeedbackBanner(
-                      isCorrect:
-                          viewModel.answerState == AnimalAnswerState.correct,
-                      isWrong: viewModel.answerState == AnimalAnswerState.wrong,
-                      correctText: l10n.animalCorrect,
-                      wrongText: l10n.animalWrong,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const FloatingSoundToggle(),
-            PauseDialog(
-              isOpen: _isPaused,
-              gameName: args.gameId.title(l10n),
-              gameEmoji: args.gameId.emoji,
-              onContinue: _closePause,
-              onRestart: _restartGame,
-              onQuit: () => _handleBack(context),
-            ),
+      child: FigmaGameScaffold(
+        palette: _animalSoundPalette,
+        roundLabel:
+            l10n.roundCounter(viewModel.round + 1, viewModel.config.rounds),
+        difficulty: args.difficulty,
+        stars: viewModel.stars,
+        progress: viewModel.round / viewModel.config.rounds,
+        onPause: _openPause,
+        backgroundGradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFF3E0),
+            Color(0xFFFFF9E6),
           ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+        pauseIcon: const FigmaPauseIcon(size: 18, color: Color(0xFFD8622A)),
+        floatingAction: const FloatingSoundToggle(
+          accentColor: Color(0xFFFFB48E),
+          borderColor: Color(0xFFD8622A),
+        ),
+        pauseDialog: PauseDialog(
+          isOpen: _isPaused,
+          gameName: args.gameId.title(l10n),
+          gameEmoji: args.gameId.emoji,
+          onContinue: _closePause,
+          onRestart: _restartGame,
+          onQuit: () => _handleBack(context),
+        ),
+        body: KidRoundSwitcher(
+          switchKey: '${viewModel.round}-${viewModel.question.target.id}',
+          child: Column(
+            children: [
+              _AnimalPromptCard(
+                prompt: viewModel.noReplay
+                    ? l10n.animalPromptHard
+                    : l10n.animalPrompt,
+                question: viewModel.question,
+                soundEnabled: soundEnabled,
+                soundPlaying: viewModel.soundPlaying,
+                hasPlayedOnce: viewModel.hasPlayedOnce,
+                noReplay: viewModel.noReplay,
+                soundLabel: viewModel.question.target.sound(languageCode),
+                replayLabel: viewModel.hasPlayedOnce
+                    ? l10n.animalReplay
+                    : l10n.animalPlaySound,
+                blockedLabel: l10n.animalReplayBlocked,
+                onPlay: !soundEnabled
+                    ? null
+                    : () {
+                        ref
+                            .read(animalSoundViewModelProvider(args))
+                            .playSound();
+                      },
+              ),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: viewModel.question.options.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.95,
+                ),
+                itemBuilder: (context, index) {
+                  final animal = viewModel.question.options[index];
+                  return _AnimalOptionTile(
+                    animal: animal,
+                    correct: viewModel.correctOptionId == animal.id,
+                    wrong: viewModel.wrongOptionId == animal.id,
+                    onTap: () => ref
+                        .read(animalSoundViewModelProvider(args))
+                        .select(animal),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+              _AnimalFeedbackBanner(
+                isCorrect: viewModel.answerState == AnimalAnswerState.correct,
+                isWrong: viewModel.answerState == AnimalAnswerState.wrong,
+                correctText: l10n.animalCorrect,
+                wrongText: l10n.animalWrong,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _AnimalHeader extends StatelessWidget {
-  const _AnimalHeader({
-    required this.title,
-    required this.difficulty,
-    required this.stars,
+class _AnimalPromptCard extends StatelessWidget {
+  const _AnimalPromptCard({
+    required this.prompt,
+    required this.question,
+    required this.soundEnabled,
+    required this.soundPlaying,
+    required this.hasPlayedOnce,
     required this.noReplay,
-    required this.onBack,
+    required this.soundLabel,
+    required this.replayLabel,
+    required this.blockedLabel,
+    required this.onPlay,
   });
 
-  final String title;
-  final GameDifficulty difficulty;
-  final int stars;
+  final String prompt;
+  final AnimalQuestion question;
+  final bool soundEnabled;
+  final bool soundPlaying;
+  final bool hasPlayedOnce;
   final bool noReplay;
-  final VoidCallback onBack;
+  final String soundLabel;
+  final String replayLabel;
+  final String blockedLabel;
+  final VoidCallback? onPlay;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        KidRoundBackButton(
-          iconColor: const Color(0xFFE64A19),
-          borderColor: const Color(0xFFFFAB91),
-          icon: Icons.pause_rounded,
-          onTap: onBack,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: const Color(0xFFFFAB91), width: 2.5),
+    final accent = question.target.color;
+    final shadow = question.target.shadow;
+
+    return FigmaGamePanel(
+      palette: _animalSoundPalette,
+      child: Column(
+        children: [
+          Text(
+            prompt,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF8A420A),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+            decoration: BoxDecoration(
+              color: question.target.background,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.4),
+                width: 2.8,
+              ),
+            ),
+            child: Column(
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    for (final radius in [152.0, 126.0, 102.0])
+                      AnimatedOpacity(
+                        opacity: soundPlaying ? 1 : 0.42,
+                        duration: const Duration(milliseconds: 220),
+                        child: Container(
+                          width: radius,
+                          height: radius,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: accent.withValues(
+                                alpha: soundPlaying ? 0.18 : 0.08,
+                              ),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    GestureDetector(
+                      onTap: onPlay,
+                      child: Container(
+                        width: 138,
+                        height: 138,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: soundEnabled
+                                ? [accent, shadow]
+                                : const [
+                                    Color(0xFFE2E5EC),
+                                    Color(0xFFC6CBD7),
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.86),
+                            width: 4,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: shadow.withValues(alpha: 0.22),
+                              blurRadius: 24,
+                              offset: const Offset(0, 14),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: soundPlaying
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    3,
+                                    (index) => KidLoopAnimation(
+                                      delay:
+                                          Duration(milliseconds: index * 120),
+                                      duration:
+                                          const Duration(milliseconds: 420),
+                                      builder: (context, value, child) {
+                                        final height = lerpValue(
+                                          18,
+                                          42,
+                                          wave(value, min: 0, max: 1),
+                                        );
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: Container(
+                                              width: 8,
+                                              height: height,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                )
+                              : FigmaSpeakerIcon(
+                                  size: 34,
+                                  color: soundEnabled
+                                      ? Colors.white
+                                      : const Color(0xFF7A8391),
+                                  muted: !soundEnabled,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                const SizedBox(height: 16),
+                Text(
+                  soundLabel,
+                  style: TextStyle(
+                    fontSize: 30,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFFBF360C),
+                    color: shadow,
                   ),
                 ),
+                const SizedBox(height: 14),
+                if (!noReplay || !hasPlayedOnce)
+                  _AnimalPlayButton(
+                    label: replayLabel,
+                    enabled: soundEnabled,
+                    accent: accent,
+                    shadow: shadow,
+                    onTap: onPlay,
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF1E7),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: const Color(0xFFFFB48E),
+                        width: 2,
+                      ),
+                    ),
+                    child: Text(
+                      '🔥 $blockedLabel',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFD8622A),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnimalPlayButton extends StatelessWidget {
+  const _AnimalPlayButton({
+    required this.label,
+    required this.enabled,
+    required this.accent,
+    required this.shadow,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool enabled;
+  final Color accent;
+  final Color shadow;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: enabled ? onTap : null,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: enabled
+                  ? [accent, shadow]
+                  : const [Color(0xFFE2E5EC), Color(0xFFC6CBD7)],
+            ),
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: shadow.withValues(alpha: enabled ? 0.18 : 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 8),
               ),
-              const SizedBox(height: 6),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FigmaSpeakerIcon(
+                size: 18,
+                color: enabled ? Colors.white : const Color(0xFF7A8391),
+                muted: !enabled,
+              ),
+              const SizedBox(width: 8),
               Text(
-                noReplay
-                    ? '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)} · ${context.l10n.animalHardModeHint}'
-                    : '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)}',
-                style: const TextStyle(
-                  fontSize: 11,
+                label,
+                style: TextStyle(
+                  fontSize: 15,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF546E7A),
+                  color: enabled ? Colors.white : const Color(0xFF7A8391),
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12),
-        KidStarCounterBadge(
-          count: stars,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          iconSize: 20,
-          textSize: 18,
+      ),
+    );
+  }
+}
+
+class _AnimalOptionTile extends StatelessWidget {
+  const _AnimalOptionTile({
+    required this.animal,
+    required this.correct,
+    required this.wrong,
+    required this.onTap,
+  });
+
+  final AnimalChoice animal;
+  final bool correct;
+  final bool wrong;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: correct || wrong ? 1 : 0),
+      duration: Duration(milliseconds: wrong ? 420 : 260),
+      curve: Curves.easeOutCubic,
+      builder: (context, effect, child) {
+        final dx = wrong ? shakeOffset(effect) : 0.0;
+        final scale = correct ? punchScale(effect) : 1.0;
+        return Transform.translate(
+          offset: Offset(dx, 0),
+          child: Transform.scale(scale: scale, child: child),
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: correct
+                  ? animal.color
+                  : wrong
+                      ? const Color(0xFFFFD9D9)
+                      : animal.background,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: correct
+                    ? const Color(0xFFFFD700)
+                    : wrong
+                        ? const Color(0xFFF44336)
+                        : animal.color.withValues(alpha: 0.56),
+                width: correct || wrong ? 5 : 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: animal.color.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        width: 1.6,
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(animal.emoji, style: const TextStyle(fontSize: 46)),
+                    const SizedBox(height: 6),
+                    Text(
+                      animal.name(context),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: correct ? Colors.white : animal.shadow,
+                      ),
+                    ),
+                  ],
+                ),
+                AnimatedOpacity(
+                  opacity: correct ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: const Center(
+                      child: Text('✅', style: TextStyle(fontSize: 42)),
+                    ),
+                  ),
+                ),
+                AnimatedOpacity(
+                  opacity: wrong ? 1 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0x1FFF0000),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: const Center(
+                      child: Text('💨', style: TextStyle(fontSize: 34)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -990,57 +1005,45 @@ class _AnimalFeedbackBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 68,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutBack,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-                child: child,
+    if (!isCorrect && !isWrong) {
+      return const SizedBox(height: 72);
+    }
+
+    final background =
+        isCorrect ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0);
+    final border =
+        isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF8C42);
+    final textColor =
+        isCorrect ? const Color(0xFF2E7D32) : const Color(0xFFE65100);
+    final emoji = isCorrect ? '🌟' : '💪';
+
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: border, width: 2.5),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              isCorrect ? correctText : wrongText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                color: textColor,
               ),
             ),
-          );
-        },
-        child: !isCorrect && !isWrong
-            ? const SizedBox.shrink()
-            : Container(
-                key: ValueKey('${isCorrect}_$isWrong'),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: isCorrect
-                      ? const Color(0xFFE8F5E9)
-                      : const Color(0xFFFFF3E0),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: isCorrect
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFFFF8C42),
-                    width: 2.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    isCorrect ? correctText : wrongText,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: isCorrect
-                          ? const Color(0xFF2E7D32)
-                          : const Color(0xFFE65100),
-                    ),
-                  ),
-                ),
-              ),
+          ),
+          const SizedBox(width: 12),
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+        ],
       ),
     );
   }

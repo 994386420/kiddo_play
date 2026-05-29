@@ -9,6 +9,7 @@ import 'package:kiddo_play/app/route_args.dart';
 import 'package:kiddo_play/app/router.dart';
 import 'package:kiddo_play/core/app_controllers.dart';
 import 'package:kiddo_play/core/game_models.dart';
+import 'package:kiddo_play/core/widgets/figma_home_icons.dart';
 import 'package:kiddo_play/features/difficulty_select/difficulty_select_page.dart';
 import 'package:kiddo_play/features/home/home_page.dart';
 import 'package:kiddo_play/l10n/app_localizations.dart';
@@ -89,8 +90,10 @@ void main() {
     await tester.pumpWidget(_buildTestApp(preferences));
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('继续：🎨 颜色配对'), findsOneWidget);
+    expect(find.text('上次：'), findsOneWidget);
+    expect(find.text('颜色配对'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('选择游戏'));
     await tester.tap(find.text('选择游戏'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -112,14 +115,13 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('即将解锁'), findsOneWidget);
-    expect(find.text('未解锁'), findsOneWidget);
-    expect(find.text('🔒'), findsNWidgets(2));
+    expect(find.byType(FigmaLockIcon), findsNWidgets(2));
 
     await tester.tap(find.text('中等'));
     await tester.pump();
 
-    expect(find.text('先完成上一个难度，再来挑战这里吧！'), findsOneWidget);
+    expect(find.text('选择难度'), findsOneWidget);
+    expect(find.text('第 1 / 5 题'), findsNothing);
   });
 
   testWidgets('completing easy unlocks medium but keeps hard locked',
@@ -140,9 +142,8 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('已解锁'), findsNWidgets(2));
-    expect(find.text('即将解锁'), findsOneWidget);
-    expect(find.text('🔒'), findsOneWidget);
+    expect(find.byType(FigmaFloatIcon), findsNWidgets(2));
+    expect(find.byType(FigmaLockIcon), findsOneWidget);
 
     await tester.tap(find.text('中等'));
     await tester.pump();

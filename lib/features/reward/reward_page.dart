@@ -9,8 +9,11 @@ import '../../app/route_args.dart';
 import '../../app/router.dart';
 import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
+import '../../core/progress_insights.dart';
 import '../../core/sound/game_sound_controller.dart';
-import '../../core/widgets/kid_button.dart';
+import '../../core/widgets/figma_game_icons.dart';
+import '../../core/widgets/figma_home_icons.dart';
+import '../../core/widgets/figma_playground_background.dart';
 import '../../core/widgets/kid_motion.dart';
 
 class RewardPage extends ConsumerStatefulWidget {
@@ -41,7 +44,8 @@ class _RewardPageState extends ConsumerState<RewardPage>
   late final double _celebrationTotalMs;
 
   Timer? _unlockTimer;
-  GameId? _newlyUnlockedGame;
+  final List<Timer> _toastTimers = [];
+  List<_RewardToastItem> _toastQueue = const [];
   late final String _encouragement;
 
   @override
@@ -74,6 +78,12 @@ class _RewardPageState extends ConsumerState<RewardPage>
 
       final progressController = ref.read(gameProgressProvider);
       final parentDataController = ref.read(parentDataProvider);
+      final previousBadges = deriveUnlockedAchievements(
+        totalStars: progressController.totalStars,
+        unlockedGames: progressController.unlockedGames,
+        gameStats: parentDataController.gameStats,
+        activityLog: parentDataController.activityLog,
+      );
 
       final newlyUnlockedGame = progressController.completeGame(
         gameId: widget.args.gameId,
@@ -91,17 +101,38 @@ class _RewardPageState extends ConsumerState<RewardPage>
         return;
       }
 
-      setState(() {
-        _newlyUnlockedGame = newlyUnlockedGame;
-      });
+      final currentBadges = deriveUnlockedAchievements(
+        totalStars: progressController.totalStars,
+        unlockedGames: progressController.unlockedGames,
+        gameStats: parentDataController.gameStats,
+        activityLog: parentDataController.activityLog,
+      );
+      final newlyUnlockedBadges =
+          currentBadges.difference(previousBadges).toList();
 
       if (newlyUnlockedGame != null) {
         unawaited(ref.read(gameSoundControllerProvider).playUnlock());
         _unlockTimer = Timer(const Duration(milliseconds: 1400), () {
           if (mounted) {
-            setState(() {});
+            _enqueueToast(
+              _RewardToastItem.unlock(gameId: newlyUnlockedGame),
+            );
           }
         });
+      }
+
+      for (var index = 0; index < newlyUnlockedBadges.length; index++) {
+        final badgeId = newlyUnlockedBadges[index];
+        final timer = Timer(
+          Duration(milliseconds: 2000 + index * 800),
+          () {
+            if (!mounted) {
+              return;
+            }
+            _enqueueToast(_RewardToastItem.badge(badgeId: badgeId));
+          },
+        );
+        _toastTimers.add(timer);
       }
     });
   }
@@ -109,9 +140,29 @@ class _RewardPageState extends ConsumerState<RewardPage>
   @override
   void dispose() {
     _unlockTimer?.cancel();
+    for (final timer in _toastTimers) {
+      timer.cancel();
+    }
     _celebrationController.dispose();
     _timelineController.dispose();
     super.dispose();
+  }
+
+  void _enqueueToast(_RewardToastItem item) {
+    setState(() {
+      _toastQueue = [..._toastQueue, item];
+    });
+
+    final timer = Timer(const Duration(milliseconds: 3400), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _toastQueue =
+            _toastQueue.where((toast) => toast.id != item.id).toList();
+      });
+    });
+    _toastTimers.add(timer);
   }
 
   String _pickEncouragement(BuildContext context) {
@@ -262,24 +313,9 @@ class _RewardPageState extends ConsumerState<RewardPage>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final gameId = widget.args.gameId;
-    final showUnlockBanner =
-        _newlyUnlockedGame != null && !(_unlockTimer?.isActive ?? false);
-    final isCompactHeight = MediaQuery.sizeOf(context).height < 900;
-    final screenPadding = isCompactHeight ? 10.0 : 20.0;
-    final topGap = isCompactHeight ? 4.0 : 8.0;
-    final titleGap = isCompactHeight ? 4.0 : 6.0;
-    final badgeGap = isCompactHeight ? 6.0 : 10.0;
-    final starsSectionGap = isCompactHeight ? 16.0 : 22.0;
-    final cardPadding = isCompactHeight ? 18.0 : 24.0;
-    final unlockTopMargin = isCompactHeight ? 12.0 : 18.0;
-    final unlockPadding = isCompactHeight ? 16.0 : 18.0;
-    final buttonGap = isCompactHeight ? 8.0 : 12.0;
-    final buttonVerticalPadding = isCompactHeight ? 12.0 : 16.0;
-    final homeButtonVerticalPadding = isCompactHeight ? 10.0 : 14.0;
-    final bottomGap = isCompactHeight ? 10.0 : 16.0;
-    final scrollBottomPadding = isCompactHeight ? 16.0 : 28.0;
-    final trophySize = isCompactHeight ? 80.0 : 86.0;
-    final trophyAnimation = _stageAnimation(
+    final diffStars = widget.args.difficulty.index + 1;
+    final topInset = MediaQuery.paddingOf(context).top;
+    final heroAnimation = _stageAnimation(
       delayMs: 100,
       durationMs: 520,
       curve: Curves.elasticOut,
@@ -289,383 +325,74 @@ class _RewardPageState extends ConsumerState<RewardPage>
       durationMs: 430,
       curve: Curves.elasticOut,
     );
-    final descriptionAnimation = _stageAnimation(
+    final pillAnimation = _stageAnimation(
       delayMs: 500,
-      durationMs: 220,
-    );
-    final badgeAnimation = _stageAnimation(
-      delayMs: 600,
       durationMs: 260,
-      curve: Curves.easeOutBack,
     );
     final starsCardAnimation = _stageAnimation(
-      delayMs: 350,
+      delayMs: 600,
       durationMs: 340,
-    );
-    final starsSummaryAnimation = _stageAnimation(
-      delayMs: 1100,
-      durationMs: 220,
     );
     final replayButtonAnimation = _stageAnimation(
       delayMs: 800,
       durationMs: 320,
       curve: Curves.easeOutBack,
     );
-    final difficultyButtonAnimation = _stageAnimation(
+    final secondaryButtonsAnimation = _stageAnimation(
       delayMs: 880,
       durationMs: 320,
       curve: Curves.easeOutBack,
     );
-    final gameSelectButtonAnimation = _stageAnimation(
-      delayMs: 960,
-      durationMs: 320,
-      curve: Curves.easeOutBack,
-    );
     final homeButtonAnimation = _stageAnimation(
-      delayMs: 1040,
+      delayMs: 980,
       durationMs: 320,
       curve: Curves.easeOutBack,
     );
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFFDE7), Color(0xFFE3F2FD), Color(0xFFF3E5F5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const Positioned(
-              top: -60,
-              left: -60,
-              child: _Blob(size: 200, color: Color(0x4DFFD93D)),
-            ),
-            const Positioned(
-              bottom: -70,
-              right: -70,
-              child: _Blob(size: 250, color: Color(0x33A855F7)),
-            ),
-            const Positioned(
-              top: 180,
-              right: -40,
-              child: _Blob(size: 150, color: Color(0x334FC3F7)),
-            ),
-            for (final entry in [
-              ('🎉', 0.10, 0.06, 28.0, 0),
-              ('🌟', 0.25, 0.84, 36.0, 200),
-              ('🎈', 0.42, 0.12, 32.0, 400),
-              ('✨', 0.62, 0.88, 28.0, 600),
-              ('🏆', 0.78, 0.18, 34.0, 800),
-            ])
-              Positioned(
-                top: MediaQuery.sizeOf(context).height * entry.$2,
-                left: MediaQuery.sizeOf(context).width * entry.$3,
-                child: KidLoopAnimation(
-                  delay: Duration(milliseconds: entry.$5),
-                  duration: Duration(milliseconds: 2500 + entry.$5),
-                  builder: (context, value, child) {
-                    final dy = lerpValue(0, -12, value);
-                    final angle = lerpValue(-0.18, 0.18, value);
-                    return Transform.translate(
-                      offset: Offset(0, dy),
-                      child: Transform.rotate(angle: angle, child: child),
-                    );
-                  },
-                  child: Text(
-                    entry.$1,
-                    style: TextStyle(
-                      fontSize: entry.$4,
-                      color: Colors.black.withValues(alpha: 0.65),
-                    ),
-                  ),
-                ),
+      body: Stack(
+        children: [
+          FigmaPlaygroundBackground(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: 28 + MediaQuery.paddingOf(context).bottom,
               ),
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  screenPadding,
-                  screenPadding,
-                  screenPadding,
-                  scrollBottomPadding,
-                ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 390),
-                    child: Column(
-                      children: [
-                        SizedBox(height: topGap),
-                        _StageEntrance(
-                          animation: trophyAnimation,
-                          beginScale: 0,
-                          beginOffset: const Offset(0, -40),
-                          child: Text(
-                            '🏆',
-                            style: TextStyle(fontSize: trophySize),
-                          ),
-                        ),
-                        SizedBox(height: topGap),
-                        _StageEntrance(
-                          animation: headingAnimation,
-                          beginScale: 0.7,
-                          child: Text(
-                            _pickEncouragement(context),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFB45309),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: titleGap),
-                        _StageEntrance(
-                          animation: descriptionAnimation,
-                          child: Text(
-                            l10n.rewardCompleted(gameId.title(l10n)),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF546E7A),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: badgeGap),
-                        _StageEntrance(
-                          animation: badgeAnimation,
-                          beginScale: 0.8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.75),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: const Color(0xFFFFD93D),
-                                width: 2,
-                              ),
-                            ),
-                            child: Text(
-                              l10n.rewardDifficultyLabel(
-                                widget.args.difficulty.label(l10n),
-                              ),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF7B5800),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: starsSectionGap),
-                        _StageEntrance(
-                          animation: starsCardAnimation,
-                          beginOffset: const Offset(0, 20),
-                          beginScale: 0.98,
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: cardPadding,
-                              vertical: cardPadding,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: const Color(0xFFFFD93D),
-                                width: 4,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFFFFD93D)
-                                      .withValues(alpha: 0.16),
-                                  blurRadius: 22,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: List.generate(
-                                    widget.args.totalRounds,
-                                    (index) => _StageEntrance(
-                                      animation: _stageAnimation(
-                                        delayMs: 400 + index * 100,
-                                        durationMs: 480,
-                                        curve: Curves.elasticOut,
-                                      ),
-                                      beginScale: 0,
-                                      beginRotation: -0.55,
-                                      child: Text(
-                                        '⭐',
-                                        style: TextStyle(
-                                          fontSize:
-                                              index < widget.args.earnedStars
-                                                  ? 40
-                                                  : 32,
-                                          color: index < widget.args.earnedStars
-                                              ? null
-                                              : Colors.black.withValues(
-                                                  alpha: 0.22,
-                                                ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                _StageEntrance(
-                                  animation: starsSummaryAnimation,
-                                  child: Text(
-                                    l10n.rewardStarsResult(
-                                      widget.args.earnedStars,
-                                      widget.args.totalRounds,
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFB45309),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 420),
-                          transitionBuilder: (child, animation) {
-                            final curved = CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutBack,
-                              reverseCurve: Curves.easeInCubic,
-                            );
-
-                            return FadeTransition(
-                              opacity: animation,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0, 0.08),
-                                  end: Offset.zero,
-                                ).animate(curved),
-                                child: ScaleTransition(
-                                  scale: Tween<double>(
-                                    begin: 0.7,
-                                    end: 1,
-                                  ).animate(curved),
-                                  child: child,
-                                ),
-                              ),
-                            );
-                          },
-                          child: !showUnlockBanner
-                              ? const SizedBox(
-                                  key: ValueKey('unlock_placeholder'),
-                                  height: 18,
-                                )
-                              : Container(
-                                  key: ValueKey(_newlyUnlockedGame),
-                                  margin: EdgeInsets.only(top: unlockTopMargin),
-                                  width: double.infinity,
-                                  padding: EdgeInsets.all(unlockPadding),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFFFF9C4),
-                                        Color(0xFFFFD54F),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(28),
-                                    border: Border.all(
-                                      color: const Color(0xFFF9A825),
-                                      width: 3,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFFF9A825)
-                                            .withValues(alpha: 0.16),
-                                        blurRadius: 18,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Text(
-                                        '🎊',
-                                        style: TextStyle(fontSize: 36),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              l10n.rewardUnlockedTitle,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w900,
-                                                color: Color(0xFF7B5800),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              l10n.rewardUnlockedDescription(
-                                                _newlyUnlockedGame!.emoji,
-                                                _newlyUnlockedGame!.title(l10n),
-                                              ),
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFFA16207),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const Text(
-                                        '🔓',
-                                        style: TextStyle(fontSize: 28),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                        ),
-                        SizedBox(height: bottomGap),
-                        Column(
+              child: Column(
+                children: [
+                  _RewardHeroSection(
+                    topInset: topInset,
+                    medalAnimation: heroAnimation,
+                    headingAnimation: headingAnimation,
+                    pillAnimation: pillAnimation,
+                    heading: _pickEncouragement(context),
+                    gameId: gameId,
+                    gameName: gameId.title(l10n),
+                    diffStars: diffStars,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 390),
+                        child: Column(
                           children: [
                             _StageEntrance(
+                              animation: starsCardAnimation,
+                              beginOffset: const Offset(0, 20),
+                              beginScale: 0.96,
+                              child: _RewardScoreCard(
+                                earnedStars: widget.args.earnedStars,
+                                totalRounds: widget.args.totalRounds,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _StageEntrance(
                               animation: replayButtonAnimation,
-                              beginOffset: const Offset(0, 30),
-                              beginScale: 0.97,
-                              child: KidPrimaryButton(
+                              beginOffset: const Offset(0, 26),
+                              beginScale: 0.96,
+                              child: _RewardReplayButton(
+                                gameId: gameId,
                                 label: l10n.rewardPlayAgain,
-                                icon: '🔄',
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF4FC3F7),
-                                    Color(0xFF1976D2),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderColor: const Color(0xFF0D47A1),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: buttonVerticalPadding,
-                                ),
                                 onPressed: () {
                                   Navigator.pushReplacementNamed(
                                     context,
@@ -678,135 +405,823 @@ class _RewardPageState extends ConsumerState<RewardPage>
                                 },
                               ),
                             ),
-                            SizedBox(height: buttonGap),
+                            const SizedBox(height: 12),
                             _StageEntrance(
-                              animation: difficultyButtonAnimation,
-                              beginOffset: const Offset(0, 30),
-                              beginScale: 0.97,
-                              child: KidPrimaryButton(
-                                label: l10n.rewardTryOtherDifficulty,
-                                icon: '🎯',
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFCE93D8),
-                                    Color(0xFF7B1FA2),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderColor: const Color(0xFF4A148C),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: buttonVerticalPadding,
-                                ),
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    AppRoutes.difficulty,
-                                    arguments: DifficultyRouteArgs(
-                                      gameId: gameId,
+                              animation: secondaryButtonsAnimation,
+                              beginOffset: const Offset(0, 26),
+                              beginScale: 0.96,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _RewardSmallActionButton(
+                                      label: l10n.rewardTryOtherDifficulty,
+                                      icon: const FigmaSparkleStarIcon(
+                                        size: 22,
+                                      ),
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFA5D6A7),
+                                          Color(0xFF43A047),
+                                        ],
+                                      ),
+                                      borderColor: const Color(0xFF1B5E20),
+                                      onPressed: () {
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          AppRoutes.difficulty,
+                                          arguments: DifficultyRouteArgs(
+                                            gameId: gameId,
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _RewardSmallActionButton(
+                                      label: l10n.rewardChooseOtherGame,
+                                      icon: const FigmaGameGridIcon(
+                                        size: 22,
+                                      ),
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFD54F),
+                                          Color(0xFFFF8C42),
+                                        ],
+                                      ),
+                                      borderColor: const Color(0xFFC85000),
+                                      onPressed: () {
+                                        AppRouter.showGameSelect(context);
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            SizedBox(height: buttonGap),
-                            _StageEntrance(
-                              animation: gameSelectButtonAnimation,
-                              beginOffset: const Offset(0, 30),
-                              beginScale: 0.97,
-                              child: KidPrimaryButton(
-                                label: l10n.rewardChooseOtherGame,
-                                icon: '🎮',
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFFFD93D),
-                                    Color(0xFFF4A200),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderColor: const Color(0xFFB77B00),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: buttonVerticalPadding,
-                                ),
-                                onPressed: () {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    AppRoutes.gameSelect,
-                                    (route) => route.isFirst,
-                                  );
-                                },
-                              ),
-                            ),
-                            SizedBox(height: buttonGap),
+                            const SizedBox(height: 12),
                             _StageEntrance(
                               animation: homeButtonAnimation,
-                              beginOffset: const Offset(0, 30),
-                              beginScale: 0.97,
-                              child: OutlinedButton(
+                              beginOffset: const Offset(0, 26),
+                              beginScale: 0.96,
+                              child: _RewardHomeButton(
+                                label: l10n.rewardBackHome,
                                 onPressed: () {
-                                  AppRouter.pushBackwardAndRemoveUntil(
-                                    context,
-                                    name: AppRoutes.home,
-                                    predicate: (_) => false,
-                                  );
+                                  AppRouter.showHome(context);
                                 },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF1976D2),
-                                  side: const BorderSide(
-                                    color: Color(0xFF90CAF9),
-                                    width: 2.5,
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: homeButtonVerticalPadding,
-                                    horizontal: 20,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(26),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      '🏠',
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      l10n.rewardBackHome,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 18,
+            right: 16,
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final toast in _toastQueue) ...[
+                    _RewardToastCard(item: toast),
+                    const SizedBox(height: 8),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _celebrationController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: _CelebrationPainter(
+                      particles: _celebrationParticles,
+                      elapsedMs:
+                          _celebrationController.value * _celebrationTotalMs,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RewardToastItem {
+  const _RewardToastItem._({
+    required this.id,
+    this.gameId,
+    this.badgeId,
+  });
+
+  factory _RewardToastItem.unlock({required GameId gameId}) {
+    return _RewardToastItem._(
+      id: 'unlock-${gameId.name}-${DateTime.now().microsecondsSinceEpoch}',
+      gameId: gameId,
+    );
+  }
+
+  factory _RewardToastItem.badge({required KidAchievementId badgeId}) {
+    return _RewardToastItem._(
+      id: 'badge-${badgeId.name}-${DateTime.now().microsecondsSinceEpoch}',
+      badgeId: badgeId,
+    );
+  }
+
+  final String id;
+  final GameId? gameId;
+  final KidAchievementId? badgeId;
+}
+
+class _RewardHeroSection extends StatelessWidget {
+  const _RewardHeroSection({
+    required this.topInset,
+    required this.medalAnimation,
+    required this.headingAnimation,
+    required this.pillAnimation,
+    required this.heading,
+    required this.gameId,
+    required this.gameName,
+    required this.diffStars,
+  });
+
+  final double topInset;
+  final Animation<double> medalAnimation;
+  final Animation<double> headingAnimation;
+  final Animation<double> pillAnimation;
+  final String heading;
+  final GameId gameId;
+  final String gameName;
+  final int diffStars;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(20, topInset + 24, 20, 54),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFF9AD5),
+                  Color(0xFFB56CF5),
+                  Color(0xFF5B9EF5),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                _StageEntrance(
+                  animation: medalAnimation,
+                  beginScale: 0,
+                  beginOffset: const Offset(0, -32),
+                  child: const _RewardMedal(size: 100),
+                ),
+                const SizedBox(height: 16),
+                _StageEntrance(
+                  animation: headingAnimation,
+                  beginScale: 0.72,
+                  child: Text(
+                    heading,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Color(0x33000000),
+                          offset: Offset(2, 2),
+                          blurRadius: 0,
                         ),
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                _StageEntrance(
+                  animation: pillAnimation,
+                  beginScale: 0.88,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.10),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        FigmaGameIcon(gameId: gameId, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          gameName,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF7B3FC4),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            3,
+                            (index) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 1),
+                              child: Opacity(
+                                opacity: index < diffStars ? 1 : 0.3,
+                                child: const FigmaSparkleStarIcon(size: 14),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: _RewardHeroDecorations(),
+            ),
+          ),
+          const Positioned(
+            left: -10,
+            right: -10,
+            bottom: -1,
+            child: _RewardWaveDivider(height: 42),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RewardHeroDecorations extends StatelessWidget {
+  const _RewardHeroDecorations();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        Widget floater({
+          required double left,
+          required double top,
+          required double size,
+          required double delay,
+          required FigmaFloatIconType type,
+        }) {
+          return Positioned(
+            left: constraints.maxWidth * left,
+            top: constraints.maxHeight * top,
+            child: KidLoopAnimation(
+              delay: Duration(milliseconds: (delay * 1000).round()),
+              duration: Duration(milliseconds: (3000 + delay * 500).round()),
+              builder: (context, value, child) {
+                final y = sin((value + delay) * pi * 2) * 10;
+                final angle = sin((value + delay) * pi * 2) * 0.14;
+                return Transform.translate(
+                  offset: Offset(0, y),
+                  child: Transform.rotate(angle: angle, child: child),
+                );
+              },
+              child: FigmaFloatIcon(type: type, size: size),
+            ),
+          );
+        }
+
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _RewardHeroDotPainter(),
               ),
             ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: AnimatedBuilder(
-                  animation: _celebrationController,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: _CelebrationPainter(
-                        particles: _celebrationParticles,
-                        elapsedMs:
-                            _celebrationController.value * _celebrationTotalMs,
-                      ),
-                    );
-                  },
+            Positioned(
+              top: -62,
+              right: -50,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
                 ),
+              ),
+            ),
+            floater(
+              left: 0.06,
+              top: 0.20,
+              size: 22,
+              delay: 0.0,
+              type: FigmaFloatIconType.star,
+            ),
+            floater(
+              left: 0.86,
+              top: 0.16,
+              size: 20,
+              delay: 0.4,
+              type: FigmaFloatIconType.heart,
+            ),
+            floater(
+              left: 0.12,
+              top: 0.62,
+              size: 18,
+              delay: 0.7,
+              type: FigmaFloatIconType.sparkle,
+            ),
+            floater(
+              left: 0.80,
+              top: 0.58,
+              size: 20,
+              delay: 0.2,
+              type: FigmaFloatIconType.flower,
+            ),
+            floater(
+              left: 0.46,
+              top: 0.08,
+              size: 16,
+              delay: 0.9,
+              type: FigmaFloatIconType.diamond,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RewardHeroDotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.18);
+    const spacing = 30.0;
+    for (double y = 0; y <= size.height + spacing; y += spacing) {
+      for (double x = 0; x <= size.width + spacing; x += spacing) {
+        canvas.drawCircle(Offset(x, y), 2.4, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _RewardWaveDivider extends StatelessWidget {
+  const _RewardWaveDivider({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: CustomPaint(
+        painter: _RewardWavePainter(),
+        size: Size.infinite,
+      ),
+    );
+  }
+}
+
+class _RewardWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0xFFFFF9F5);
+    final path = Path()
+      ..moveTo(0, size.height * 0.35)
+      ..cubicTo(
+        size.width * 0.12,
+        size.height * 0.88,
+        size.width * 0.25,
+        size.height * 0.10,
+        size.width * 0.38,
+        size.height * 0.48,
+      )
+      ..cubicTo(
+        size.width * 0.50,
+        size.height * 0.86,
+        size.width * 0.64,
+        size.height * 0.18,
+        size.width * 0.78,
+        size.height * 0.56,
+      )
+      ..cubicTo(
+        size.width * 0.88,
+        size.height * 0.78,
+        size.width * 0.95,
+        size.height * 0.40,
+        size.width,
+        size.height * 0.44,
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _RewardScoreCard extends StatelessWidget {
+  const _RewardScoreCard({
+    required this.earnedStars,
+    required this.totalRounds,
+  });
+
+  final int earnedStars;
+  final int totalRounds;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFF0C8E0), width: 4),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0xFFF0C8E0),
+            offset: Offset(6, 6),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 12,
+            children: List.generate(
+              totalRounds,
+              (index) => Opacity(
+                opacity: index < earnedStars ? 1 : 0.2,
+                child: FigmaSparkleStarIcon(
+                  size: index < earnedStars ? 46 : 36,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFFFFD54F),
+                  Color(0xFFFF9A3D),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: const Color(0xFFC85000), width: 3),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFFC85000),
+                  offset: Offset(3, 3),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const FigmaSparkleStarIcon(size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  '$earnedStars / $totalRounds',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RewardReplayButton extends StatelessWidget {
+  const _RewardReplayButton({
+    required this.gameId,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final GameId gameId;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(28);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFF6CAE),
+            Color(0xFFC455F5),
+          ],
+        ),
+        borderRadius: radius,
+        border: Border.all(color: const Color(0xFF8B11CC), width: 4),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0xFF8B11CC),
+            offset: Offset(6, 7),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onPressed,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            decoration: BoxDecoration(borderRadius: radius),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const FigmaReplayIcon(size: 28, color: Colors.white),
+                const SizedBox(width: 12),
+                FigmaGameIcon(gameId: gameId, size: 28),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardSmallActionButton extends StatelessWidget {
+  const _RewardSmallActionButton({
+    required this.label,
+    required this.icon,
+    required this.gradient,
+    required this.borderColor,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Widget icon;
+  final Gradient gradient;
+  final Color borderColor;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(24);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: radius,
+        border: Border.all(color: borderColor, width: 3.5),
+        boxShadow: [
+          BoxShadow(
+            color: borderColor,
+            offset: const Offset(5, 5),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onPressed,
+          child: Ink(
+            height: 98,
+            decoration: BoxDecoration(borderRadius: radius),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardHomeButton extends StatelessWidget {
+  const _RewardHomeButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(24);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: radius,
+        border: Border.all(color: const Color(0xFFF0C8E0), width: 3.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0xFFF0C8E0),
+            offset: Offset(5, 5),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onPressed,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(borderRadius: radius),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const FigmaHomeIcon(size: 28),
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF7B3FC4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardToastCard extends StatelessWidget {
+  const _RewardToastCard({required this.item});
+
+  final _RewardToastItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final unlockGameId = item.gameId;
+    final badgeId = item.badgeId;
+    late final Gradient gradient;
+    late final Color borderColor;
+    late final String title;
+    late final String subtitle;
+    late final Widget icon;
+
+    if (unlockGameId != null) {
+      gradient = const LinearGradient(
+        colors: [
+          Color(0xFFFFF9C4),
+          Color(0xFFFFD54F),
+        ],
+      );
+      borderColor = const Color(0xFFE6A800);
+      title = '新游戏解锁啦！';
+      subtitle = unlockGameId.title(context.l10n);
+      icon = const FigmaSparkleStarIcon(size: 26);
+    } else {
+      final achievement = achievementById(badgeId!);
+      gradient = LinearGradient(
+        colors: [
+          Color(achievement.background),
+          Color(achievement.background).withValues(alpha: 0.9),
+        ],
+      );
+      borderColor = Color(achievement.color);
+      title = '新徽章解锁！';
+      subtitle = achievement.name;
+      icon = Text(achievement.emoji, style: const TextStyle(fontSize: 24));
+    }
+
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(item.id),
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(lerpValue(64, 0, value), 0),
+            child: Transform.scale(
+              scale: lerpValue(0.82, 1, value),
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 230),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 3.5),
+          boxShadow: [
+            BoxShadow(
+              color: borderColor,
+              offset: const Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: borderColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF6E6E6E),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -816,23 +1231,78 @@ class _RewardPageState extends ConsumerState<RewardPage>
   }
 }
 
-class _Blob extends StatelessWidget {
-  const _Blob({
-    required this.size,
-    required this.color,
-  });
+class _RewardMedal extends StatelessWidget {
+  const _RewardMedal({required this.size});
 
   final double size;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
+    return SizedBox(
+      width: size + 44,
+      height: size + 44,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          KidLoopAnimation(
+            reverse: false,
+            duration: const Duration(milliseconds: 6000),
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * pi * 2,
+                child: child,
+              );
+            },
+            child: Container(
+              width: size + 36,
+              height: size + 36,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: SweepGradient(
+                  colors: [
+                    Color(0xFFFF9AD5),
+                    Color(0xFFFFE234),
+                    Color(0xFF4BC96A),
+                    Color(0xFF42D4FF),
+                    Color(0xFFB56CF5),
+                    Color(0xFFFF9AD5),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: size + 12,
+            height: size + 12,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.22),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.45),
+                width: 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFFC857).withValues(alpha: 0.20),
+                  blurRadius: 28,
+                  offset: const Offset(0, 14),
+                ),
+              ],
+            ),
+          ),
+          KidLoopAnimation(
+            duration: const Duration(milliseconds: 2500),
+            builder: (context, value, child) {
+              final scale = lerpValue(1, 1.08, wave(value, min: 0, max: 1));
+              final angle = sin(value * pi * 4) * 0.08;
+              return Transform.rotate(
+                angle: angle,
+                child: Transform.scale(scale: scale, child: child),
+              );
+            },
+            child: FigmaTrophyIcon(size: size * 0.72),
+          ),
+        ],
       ),
     );
   }
@@ -844,14 +1314,12 @@ class _StageEntrance extends StatelessWidget {
     required this.child,
     this.beginOffset = Offset.zero,
     this.beginScale = 1,
-    this.beginRotation = 0,
   });
 
   final Animation<double> animation;
   final Widget child;
   final Offset beginOffset;
   final double beginScale;
-  final double beginRotation;
 
   @override
   Widget build(BuildContext context) {
@@ -869,12 +1337,9 @@ class _StageEntrance extends StatelessWidget {
               lerpValue(beginOffset.dx, 0, progress),
               lerpValue(beginOffset.dy, 0, progress),
             ),
-            child: Transform.rotate(
-              angle: lerpValue(beginRotation, 0, progress),
-              child: Transform.scale(
-                scale: lerpValue(beginScale, 1, progress),
-                child: child,
-              ),
+            child: Transform.scale(
+              scale: lerpValue(beginScale, 1, progress),
+              child: child,
             ),
           ),
         );
