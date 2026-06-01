@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/localization.dart';
 import '../../../app/route_args.dart';
 import '../../../app/router.dart';
+import '../../../core/app_controllers.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
+import '../../../core/sound/voice_guide_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
 import '../../../core/widgets/figma_game_icons.dart';
 import '../../../core/widgets/figma_game_shell.dart';
@@ -257,10 +259,14 @@ class NumberGamePage extends ConsumerStatefulWidget {
 class _NumberGamePageState extends ConsumerState<NumberGamePage> {
   bool _isPaused = false;
   late final GameSoundController _soundController;
+  late final VoiceGuideController _voiceGuideController;
+  late final ProviderSubscription<String> _questionVoiceSubscription;
+  late final ProviderSubscription<bool> _voiceGuideSubscription;
 
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
+    unawaited(_voiceGuideController.stop());
     AppRouter.showGameSelect(context);
   }
 
@@ -268,13 +274,45 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
   void initState() {
     super.initState();
     _soundController = ref.read(gameSoundControllerProvider);
+    _voiceGuideController = ref.read(voiceGuideControllerProvider);
+    _questionVoiceSubscription = ref.listenManual<String>(
+      numberGameViewModelProvider(args).select(
+        (viewModel) =>
+            '${viewModel.round}-${viewModel.question.count}-${viewModel.question.emojiSet.emoji}',
+      ),
+      (_, __) {
+        if (!mounted || _isPaused) {
+          return;
+        }
+        unawaited(_speakCurrentPrompt());
+      },
+    );
+    _voiceGuideSubscription = ref.listenManual<bool>(
+      parentDataProvider.select((parentData) => parentData.voiceGuideEnabled),
+      (_, enabled) {
+        if (!mounted) {
+          return;
+        }
+        if (!enabled) {
+          unawaited(_voiceGuideController.stop());
+          return;
+        }
+        if (!_isPaused) {
+          unawaited(_speakCurrentPrompt());
+        }
+      },
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_soundController.startBgm());
+      unawaited(_speakCurrentPrompt());
     });
   }
 
   @override
   void dispose() {
+    _questionVoiceSubscription.close();
+    _voiceGuideSubscription.close();
+    unawaited(_voiceGuideController.stop());
     unawaited(_soundController.stopBgm());
     super.dispose();
   }
@@ -284,6 +322,7 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
       return;
     }
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     setState(() {
       _isPaused = true;
     });
@@ -294,10 +333,12 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
     setState(() {
       _isPaused = false;
     });
+    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     ref.read(numberGameViewModelProvider(args)).reset();
     setState(() {
       _isPaused = false;
@@ -311,6 +352,7 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
           .select((viewModel) => viewModel.pendingRewardArgs),
       (_, next) {
         if (next != null) {
+          unawaited(_voiceGuideController.stop());
           Navigator.pushReplacementNamed(context, AppRoutes.reward,
               arguments: next);
         }
@@ -322,6 +364,9 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
       (previous, next) {
         if (previous == next) {
           return;
+        }
+        if (next != NumberAnswerState.idle) {
+          unawaited(_voiceGuideController.stop());
         }
         final soundController = ref.read(gameSoundControllerProvider);
         if (next == NumberAnswerState.correct) {
@@ -426,6 +471,30 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
       ),
     );
   }
+
+  Future<void> _speakCurrentPrompt() async {
+    if (!mounted || _isPaused) {
+      return;
+    }
+
+    final viewModel = ref.read(numberGameViewModelProvider(args));
+    await _voiceGuideController.speak(
+      _numberPromptText(context, viewModel.question, context.l10n.numberPrompt),
+      locale: Localizations.localeOf(context),
+    );
+  }
+}
+
+String _numberPromptText(
+  BuildContext context,
+  NumberQuestion question,
+  String prompt,
+) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '数一数，有几个${question.emojiSet.label(context)}？',
+    'ko' => '${question.emojiSet.label(context)}가 몇 개 있을까요?',
+    _ => '$prompt ${question.emojiSet.label(context)}?',
+  };
 }
 
 class _NumberPromptCard extends StatelessWidget {
@@ -446,11 +515,7 @@ class _NumberPromptCard extends StatelessWidget {
         : question.count > 5
             ? 34.0
             : 40.0;
-    final promptText = switch (Localizations.localeOf(context).languageCode) {
-      'zh' => '数一数，有几个${question.emojiSet.label(context)}？🔢',
-      'ko' => '${question.emojiSet.label(context)}가 몇 개 있을까요? 🔢',
-      _ => '$prompt ${question.emojiSet.label(context)}? 🔢',
-    };
+    final promptText = '${_numberPromptText(context, question, prompt)} 🔢';
 
     return FigmaGamePanel(
       palette: _numberGamePalette,

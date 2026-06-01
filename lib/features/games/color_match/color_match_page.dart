@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/localization.dart';
 import '../../../app/route_args.dart';
 import '../../../app/router.dart';
+import '../../../core/app_controllers.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
+import '../../../core/sound/voice_guide_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
 import '../../../core/widgets/figma_game_icons.dart';
 import '../../../core/widgets/figma_game_shell.dart';
@@ -316,10 +318,14 @@ class ColorMatchPage extends ConsumerStatefulWidget {
 class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
   bool _isPaused = false;
   late final GameSoundController _soundController;
+  late final VoiceGuideController _voiceGuideController;
+  late final ProviderSubscription<String> _questionVoiceSubscription;
+  late final ProviderSubscription<bool> _voiceGuideSubscription;
 
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
+    unawaited(_voiceGuideController.stop());
     AppRouter.showGameSelect(context);
   }
 
@@ -327,13 +333,43 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
   void initState() {
     super.initState();
     _soundController = ref.read(gameSoundControllerProvider);
+    _voiceGuideController = ref.read(voiceGuideControllerProvider);
+    _questionVoiceSubscription = ref.listenManual<String>(
+      colorMatchViewModelProvider(args).select(
+          (viewModel) => '${viewModel.round}-${viewModel.question.target.id}'),
+      (_, __) {
+        if (!mounted || _isPaused) {
+          return;
+        }
+        unawaited(_speakCurrentPrompt());
+      },
+    );
+    _voiceGuideSubscription = ref.listenManual<bool>(
+      parentDataProvider.select((parentData) => parentData.voiceGuideEnabled),
+      (_, enabled) {
+        if (!mounted) {
+          return;
+        }
+        if (!enabled) {
+          unawaited(_voiceGuideController.stop());
+          return;
+        }
+        if (!_isPaused) {
+          unawaited(_speakCurrentPrompt());
+        }
+      },
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_soundController.startBgm());
+      unawaited(_speakCurrentPrompt());
     });
   }
 
   @override
   void dispose() {
+    _questionVoiceSubscription.close();
+    _voiceGuideSubscription.close();
+    unawaited(_voiceGuideController.stop());
     unawaited(_soundController.stopBgm());
     super.dispose();
   }
@@ -343,6 +379,7 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
       return;
     }
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     setState(() {
       _isPaused = true;
     });
@@ -353,10 +390,12 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
     setState(() {
       _isPaused = false;
     });
+    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     ref.read(colorMatchViewModelProvider(args)).reset();
     setState(() {
       _isPaused = false;
@@ -370,6 +409,7 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
           .select((viewModel) => viewModel.pendingRewardArgs),
       (_, next) {
         if (next != null) {
+          unawaited(_voiceGuideController.stop());
           Navigator.pushReplacementNamed(
             context,
             AppRoutes.reward,
@@ -384,6 +424,9 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
       (previous, next) {
         if (previous == next) {
           return;
+        }
+        if (next != ColorAnswerState.idle) {
+          unawaited(_voiceGuideController.stop());
         }
         final soundController = ref.read(gameSoundControllerProvider);
         if (next == ColorAnswerState.correct) {
@@ -478,6 +521,27 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
       ),
     );
   }
+
+  Future<void> _speakCurrentPrompt() async {
+    if (!mounted || _isPaused) {
+      return;
+    }
+
+    final viewModel = ref.read(colorMatchViewModelProvider(args));
+    await _voiceGuideController.speak(
+      _colorVoicePrompt(context, viewModel.question.target),
+      locale: Localizations.localeOf(context),
+    );
+  }
+}
+
+String _colorVoicePrompt(BuildContext context, ColorChoice target) {
+  final label = target.label(context);
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '请找到$label。',
+    'ko' => '$label 찾아보세요.',
+    _ => 'Find the $label color.',
+  };
 }
 
 class _ColorPromptCard extends StatelessWidget {

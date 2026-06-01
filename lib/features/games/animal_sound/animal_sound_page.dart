@@ -15,6 +15,7 @@ import '../../../core/app_controllers.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/app_audio_context.dart';
 import '../../../core/sound/game_sound_controller.dart';
+import '../../../core/sound/voice_guide_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
 import '../../../core/widgets/figma_game_icons.dart';
 import '../../../core/widgets/figma_game_shell.dart';
@@ -415,11 +416,59 @@ class AnimalSoundPage extends ConsumerStatefulWidget {
 
 class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
   bool _isPaused = false;
+  late final VoiceGuideController _voiceGuideController;
+  late final ProviderSubscription<String> _questionVoiceSubscription;
+  late final ProviderSubscription<bool> _voiceGuideSubscription;
 
   GameRouteArgs get args => widget.args;
 
   void _handleBack(BuildContext context) {
+    unawaited(_voiceGuideController.stop());
+    unawaited(ref.read(animalSoundViewModelProvider(args)).stopSound());
     AppRouter.showGameSelect(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _voiceGuideController = ref.read(voiceGuideControllerProvider);
+    _questionVoiceSubscription = ref.listenManual<String>(
+      animalSoundViewModelProvider(args).select(
+          (viewModel) => '${viewModel.round}-${viewModel.question.target.id}'),
+      (_, __) {
+        if (!mounted || _isPaused) {
+          return;
+        }
+        unawaited(_speakCurrentPrompt());
+      },
+    );
+    _voiceGuideSubscription = ref.listenManual<bool>(
+      parentDataProvider.select((parentData) => parentData.voiceGuideEnabled),
+      (_, enabled) {
+        if (!mounted) {
+          return;
+        }
+        if (!enabled) {
+          unawaited(_voiceGuideController.stop());
+          return;
+        }
+        if (!_isPaused) {
+          unawaited(_speakCurrentPrompt());
+        }
+      },
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_speakCurrentPrompt());
+    });
+  }
+
+  @override
+  void dispose() {
+    _questionVoiceSubscription.close();
+    _voiceGuideSubscription.close();
+    unawaited(_voiceGuideController.stop());
+    unawaited(ref.read(animalSoundViewModelProvider(args)).stopSound());
+    super.dispose();
   }
 
   void _openPause() {
@@ -427,6 +476,7 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
       return;
     }
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     unawaited(ref.read(animalSoundViewModelProvider(args)).stopSound());
     setState(() {
       _isPaused = true;
@@ -438,10 +488,12 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
     setState(() {
       _isPaused = false;
     });
+    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {
     unawaited(ref.read(gameSoundControllerProvider).playClick());
+    unawaited(_voiceGuideController.stop());
     unawaited(ref.read(animalSoundViewModelProvider(args)).reset());
     setState(() {
       _isPaused = false;
@@ -455,6 +507,8 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
           .select((viewModel) => viewModel.pendingRewardArgs),
       (_, next) {
         if (next != null) {
+          unawaited(_voiceGuideController.stop());
+          unawaited(ref.read(animalSoundViewModelProvider(args)).stopSound());
           Navigator.pushReplacementNamed(context, AppRoutes.reward,
               arguments: next);
         }
@@ -466,6 +520,10 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
       (previous, next) {
         if (previous == next) {
           return;
+        }
+        if (next != AnimalAnswerState.idle) {
+          unawaited(_voiceGuideController.stop());
+          unawaited(ref.read(animalSoundViewModelProvider(args)).stopSound());
         }
         final soundController = ref.read(gameSoundControllerProvider);
         if (next == AnimalAnswerState.correct) {
@@ -594,6 +652,29 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _speakCurrentPrompt() async {
+    if (!mounted || _isPaused) {
+      return;
+    }
+
+    final l10n = context.l10n;
+    final viewModel = ref.read(animalSoundViewModelProvider(args));
+    final result = await _voiceGuideController.speak(
+      viewModel.noReplay ? l10n.animalPromptHard : l10n.animalPrompt,
+      locale: Localizations.localeOf(context),
+    );
+
+    if (!mounted ||
+        _isPaused ||
+        result != VoiceGuideResult.completed ||
+        !ref.read(parentDataProvider).voiceGuideEnabled ||
+        !ref.read(parentDataProvider).soundEnabled) {
+      return;
+    }
+
+    await ref.read(animalSoundViewModelProvider(args)).playSound();
   }
 }
 
