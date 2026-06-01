@@ -12,6 +12,7 @@ import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
 import '../../core/progress_insights.dart';
 import '../../core/widgets/figma_home_icons.dart';
+import '../../core/widgets/kid_badges.dart';
 import '../../core/widgets/kid_motion.dart';
 
 final homeViewModelProvider = Provider<HomeViewModel>((ref) {
@@ -673,7 +674,9 @@ class _HomePageState extends ConsumerState<HomePage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (sheetContext) => _BadgeWallSheet(viewModel: viewModel),
+      builder: (sheetContext) => KidBadgeWallSheet(
+        unlockedAchievements: viewModel.unlockedAchievements,
+      ),
     );
   }
 }
@@ -998,46 +1001,64 @@ class _SpeechBubble extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           Positioned(
-            top: -15,
-            child: SizedBox(
-              width: 20,
-              height: 16,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                clipBehavior: Clip.none,
-                children: const [
-                  _SpeechTriangle(
-                    width: 20,
-                    height: 16,
-                    color: Color(0xFFB56CF5),
+            top: -10,
+            child: Transform.translate(
+              offset: const Offset(0, 7),
+              child: const _SpeechTriangle(
+                width: 24,
+                height: 18,
+                color: Color(0xFFD968F4),
+              ),
+            ),
+          ),
+          const Positioned(
+            top: -10,
+            child: _SpeechTriangle(
+              width: 18,
+              height: 14,
+              color: Colors.white,
+            ),
+          ),
+          Transform.translate(
+            offset: const Offset(0, 8),
+            child: IgnorePointer(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xFFF067E7), Color(0xFFB855F3)],
                   ),
-                  Positioned(
-                    top: 7,
-                    child: _SpeechTriangle(
-                      width: 14,
-                      height: 11,
-                      color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x4DB855F3),
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: _bubbleTextStyle().copyWith(color: Colors.transparent),
+                ),
               ),
             ),
           ),
           Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFB56CF5),
-                width: 3.5,
-              ),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0xFFB56CF5),
-                  offset: Offset(5, 5),
-                  blurRadius: 0,
+                  color: Color(0x12FFFFFF),
+                  blurRadius: 2,
+                  offset: Offset(0, 1),
                 ),
               ],
             ),
@@ -1237,358 +1258,6 @@ class _LoopTransform extends StatelessWidget {
   }
 }
 
-class _BadgeTile extends StatelessWidget {
-  const _BadgeTile({
-    required this.achievement,
-    required this.unlocked,
-  });
-
-  final KidAchievement achievement;
-  final bool unlocked;
-
-  @override
-  Widget build(BuildContext context) {
-    final accentColor = Color(achievement.color);
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-      decoration: BoxDecoration(
-        color:
-            unlocked ? Color(achievement.background) : const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: unlocked
-              ? accentColor.withValues(alpha: 0.33)
-              : const Color(0xFFE0E0E0),
-          width: 2.5,
-        ),
-      ),
-      child: Stack(
-        children: [
-          if (unlocked)
-            Positioned(
-              top: -16,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      accentColor.withValues(alpha: 0.53),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ColorFiltered(
-                    colorFilter: unlocked
-                        ? const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.srcOver,
-                          )
-                        : const ColorFilter.matrix(_greyMatrix),
-                    child: Opacity(
-                      opacity: unlocked ? 1 : 0.35,
-                      child: _achievementIcon(achievement.id, 44),
-                    ),
-                  ),
-                  if (!unlocked)
-                    const Positioned(
-                      right: -6,
-                      bottom: -4,
-                      child: FigmaLockIcon(size: 18),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                achievement.name,
-                textAlign: TextAlign.center,
-                style: _miniCardTitleStyle(
-                  color: unlocked ? accentColor : const Color(0xFF9E9E9E),
-                  size: 14,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                achievement.description,
-                textAlign: TextAlign.center,
-                style: _miniCardMetaStyle(
-                  color: unlocked
-                      ? const Color(0xFF78909C)
-                      : const Color(0xFFBDBDBD),
-                  size: 11,
-                ),
-              ),
-              if (unlocked) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.13),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: accentColor.withValues(alpha: 0.33),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Text(
-                    '已获得 ✓',
-                    style: _miniCardMetaStyle(
-                      color: accentColor,
-                      size: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BadgeWallSheet extends StatelessWidget {
-  const _BadgeWallSheet({required this.viewModel});
-
-  final HomeViewModel viewModel;
-
-  @override
-  Widget build(BuildContext context) {
-    final media = MediaQuery.sizeOf(context);
-
-    return SafeArea(
-      top: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 430,
-            maxHeight: media.height * 0.88,
-          ),
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFFFF9E6),
-                  Colors.white,
-                  Colors.white,
-                ],
-                stops: [0, 0.3, 1],
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              border: Border.all(
-                color: const Color(0xFFFFD93D),
-                width: 3,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _badgesLabel(context),
-                              style: _dialogTitleStyle(
-                                color: const Color(0xFFB45309),
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '已解锁 ${viewModel.unlockedBadgeCount} / ${kidAchievements.length} 个',
-                              style: _miniCardMetaStyle(
-                                color: const Color(0xFF9E9E9E),
-                                size: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      _BadgeCloseButton(
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: const Color(0xFFFFD93D),
-                        width: 2,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(
-                          begin: 0,
-                          end: kidAchievements.isEmpty
-                              ? 0
-                              : viewModel.unlockedBadgeCount /
-                                  kidAchievements.length,
-                        ),
-                        duration: const Duration(milliseconds: 900),
-                        curve: Curves.easeOut,
-                        builder: (context, value, child) {
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: FractionallySizedBox(
-                              widthFactor: value,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFFFFD93D),
-                                Color(0xFFF4A200),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: kidAchievements.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.92,
-                        ),
-                        itemBuilder: (context, index) {
-                          final achievement = kidAchievements[index];
-                          return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.88, end: 1),
-                            duration:
-                                Duration(milliseconds: 260 + (index * 50)),
-                            curve: Curves.easeOutBack,
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: ((value - 0.88) / 0.12).clamp(0, 1),
-                                child: Transform.scale(
-                                  scale: value,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: _BadgeTile(
-                              achievement: achievement,
-                              unlocked: viewModel.unlockedAchievements
-                                  .contains(achievement.id),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BadgeCloseButton extends StatefulWidget {
-  const _BadgeCloseButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  State<_BadgeCloseButton> createState() => _BadgeCloseButtonState();
-}
-
-class _BadgeCloseButtonState extends State<_BadgeCloseButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.9 : 1,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xFFE0E0E0),
-              width: 2,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'X',
-            style: _dialogTitleStyle(
-              color: const Color(0xFF546E7A),
-              size: 18,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PolkaDotBackgroundPainter extends CustomPainter {
   _PolkaDotBackgroundPainter({
     required this.backgroundColor,
@@ -1687,34 +1356,6 @@ class _HeroWavePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-Widget _achievementIcon(KidAchievementId id, double size) {
-  return switch (id) {
-    KidAchievementId.firstGame => FigmaGameGridIcon(size: size),
-    KidAchievementId.firstPerfect => FigmaSparkleStarIcon(size: size),
-    KidAchievementId.stars50 => FigmaFloatIcon(
-        type: FigmaFloatIconType.star,
-        size: size,
-      ),
-    KidAchievementId.stars100 => FigmaFloatIcon(
-        type: FigmaFloatIconType.sparkle,
-        size: size,
-      ),
-    KidAchievementId.allGamesPlayed => FigmaGameIcon(
-        gameId: GameId.colorMatch,
-        size: size,
-      ),
-    KidAchievementId.allUnlocked => FigmaTrophyIcon(size: size),
-    KidAchievementId.hardPerfect => FigmaFloatIcon(
-        type: FigmaFloatIconType.diamond,
-        size: size,
-      ),
-    KidAchievementId.streak7 => FigmaFloatIcon(
-        type: FigmaFloatIconType.fire,
-        size: size,
-      ),
-  };
-}
-
 TextStyle _titleStyle({required Color color}) {
   return GoogleFonts.baloo2(
     fontSize: 24,
@@ -1760,8 +1401,8 @@ TextStyle _miniCardMetaStyle({
 
 TextStyle _bubbleTextStyle() {
   return GoogleFonts.baloo2(
-    fontSize: 17,
-    fontWeight: FontWeight.w800,
+    fontSize: 16.5,
+    fontWeight: FontWeight.w900,
     height: 1,
     color: const Color(0xFF7B3FC4),
   );
@@ -1791,18 +1432,6 @@ TextStyle _badgeCounterStyle() {
     fontWeight: FontWeight.w800,
     height: 1,
     color: const Color(0xFF6D4C00),
-  );
-}
-
-TextStyle _dialogTitleStyle({
-  required Color color,
-  double size = 20,
-}) {
-  return GoogleFonts.baloo2(
-    fontSize: size,
-    fontWeight: FontWeight.w800,
-    height: 1,
-    color: color,
   );
 }
 
@@ -1847,29 +1476,6 @@ const _buttonTitleShadows = <Shadow>[
     offset: Offset(1, 1),
     color: Color(0x33000000),
   ),
-];
-
-const _greyMatrix = <double>[
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
 ];
 
 class _HeroFloaterSpec {

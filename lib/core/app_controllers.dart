@@ -247,6 +247,12 @@ class ParentDataController extends ChangeNotifier {
       : _childName = _preferences.getString(_childNameKey) ?? '小朋友',
         _childAvatar = _preferences.getString(_childAvatarKey) ?? '🦁',
         _soundEnabled = _preferences.getBool(_soundEnabledKey) ?? true,
+        _voiceGuideEnabled =
+            _preferences.getBool(_voiceGuideEnabledKey) ?? true,
+        _sessionTimeLimitMinutes =
+            _preferences.getInt(_sessionTimeLimitMinutesKey) ?? 0,
+        _dailyTimeLimitMinutes =
+            _preferences.getInt(_dailyTimeLimitMinutesKey) ?? 0,
         _gameStats = _readGameStats(_preferences),
         _activityLog = _readActivityLog(_preferences) {
     _mergeDifficultyProgressFromActivityLog();
@@ -257,6 +263,10 @@ class ParentDataController extends ChangeNotifier {
   static const _childNameKey = 'kidapp_child_name';
   static const _childAvatarKey = 'kidapp_child_avatar';
   static const _soundEnabledKey = 'kidapp_sound_enabled';
+  static const _voiceGuideEnabledKey = 'kidapp_voice_guide_enabled';
+  static const _sessionTimeLimitMinutesKey =
+      'kidapp_session_time_limit_minutes';
+  static const _dailyTimeLimitMinutesKey = 'kidapp_daily_time_limit_minutes';
   static const _gameStatsKey = 'kidapp_game_stats';
   static const _activityLogKey = 'kidapp_activity_log';
 
@@ -265,12 +275,18 @@ class ParentDataController extends ChangeNotifier {
   String _childName;
   String _childAvatar;
   bool _soundEnabled;
+  bool _voiceGuideEnabled;
+  int _sessionTimeLimitMinutes;
+  int _dailyTimeLimitMinutes;
   Map<GameId, ParentGameStats> _gameStats;
   List<ActivityEntry> _activityLog;
 
   String get childName => _childName;
   String get childAvatar => _childAvatar;
   bool get soundEnabled => _soundEnabled;
+  bool get voiceGuideEnabled => _voiceGuideEnabled;
+  int get sessionTimeLimitMinutes => _sessionTimeLimitMinutes;
+  int get dailyTimeLimitMinutes => _dailyTimeLimitMinutes;
   bool get isPinSet => _preferences.containsKey(_parentPinKey);
 
   UnmodifiableMapView<GameId, ParentGameStats> get gameStats =>
@@ -314,6 +330,24 @@ class ParentDataController extends ChangeNotifier {
   Future<void> setSoundEnabled(bool value) async {
     _soundEnabled = value;
     await _preferences.setBool(_soundEnabledKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setVoiceGuideEnabled(bool value) async {
+    _voiceGuideEnabled = value;
+    await _preferences.setBool(_voiceGuideEnabledKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setSessionTimeLimitMinutes(int value) async {
+    _sessionTimeLimitMinutes = value;
+    await _preferences.setInt(_sessionTimeLimitMinutesKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setDailyTimeLimitMinutes(int value) async {
+    _dailyTimeLimitMinutes = value;
+    await _preferences.setInt(_dailyTimeLimitMinutesKey, value);
     notifyListeners();
   }
 

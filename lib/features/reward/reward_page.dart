@@ -14,6 +14,7 @@ import '../../core/sound/game_sound_controller.dart';
 import '../../core/widgets/figma_game_icons.dart';
 import '../../core/widgets/figma_home_icons.dart';
 import '../../core/widgets/figma_playground_background.dart';
+import '../../core/widgets/kid_badges.dart';
 import '../../core/widgets/kid_motion.dart';
 
 class RewardPage extends ConsumerStatefulWidget {
@@ -1161,7 +1162,7 @@ class _RewardToastCard extends StatelessWidget {
       borderColor = Color(achievement.color);
       title = '新徽章解锁！';
       subtitle = achievement.name;
-      icon = Text(achievement.emoji, style: const TextStyle(fontSize: 24));
+      icon = kidAchievementIcon(badgeId, 24);
     }
 
     return TweenAnimationBuilder<double>(

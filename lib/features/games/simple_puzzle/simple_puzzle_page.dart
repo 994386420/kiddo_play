@@ -10,10 +10,25 @@ import '../../../app/router.dart';
 import '../../../core/game_models.dart';
 import '../../../core/sound/game_sound_controller.dart';
 import '../../../core/widgets/floating_sound_toggle.dart';
-import '../../../core/widgets/kid_badges.dart';
+import '../../../core/widgets/figma_game_icons.dart';
+import '../../../core/widgets/figma_game_shell.dart';
+import '../../../core/widgets/figma_home_icons.dart';
 import '../../../core/widgets/kid_motion.dart';
 import '../../../core/widgets/pause_dialog.dart';
-import '../../../core/widgets/round_back_button.dart';
+
+const _simplePuzzlePalette = FigmaGamePalette(
+  accent: Color(0xFFE3B3EE),
+  accentStrong: Color(0xFF7B1FA2),
+  accentSoft: Color(0xFFF7EDFB),
+  progressTrack: Color(0xFFE1BEE7),
+  progressBorder: Color(0xFFCE93D8),
+  progressGradient: LinearGradient(
+    colors: [Color(0xFFCE93D8), Color(0xFF7B1FA2)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  ),
+  floaterIcon: FigmaFloatIconType.sparkle,
+);
 
 final simplePuzzleViewModelProvider = ChangeNotifierProvider.autoDispose
     .family<SimplePuzzleViewModel, GameRouteArgs>((ref, args) {
@@ -77,37 +92,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Cute Animals',
     pieces: [
       PuzzlePiece(
-          id: 'dog',
-          emoji: '🐶',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '小狗',
-          labelKo: '강아지',
-          labelEn: 'Dog'),
+        id: 'dog',
+        emoji: '🐶',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '小狗',
+        labelKo: '강아지',
+        labelEn: 'Dog',
+      ),
       PuzzlePiece(
-          id: 'cat',
-          emoji: '🐱',
-          background: Color(0xFFFCE4EC),
-          color: Color(0xFFE91E63),
-          labelZh: '小猫',
-          labelKo: '고양이',
-          labelEn: 'Cat'),
+        id: 'cat',
+        emoji: '🐱',
+        background: Color(0xFFFCE4EC),
+        color: Color(0xFFE91E63),
+        labelZh: '小猫',
+        labelKo: '고양이',
+        labelEn: 'Cat',
+      ),
       PuzzlePiece(
-          id: 'rabbit',
-          emoji: '🐰',
-          background: Color(0xFFF8BBD9),
-          color: Color(0xFFC2185B),
-          labelZh: '小兔',
-          labelKo: '토끼',
-          labelEn: 'Rabbit'),
+        id: 'rabbit',
+        emoji: '🐰',
+        background: Color(0xFFF8BBD9),
+        color: Color(0xFFC2185B),
+        labelZh: '小兔',
+        labelKo: '토끼',
+        labelEn: 'Rabbit',
+      ),
       PuzzlePiece(
-          id: 'frog',
-          emoji: '🐸',
-          background: Color(0xFFC8E6C9),
-          color: Color(0xFF388E3C),
-          labelZh: '青蛙',
-          labelKo: '개구리',
-          labelEn: 'Frog'),
+        id: 'frog',
+        emoji: '🐸',
+        background: Color(0xFFC8E6C9),
+        color: Color(0xFF388E3C),
+        labelZh: '青蛙',
+        labelKo: '개구리',
+        labelEn: 'Frog',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -116,37 +135,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Sweet Fruits',
     pieces: [
       PuzzlePiece(
-          id: 'apple',
-          emoji: '🍎',
-          background: Color(0xFFFFCDD2),
-          color: Color(0xFFC62828),
-          labelZh: '苹果',
-          labelKo: '사과',
-          labelEn: 'Apple'),
+        id: 'apple',
+        emoji: '🍎',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '苹果',
+        labelKo: '사과',
+        labelEn: 'Apple',
+      ),
       PuzzlePiece(
-          id: 'banana',
-          emoji: '🍌',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '香蕉',
-          labelKo: '바나나',
-          labelEn: 'Banana'),
+        id: 'banana',
+        emoji: '🍌',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '香蕉',
+        labelKo: '바나나',
+        labelEn: 'Banana',
+      ),
       PuzzlePiece(
-          id: 'grape',
-          emoji: '🍇',
-          background: Color(0xFFE1BEE7),
-          color: Color(0xFF6A1B9A),
-          labelZh: '葡萄',
-          labelKo: '포도',
-          labelEn: 'Grape'),
+        id: 'grape',
+        emoji: '🍇',
+        background: Color(0xFFE1BEE7),
+        color: Color(0xFF6A1B9A),
+        labelZh: '葡萄',
+        labelKo: '포도',
+        labelEn: 'Grape',
+      ),
       PuzzlePiece(
-          id: 'orange',
-          emoji: '🍊',
-          background: Color(0xFFFFE0B2),
-          color: Color(0xFFE64A19),
-          labelZh: '橙子',
-          labelKo: '오렌지',
-          labelEn: 'Orange'),
+        id: 'orange',
+        emoji: '🍊',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '橙子',
+        labelKo: '오렌지',
+        labelEn: 'Orange',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -155,37 +178,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Weather Fun',
     pieces: [
       PuzzlePiece(
-          id: 'sun',
-          emoji: '☀️',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '晴天',
-          labelKo: '맑음',
-          labelEn: 'Sunny'),
+        id: 'sun',
+        emoji: '☀️',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '晴天',
+        labelKo: '맑음',
+        labelEn: 'Sunny',
+      ),
       PuzzlePiece(
-          id: 'rain',
-          emoji: '🌧️',
-          background: Color(0xFFBBDEFB),
-          color: Color(0xFF1565C0),
-          labelZh: '雨天',
-          labelKo: '비',
-          labelEn: 'Rainy'),
+        id: 'rain',
+        emoji: '🌧️',
+        background: Color(0xFFBBDEFB),
+        color: Color(0xFF1565C0),
+        labelZh: '雨天',
+        labelKo: '비',
+        labelEn: 'Rainy',
+      ),
       PuzzlePiece(
-          id: 'snow',
-          emoji: '❄️',
-          background: Color(0xFFE3F2FD),
-          color: Color(0xFF0288D1),
-          labelZh: '雪天',
-          labelKo: '눈',
-          labelEn: 'Snowy'),
+        id: 'snow',
+        emoji: '❄️',
+        background: Color(0xFFE3F2FD),
+        color: Color(0xFF0288D1),
+        labelZh: '雪天',
+        labelKo: '눈',
+        labelEn: 'Snowy',
+      ),
       PuzzlePiece(
-          id: 'rainbow',
-          emoji: '🌈',
-          background: Color(0xFFFCE4EC),
-          color: Color(0xFFE91E63),
-          labelZh: '彩虹',
-          labelKo: '무지개',
-          labelEn: 'Rainbow'),
+        id: 'rainbow',
+        emoji: '🌈',
+        background: Color(0xFFFCE4EC),
+        color: Color(0xFFE91E63),
+        labelZh: '彩虹',
+        labelKo: '무지개',
+        labelEn: 'Rainbow',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -194,37 +221,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Space Trip',
     pieces: [
       PuzzlePiece(
-          id: 'rocket',
-          emoji: '🚀',
-          background: Color(0xFFE8EAF6),
-          color: Color(0xFF3949AB),
-          labelZh: '火箭',
-          labelKo: '로켓',
-          labelEn: 'Rocket'),
+        id: 'rocket',
+        emoji: '🚀',
+        background: Color(0xFFE8EAF6),
+        color: Color(0xFF3949AB),
+        labelZh: '火箭',
+        labelKo: '로켓',
+        labelEn: 'Rocket',
+      ),
       PuzzlePiece(
-          id: 'star',
-          emoji: '⭐',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '星星',
-          labelKo: '별',
-          labelEn: 'Star'),
+        id: 'star',
+        emoji: '⭐',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '星星',
+        labelKo: '별',
+        labelEn: 'Star',
+      ),
       PuzzlePiece(
-          id: 'moon',
-          emoji: '🌙',
-          background: Color(0xFFEDE7F6),
-          color: Color(0xFF512DA8),
-          labelZh: '月亮',
-          labelKo: '달',
-          labelEn: 'Moon'),
+        id: 'moon',
+        emoji: '🌙',
+        background: Color(0xFFEDE7F6),
+        color: Color(0xFF512DA8),
+        labelZh: '月亮',
+        labelKo: '달',
+        labelEn: 'Moon',
+      ),
       PuzzlePiece(
-          id: 'planet',
-          emoji: '🪐',
-          background: Color(0xFFFFE0B2),
-          color: Color(0xFFE64A19),
-          labelZh: '星球',
-          labelKo: '행성',
-          labelEn: 'Planet'),
+        id: 'planet',
+        emoji: '🪐',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '星球',
+        labelKo: '행성',
+        labelEn: 'Planet',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -233,37 +264,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Ocean World',
     pieces: [
       PuzzlePiece(
-          id: 'fish',
-          emoji: '🐠',
-          background: Color(0xFFFFE0B2),
-          color: Color(0xFFE64A19),
-          labelZh: '小鱼',
-          labelKo: '물고기',
-          labelEn: 'Fish'),
+        id: 'fish',
+        emoji: '🐠',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '小鱼',
+        labelKo: '물고기',
+        labelEn: 'Fish',
+      ),
       PuzzlePiece(
-          id: 'octopus',
-          emoji: '🐙',
-          background: Color(0xFFE1BEE7),
-          color: Color(0xFF6A1B9A),
-          labelZh: '章鱼',
-          labelKo: '문어',
-          labelEn: 'Octopus'),
+        id: 'octopus',
+        emoji: '🐙',
+        background: Color(0xFFE1BEE7),
+        color: Color(0xFF6A1B9A),
+        labelZh: '章鱼',
+        labelKo: '문어',
+        labelEn: 'Octopus',
+      ),
       PuzzlePiece(
-          id: 'crab',
-          emoji: '🦀',
-          background: Color(0xFFFFCDD2),
-          color: Color(0xFFC62828),
-          labelZh: '螃蟹',
-          labelKo: '게',
-          labelEn: 'Crab'),
+        id: 'crab',
+        emoji: '🦀',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '螃蟹',
+        labelKo: '게',
+        labelEn: 'Crab',
+      ),
       PuzzlePiece(
-          id: 'dolphin',
-          emoji: '🐬',
-          background: Color(0xFFBBDEFB),
-          color: Color(0xFF1565C0),
-          labelZh: '海豚',
-          labelKo: '돌고래',
-          labelEn: 'Dolphin'),
+        id: 'dolphin',
+        emoji: '🐬',
+        background: Color(0xFFBBDEFB),
+        color: Color(0xFF1565C0),
+        labelZh: '海豚',
+        labelKo: '돌고래',
+        labelEn: 'Dolphin',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -272,37 +307,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Vehicles',
     pieces: [
       PuzzlePiece(
-          id: 'car',
-          emoji: '🚗',
-          background: Color(0xFFFFCDD2),
-          color: Color(0xFFC62828),
-          labelZh: '汽车',
-          labelKo: '자동차',
-          labelEn: 'Car'),
+        id: 'car',
+        emoji: '🚗',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '汽车',
+        labelKo: '자동차',
+        labelEn: 'Car',
+      ),
       PuzzlePiece(
-          id: 'bus',
-          emoji: '🚌',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '公交',
-          labelKo: '버스',
-          labelEn: 'Bus'),
+        id: 'bus',
+        emoji: '🚌',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '公交',
+        labelKo: '버스',
+        labelEn: 'Bus',
+      ),
       PuzzlePiece(
-          id: 'plane',
-          emoji: '✈️',
-          background: Color(0xFFBBDEFB),
-          color: Color(0xFF1565C0),
-          labelZh: '飞机',
-          labelKo: '비행기',
-          labelEn: 'Plane'),
+        id: 'plane',
+        emoji: '✈️',
+        background: Color(0xFFBBDEFB),
+        color: Color(0xFF1565C0),
+        labelZh: '飞机',
+        labelKo: '비행기',
+        labelEn: 'Plane',
+      ),
       PuzzlePiece(
-          id: 'ship',
-          emoji: '🚢',
-          background: Color(0xFFB2EBF2),
-          color: Color(0xFF00838F),
-          labelZh: '轮船',
-          labelKo: '배',
-          labelEn: 'Ship'),
+        id: 'ship',
+        emoji: '🚢',
+        background: Color(0xFFB2EBF2),
+        color: Color(0xFF00838F),
+        labelZh: '轮船',
+        labelKo: '배',
+        labelEn: 'Ship',
+      ),
     ],
   ),
   PuzzleConfig(
@@ -311,37 +350,41 @@ const _puzzles = <PuzzleConfig>[
     nameEn: 'Veggie Land',
     pieces: [
       PuzzlePiece(
-          id: 'carrot',
-          emoji: '🥕',
-          background: Color(0xFFFFE0B2),
-          color: Color(0xFFE64A19),
-          labelZh: '胡萝卜',
-          labelKo: '당근',
-          labelEn: 'Carrot'),
+        id: 'carrot',
+        emoji: '🥕',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '胡萝卜',
+        labelKo: '당근',
+        labelEn: 'Carrot',
+      ),
       PuzzlePiece(
-          id: 'broccoli',
-          emoji: '🥦',
-          background: Color(0xFFC8E6C9),
-          color: Color(0xFF388E3C),
-          labelZh: '西兰花',
-          labelKo: '브로콜리',
-          labelEn: 'Broccoli'),
+        id: 'broccoli',
+        emoji: '🥦',
+        background: Color(0xFFC8E6C9),
+        color: Color(0xFF388E3C),
+        labelZh: '西兰花',
+        labelKo: '브로콜리',
+        labelEn: 'Broccoli',
+      ),
       PuzzlePiece(
-          id: 'corn',
-          emoji: '🌽',
-          background: Color(0xFFFFF9C4),
-          color: Color(0xFFF9A825),
-          labelZh: '玉米',
-          labelKo: '옥수수',
-          labelEn: 'Corn'),
+        id: 'corn',
+        emoji: '🌽',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '玉米',
+        labelKo: '옥수수',
+        labelEn: 'Corn',
+      ),
       PuzzlePiece(
-          id: 'tomato',
-          emoji: '🍅',
-          background: Color(0xFFFFCDD2),
-          color: Color(0xFFC62828),
-          labelZh: '西红柿',
-          labelKo: '토마토',
-          labelEn: 'Tomato'),
+        id: 'tomato',
+        emoji: '🍅',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '西红柿',
+        labelKo: '토마토',
+        labelEn: 'Tomato',
+      ),
     ],
   ),
 ];
@@ -366,7 +409,6 @@ class SimplePuzzleViewModel extends ChangeNotifier {
   RewardRouteArgs? pendingRewardArgs;
 
   DifficultyConfig get config => args.difficulty.config;
-
   PuzzleConfig get puzzle => _puzzles[round % totalPuzzleCount];
 
   int get totalPuzzleCount {
@@ -381,7 +423,6 @@ class SimplePuzzleViewModel extends ChangeNotifier {
   }
 
   bool get hideLabels => args.difficulty == GameDifficulty.hard;
-
   bool get hidePieceLabels => args.difficulty == GameDifficulty.hard;
 
   List<PuzzlePiece> get trayPieces {
@@ -554,8 +595,11 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
           .select((viewModel) => viewModel.pendingRewardArgs),
       (_, next) {
         if (next != null) {
-          Navigator.pushReplacementNamed(context, AppRoutes.reward,
-              arguments: next);
+          Navigator.pushReplacementNamed(
+            context,
+            AppRoutes.reward,
+            arguments: next,
+          );
         }
       },
     );
@@ -582,6 +626,12 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
 
     final l10n = context.l10n;
     final viewModel = ref.watch(simplePuzzleViewModelProvider(args));
+    final selectedPieceId = viewModel.selectedPieceId;
+    final selectedPiece = selectedPieceId == null
+        ? null
+        : viewModel.puzzle.pieces.firstWhere(
+            (piece) => piece.id == selectedPieceId,
+          );
 
     return PopScope<void>(
       canPop: false,
@@ -596,512 +646,414 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
           _openPause();
         }
       },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFF3E5F5),
-                    Color(0xFFEDE7F6),
-                    Color(0xFFFFF9E6),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+      child: FigmaGameScaffold(
+        palette: _simplePuzzlePalette,
+        roundLabel: l10n.puzzleRoundCounter(
+            viewModel.round + 1, viewModel.totalPuzzleCount),
+        difficulty: args.difficulty,
+        stars: viewModel.stars,
+        progress: viewModel.round / viewModel.totalPuzzleCount,
+        onPause: _openPause,
+        pauseIcon: const FigmaPauseIcon(
+          size: 22,
+          color: Color(0xFF7B1FA2),
+        ),
+        backgroundGradient: const LinearGradient(
+          colors: [
+            Color(0xFFF3E5F5),
+            Color(0xFFEDE7F6),
+            Color(0xFFFFF9E6),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        floatingAction: const FloatingSoundToggle(
+          accentColor: Color(0xFFCE93D8),
+          borderColor: Color(0xFF7B1FA2),
+        ),
+        pauseDialog: PauseDialog(
+          isOpen: _isPaused,
+          gameName: args.gameId.title(l10n),
+          gameEmoji: args.gameId.emoji,
+          onContinue: _closePause,
+          onRestart: _restartGame,
+          onQuit: () => _handleBack(context),
+        ),
+        body: KidRoundSwitcher(
+          switchKey: '${viewModel.round}-${viewModel.puzzle.name(context)}',
+          child: Column(
+            children: [
+              _PuzzleReferenceCard(
+                puzzle: viewModel.puzzle,
+                prompt: viewModel.hideLabels
+                    ? l10n.puzzlePromptHard
+                    : l10n.puzzlePrompt,
+                selectedPiece: selectedPiece,
+              ),
+              const SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 4,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final placedPieceId = viewModel.slots[index];
+                    final placedPiece = placedPieceId == null
+                        ? null
+                        : viewModel.puzzle.pieces.firstWhere(
+                            (piece) => piece.id == placedPieceId,
+                          );
+                    final isHighlighted =
+                        placedPiece == null && selectedPieceId != null;
+                    final isShaking = viewModel.shakingSlot == index;
+
+                    return TweenAnimationBuilder<double>(
+                      key: ValueKey(
+                        '$index-${placedPieceId ?? 'empty'}-${isShaking ? 1 : 0}-${isHighlighted ? 1 : 0}',
+                      ),
+                      tween: Tween<double>(end: isShaking ? 1 : 0),
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, effect, child) {
+                        return Transform.translate(
+                          offset: Offset(
+                            isShaking ? shakeOffset(effect, amplitude: 10) : 0,
+                            0,
+                          ),
+                          child: child,
+                        );
+                      },
+                      child: _PuzzleBoardSlot(
+                        piece: placedPiece,
+                        slotIndex: index,
+                        highlighted: isHighlighted,
+                        hideLabel: viewModel.hideLabels,
+                        solved: viewModel.puzzleSolved,
+                        onTap: () {
+                          if (placedPiece != null) {
+                            unawaited(
+                              ref.read(gameSoundControllerProvider).playClick(),
+                            );
+                            ref
+                                .read(simplePuzzleViewModelProvider(args))
+                                .tapPlacedPiece(index);
+                            return;
+                          }
+
+                          final currentSelected = ref
+                              .read(simplePuzzleViewModelProvider(args))
+                              .selectedPieceId;
+                          final correctPieceId = ref
+                              .read(simplePuzzleViewModelProvider(args))
+                              .puzzle
+                              .pieces[index]
+                              .id;
+                          if (currentSelected != null &&
+                              currentSelected == correctPieceId) {
+                            unawaited(
+                              ref.read(gameSoundControllerProvider).playClick(),
+                            );
+                          }
+                          ref
+                              .read(simplePuzzleViewModelProvider(args))
+                              .tapSlot(index);
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
-              child: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-                  children: [
-                    _PuzzleHeader(
-                      title: l10n.puzzleRoundCounter(
-                          viewModel.round + 1, viewModel.totalPuzzleCount),
-                      difficulty: args.difficulty,
-                      stars: viewModel.stars,
-                      hideLabels: viewModel.hideLabels,
-                      onBack: _openPause,
-                    ),
-                    const SizedBox(height: 16),
-                    KidAnimatedProgressBar(
-                      value: viewModel.round / viewModel.totalPuzzleCount,
-                      backgroundColor: const Color(0xFFE1BEE7),
-                      borderColor: const Color(0xFFCE93D8),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFCE93D8), Color(0xFF7B1FA2)],
+              const SizedBox(height: 22),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.puzzleTrayTitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF9C27B0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final piece in viewModel.trayPieces)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: _PuzzleTrayPiece(
+                        piece: piece,
+                        selected: selectedPieceId == piece.id,
+                        hideLabel: viewModel.hidePieceLabels,
+                        onTap: () {
+                          unawaited(
+                            ref.read(gameSoundControllerProvider).playClick(),
+                          );
+                          ref
+                              .read(simplePuzzleViewModelProvider(args))
+                              .selectPiece(piece.id);
+                        },
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    KidRoundSwitcher(
-                      switchKey:
-                          '${viewModel.round}-${viewModel.puzzle.name(context)}',
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(28),
-                              border: Border.all(
-                                  color: const Color(0xFFCE93D8), width: 3),
-                            ),
-                            child: Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.puzzleReference,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF9C27B0),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    SizedBox(
-                                      width: 72,
-                                      height: 72,
-                                      child: GridView.builder(
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        itemCount: 4,
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          crossAxisSpacing: 4,
-                                          mainAxisSpacing: 4,
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          final piece =
-                                              viewModel.puzzle.pieces[index];
-                                          return DecoratedBox(
-                                            decoration: BoxDecoration(
-                                              color: piece.background,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Center(
-                                              child: Text(piece.emoji,
-                                                  style: const TextStyle(
-                                                      fontSize: 22)),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '🧩 ${viewModel.puzzle.name(context)}',
-                                        style: const TextStyle(
-                                          fontSize: 19,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color(0xFF6A1B9A),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        viewModel.hideLabels
-                                            ? l10n.puzzlePromptHard
-                                            : l10n.puzzlePrompt,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF9E9E9E),
-                                        ),
-                                      ),
-                                      if (viewModel.selectedPieceId !=
-                                          null) ...[
-                                        const SizedBox(height: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF3E5F5),
-                                            borderRadius:
-                                                BorderRadius.circular(999),
-                                          ),
-                                          child: Text(
-                                            l10n.puzzlePieceSelected,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w800,
-                                              color: Color(0xFF7B1FA2),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: 4,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 1,
-                            ),
-                            itemBuilder: (context, index) {
-                              final placedPieceId = viewModel.slots[index];
-                              final placedPiece = placedPieceId == null
-                                  ? null
-                                  : viewModel.puzzle.pieces.firstWhere(
-                                      (piece) => piece.id == placedPieceId);
-                              final isHighlighted = placedPiece == null &&
-                                  viewModel.selectedPieceId != null;
-                              final isShaking = viewModel.shakingSlot == index;
+                  for (var i = 0; i < 4 - viewModel.trayPieces.length; i++)
+                    const SizedBox(width: 84),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _PuzzleFeedbackBanner(
+                selectedPieceId: selectedPieceId,
+                shakingSlot: viewModel.shakingSlot,
+                correct: viewModel.puzzleSolved,
+                hasRemainingPieces: viewModel.trayPieces.isNotEmpty,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                              return TweenAnimationBuilder<double>(
-                                key: ValueKey(
-                                    '$index-${isShaking ? 1 : 0}-${placedPieceId ?? 'empty'}-${isHighlighted ? 1 : 0}'),
-                                tween: Tween<double>(end: isShaking ? 1 : 0),
-                                duration: const Duration(milliseconds: 420),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, effect, child) {
-                                  final dx =
-                                      isShaking ? shakeOffset(effect) : 0.0;
-                                  return Transform.translate(
-                                    offset: Offset(dx, 0),
-                                    child: child,
-                                  );
-                                },
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (placedPiece != null) {
-                                      unawaited(ref
-                                          .read(gameSoundControllerProvider)
-                                          .playClick());
-                                      ref
-                                          .read(simplePuzzleViewModelProvider(
-                                              args))
-                                          .tapPlacedPiece(index);
-                                    } else {
-                                      final selectedPieceId = ref
-                                          .read(simplePuzzleViewModelProvider(
-                                              args))
-                                          .selectedPieceId;
-                                      final correctPieceId = ref
-                                          .read(simplePuzzleViewModelProvider(
-                                              args))
-                                          .puzzle
-                                          .pieces[index]
-                                          .id;
-                                      if (selectedPieceId != null &&
-                                          selectedPieceId == correctPieceId) {
-                                        unawaited(ref
-                                            .read(gameSoundControllerProvider)
-                                            .playClick());
-                                      }
-                                      ref
-                                          .read(simplePuzzleViewModelProvider(
-                                              args))
-                                          .tapSlot(index);
-                                    }
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 220),
-                                    curve: Curves.easeOut,
-                                    decoration: BoxDecoration(
-                                      color: placedPiece?.background ??
-                                          (isHighlighted
-                                              ? const Color(0xFFF3E5F5)
-                                              : const Color(0xFFEDE7F6)),
-                                      borderRadius: BorderRadius.circular(28),
-                                      border: Border.all(
-                                        color: placedPiece != null
-                                            ? placedPiece.color
-                                            : isShaking
-                                                ? const Color(0xFFF44336)
-                                                : isHighlighted
-                                                    ? const Color(0xFFAB47BC)
-                                                    : const Color(0xFFCE93D8),
-                                        width: placedPiece != null ? 4 : 3,
-                                      ),
-                                      boxShadow: [
-                                        if (placedPiece != null)
-                                          BoxShadow(
-                                            color: placedPiece.color
-                                                .withValues(alpha: 0.18),
-                                            blurRadius: 14,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                      ],
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Center(
-                                          child: AnimatedSwitcher(
-                                            duration: const Duration(
-                                                milliseconds: 260),
-                                            transitionBuilder:
-                                                (child, animation) {
-                                              return FadeTransition(
-                                                opacity: animation,
-                                                child: ScaleTransition(
-                                                  scale: Tween<double>(
-                                                    begin: 0.75,
-                                                    end: 1,
-                                                  ).animate(animation),
-                                                  child: child,
-                                                ),
-                                              );
-                                            },
-                                            child: placedPiece == null
-                                                ? Column(
-                                                    key:
-                                                        const ValueKey('empty'),
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      const Text('🧩',
-                                                          style: TextStyle(
-                                                              fontSize: 28)),
-                                                      if (!viewModel
-                                                          .hideLabels) ...[
-                                                        const SizedBox(
-                                                            height: 6),
-                                                        Text(
-                                                          l10n.puzzleSlotLabel(
-                                                              index + 1),
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight.w800,
-                                                            color: isHighlighted
-                                                                ? const Color(
-                                                                    0xFFAB47BC)
-                                                                : const Color(
-                                                                    0xFFB0BEC5),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ],
-                                                  )
-                                                : Column(
-                                                    key: ValueKey(
-                                                        placedPiece.id),
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Text(placedPiece.emoji,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize:
-                                                                      48)),
-                                                      if (!viewModel
-                                                          .hidePieceLabels) ...[
-                                                        const SizedBox(
-                                                            height: 6),
-                                                        Text(
-                                                          placedPiece
-                                                              .label(context),
-                                                          style: TextStyle(
-                                                            fontSize: 13,
-                                                            fontWeight:
-                                                                FontWeight.w900,
-                                                            color: placedPiece
-                                                                .color,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ],
-                                                  ),
-                                          ),
-                                        ),
-                                        if (placedPiece != null &&
-                                            viewModel.puzzleSolved)
-                                          const Positioned(
-                                            top: 8,
-                                            right: 8,
-                                            child: Text('⭐',
-                                                style: TextStyle(fontSize: 16)),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+class _PuzzleReferenceCard extends StatelessWidget {
+  const _PuzzleReferenceCard({
+    required this.puzzle,
+    required this.prompt,
+    required this.selectedPiece,
+  });
+
+  final PuzzleConfig puzzle;
+  final String prompt;
+  final PuzzlePiece? selectedPiece;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFCE93D8), width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7B1FA2).withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.puzzleReference,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF9C27B0),
+                ),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: 68,
+                height: 68,
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 4,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 3,
+                    mainAxisSpacing: 3,
+                  ),
+                  itemBuilder: (context, index) {
+                    final piece = puzzle.pieces[index];
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: piece.background,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          piece.emoji,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '🧩 ${puzzle.name(context)}',
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF6A1B9A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  prompt,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF9E9E9E),
+                  ),
+                ),
+                if (selectedPiece != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3E5F5),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          selectedPiece!.emoji,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.puzzlePieceSelected,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF7B1FA2),
                           ),
-                          const SizedBox(height: 20),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PuzzleBoardSlot extends StatelessWidget {
+  const _PuzzleBoardSlot({
+    required this.piece,
+    required this.slotIndex,
+    required this.highlighted,
+    required this.hideLabel,
+    required this.solved,
+    required this.onTap,
+  });
+
+  final PuzzlePiece? piece;
+  final int slotIndex;
+  final bool highlighted;
+  final bool hideLabel;
+  final bool solved;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        height: 120,
+        decoration: BoxDecoration(
+          color: piece?.background ??
+              (highlighted ? const Color(0xFFF3E5F5) : const Color(0xFFEDE7F6)),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: piece != null
+                ? piece!.color
+                : highlighted
+                    ? const Color(0xFFAB47BC)
+                    : const Color(0xFFCE93D8),
+            width: 4,
+          ),
+          boxShadow: [
+            if (piece != null)
+              BoxShadow(
+                color: piece!.color.withValues(alpha: 0.25),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 260),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween<double>(
+                        begin: 0.72,
+                        end: 1,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: piece != null
+                    ? Column(
+                        key: ValueKey(piece!.id),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text(
-                            l10n.puzzleTrayTitle,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF9C27B0),
-                            ),
+                            piece!.emoji,
+                            style: const TextStyle(fontSize: 48),
                           ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              for (final piece in viewModel.trayPieces)
-                                TweenAnimationBuilder<double>(
-                                  tween: Tween<double>(
-                                    end: viewModel.selectedPieceId == piece.id
-                                        ? 1
-                                        : 0,
-                                  ),
-                                  duration: const Duration(milliseconds: 240),
-                                  curve: Curves.easeOutCubic,
-                                  builder: (context, effect, child) {
-                                    final dy =
-                                        viewModel.selectedPieceId == piece.id
-                                            ? lerpValue(0, -6, effect)
-                                            : 0.0;
-                                    final scale =
-                                        viewModel.selectedPieceId == piece.id
-                                            ? lerpValue(1, 1.06, effect)
-                                            : 1.0;
-                                    return Transform.translate(
-                                      offset: Offset(0, dy),
-                                      child: Transform.scale(
-                                        scale: scale,
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      unawaited(ref
-                                          .read(gameSoundControllerProvider)
-                                          .playClick());
-                                      ref
-                                          .read(simplePuzzleViewModelProvider(
-                                              args))
-                                          .selectPiece(piece.id);
-                                    },
-                                    child: AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      width: 78,
-                                      height:
-                                          viewModel.hidePieceLabels ? 78 : 88,
-                                      decoration: BoxDecoration(
-                                        color: piece.background,
-                                        borderRadius: BorderRadius.circular(22),
-                                        border: Border.all(
-                                          color: viewModel.selectedPieceId ==
-                                                  piece.id
-                                              ? piece.color
-                                              : piece.color
-                                                  .withValues(alpha: 0.6),
-                                          width: viewModel.selectedPieceId ==
-                                                  piece.id
-                                              ? 4
-                                              : 3,
-                                        ),
-                                        boxShadow: [
-                                          if (viewModel.selectedPieceId ==
-                                              piece.id)
-                                            BoxShadow(
-                                              color: piece.color
-                                                  .withValues(alpha: 0.22),
-                                              blurRadius: 16,
-                                              offset: const Offset(0, 8),
-                                            ),
-                                        ],
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(piece.emoji,
-                                                  style: const TextStyle(
-                                                      fontSize: 34)),
-                                              if (!viewModel
-                                                  .hidePieceLabels) ...[
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  piece.label(context),
-                                                  style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: piece.color,
-                                                  ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                          if (viewModel.selectedPieceId ==
-                                              piece.id)
-                                            Positioned(
-                                              top: 2,
-                                              right: 2,
-                                              child: Container(
-                                                width: 18,
-                                                height: 18,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color: piece.color,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Text(
-                                                  '✓',
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                          const SizedBox(height: 6),
+                          Text(
+                            piece!.label(context),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: piece!.color,
+                            ),
                           ),
                         ],
+                      )
+                    : _PuzzleEmptySlot(
+                        slotIndex: slotIndex,
+                        highlighted: highlighted,
+                        hideLabels: hideLabel,
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    _PuzzleFeedbackBanner(
-                      selectedPieceId: viewModel.selectedPieceId,
-                      shakingSlot: viewModel.shakingSlot,
-                      correct: viewModel.puzzleSolved,
-                    ),
-                  ],
-                ),
               ),
             ),
-            const FloatingSoundToggle(
-              accentColor: Color(0xFFCE93D8),
-              borderColor: Color(0xFF7B1FA2),
-            ),
-            PauseDialog(
-              isOpen: _isPaused,
-              gameName: args.gameId.title(l10n),
-              gameEmoji: args.gameId.emoji,
-              onContinue: _closePause,
-              onRestart: _restartGame,
-              onQuit: () => _handleBack(context),
-            ),
+            if (piece != null && solved)
+              const Positioned(
+                top: 6,
+                right: 6,
+                child: Text(
+                  '⭐',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
           ],
         ),
       ),
@@ -1109,76 +1061,156 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
   }
 }
 
-class _PuzzleHeader extends StatelessWidget {
-  const _PuzzleHeader({
-    required this.title,
-    required this.difficulty,
-    required this.stars,
+class _PuzzleEmptySlot extends StatelessWidget {
+  const _PuzzleEmptySlot({
+    required this.slotIndex,
+    required this.highlighted,
     required this.hideLabels,
-    required this.onBack,
   });
 
-  final String title;
-  final GameDifficulty difficulty;
-  final int stars;
+  final int slotIndex;
+  final bool highlighted;
   final bool hideLabels;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final content = Column(
+      key: const ValueKey('empty-slot'),
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        KidRoundBackButton(
-          iconColor: const Color(0xFF7B1FA2),
-          borderColor: const Color(0xFFCE93D8),
-          icon: Icons.pause_rounded,
-          onTap: onBack,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: const Color(0xFFCE93D8), width: 2.5),
-                ),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF7B1FA2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                hideLabels
-                    ? '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)} · ${context.l10n.puzzleHardModeHint}'
-                    : '${difficulty.badgeEmoji} ${difficulty.label(context.l10n)}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF546E7A),
-                ),
-                textAlign: TextAlign.center,
+        const Text('🧩', style: TextStyle(fontSize: 28)),
+        if (!hideLabels) ...[
+          const SizedBox(height: 6),
+          Text(
+            _slotLabel(context, slotIndex),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: highlighted
+                  ? const Color(0xFFAB47BC)
+                  : const Color(0xFFB0BEC5),
+            ),
+          ),
+        ],
+      ],
+    );
+
+    if (!highlighted) {
+      return content;
+    }
+
+    return KidLoopAnimation(
+      duration: const Duration(milliseconds: 1200),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 1 + (wave(value, min: -1, max: 1) * 0.04),
+          child: child,
+        );
+      },
+      child: content,
+    );
+  }
+}
+
+class _PuzzleTrayPiece extends StatelessWidget {
+  const _PuzzleTrayPiece({
+    required this.piece,
+    required this.selected,
+    required this.hideLabel,
+    required this.onTap,
+  });
+
+  final PuzzlePiece piece;
+  final bool selected;
+  final bool hideLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: selected ? 1 : 0),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      builder: (context, effect, child) {
+        return Transform.translate(
+          offset: Offset(0, selected ? lerpValue(0, -6, effect) : 0),
+          child: Transform.scale(
+            scale: selected ? lerpValue(1, 1.05, effect) : 1,
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 72,
+          height: hideLabel ? 72 : 82,
+          decoration: BoxDecoration(
+            color: piece.background,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color:
+                  selected ? piece.color : piece.color.withValues(alpha: 0.4),
+              width: selected ? 4 : 3,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: selected
+                    ? piece.color.withValues(alpha: 0.35)
+                    : piece.color.withValues(alpha: 0.18),
+                blurRadius: selected ? 16 : 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(piece.emoji, style: const TextStyle(fontSize: 36)),
+                    if (!hideLabel) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        piece.label(context),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: piece.color,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (selected)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: piece.color,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Text(
+                      '✓',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-        const SizedBox(width: 12),
-        KidStarCounterBadge(
-          count: stars,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          iconSize: 20,
-          textSize: 18,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1188,103 +1220,120 @@ class _PuzzleFeedbackBanner extends StatelessWidget {
     required this.selectedPieceId,
     required this.shakingSlot,
     required this.correct,
+    required this.hasRemainingPieces,
   });
 
   final String? selectedPieceId;
   final int? shakingSlot;
   final bool correct;
+  final bool hasRemainingPieces;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    late final Widget currentBanner;
-
     if (correct) {
-      currentBanner = _buildBanner(
-        key: const ValueKey('correct'),
-        color: const Color(0xFFE8F5E9),
+      return _PuzzleMessage(
+        emojiLeft: '🌟',
+        emojiRight: '🌟',
+        backgroundColor: const Color(0xFFE8F5E9),
         borderColor: const Color(0xFF4CAF50),
         textColor: const Color(0xFF2E7D32),
         text: l10n.puzzleCorrect,
       );
-    } else if (shakingSlot != null) {
-      currentBanner = _buildBanner(
-        key: const ValueKey('wrong'),
-        color: const Color(0xFFFFF3E0),
+    }
+
+    if (shakingSlot != null) {
+      return _PuzzleMessage(
+        emojiLeft: '💪',
+        emojiRight: '💪',
+        backgroundColor: const Color(0xFFFFF3E0),
         borderColor: const Color(0xFFFF8C42),
         textColor: const Color(0xFFE65100),
         text: l10n.puzzleWrong,
       );
-    } else if (selectedPieceId == null) {
-      currentBanner = _buildBanner(
-        key: const ValueKey('select'),
-        color: const Color(0xFFEDE7F6),
+    }
+
+    if (selectedPieceId == null && hasRemainingPieces) {
+      return _PuzzleMessage(
+        emojiLeft: '👆',
+        emojiRight: '👆',
+        backgroundColor: const Color(0xFFEDE7F6),
         borderColor: const Color(0xFFCE93D8),
         textColor: const Color(0xFF7B1FA2),
-        text: l10n.puzzleSelectHint,
-      );
-    } else {
-      currentBanner = _buildBanner(
-        key: const ValueKey('place'),
-        color: const Color(0xFFF3E5F5),
-        borderColor: const Color(0xFFAB47BC),
-        textColor: const Color(0xFF7B1FA2),
-        text: l10n.puzzleTapSlotHint,
+        text: _puzzleHint(context),
       );
     }
 
-    return SizedBox(
-      height: 68,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutBack,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-                child: child,
-              ),
-            ),
-          );
-        },
-        child: currentBanner,
-      ),
-    );
+    return const SizedBox(height: 56);
   }
+}
 
-  Widget _buildBanner({
-    Key? key,
-    required Color color,
-    required Color borderColor,
-    required Color textColor,
-    required String text,
-  }) {
-    return Container(
-      key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+class _PuzzleMessage extends StatelessWidget {
+  const _PuzzleMessage({
+    required this.emojiLeft,
+    required this.emojiRight,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.textColor,
+    required this.text,
+  });
+
+  final String emojiLeft;
+  final String emojiRight;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color textColor;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(24),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor, width: 2.5),
       ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: textColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(emojiLeft, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: textColor,
+              ),
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
+          const SizedBox(width: 10),
+          Text(emojiRight, style: const TextStyle(fontSize: 24)),
+        ],
       ),
     );
   }
+}
+
+String _slotLabel(BuildContext context, int index) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => const ['左上', '右上', '左下', '右下'][index],
+    'ko' => const ['왼쪽 위', '오른쪽 위', '왼쪽 아래', '오른쪽 아래'][index],
+    _ => const ['Top Left', 'Top Right', 'Bottom Left', 'Bottom Right'][index],
+  };
+}
+
+String _puzzleHint(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '先点选碎片，再点格子放入',
+    'ko' => '먼저 조각을 누르고, 그다음 칸을 눌러 넣어요',
+    _ => 'Tap a piece first, then tap a slot to place it',
+  };
 }

@@ -64,6 +64,28 @@ class FigmaTrophyIcon extends StatelessWidget {
   }
 }
 
+class FigmaRainbowIcon extends StatelessWidget {
+  const FigmaRainbowIcon({required this.size, super.key});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return FigmaSvgIcon(svg: _rainbowSvg, size: size);
+  }
+}
+
+class FigmaTargetIcon extends StatelessWidget {
+  const FigmaTargetIcon({required this.size, super.key});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return FigmaSvgIcon(svg: _targetSvg, size: size);
+  }
+}
+
 class FigmaHomeIcon extends StatelessWidget {
   const FigmaHomeIcon({required this.size, super.key});
 
@@ -787,6 +809,53 @@ const _trophySvg = r'''
   <circle cx="45.4" cy="7.4" r="0.9" fill="rgba(255,255,255,0.7)" />
   <circle cx="10" cy="12" r="2" fill="#A8E4FF" stroke="#0288D1" stroke-width="1.2" />
   <path d="M48 22 L49 24 L51 25 L49 26 L48 28 L47 26 L45 25 L47 24Z" fill="#FFD93D" stroke="#F4A200" stroke-width="0.8" />
+</svg>
+''';
+
+const _rainbowSvg = r'''
+<svg viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="10" cy="50" rx="10" ry="7" fill="white" />
+  <ellipse cx="5" cy="46" rx="7" ry="5" fill="white" />
+  <ellipse cx="70" cy="50" rx="10" ry="7" fill="white" />
+  <ellipse cx="75" cy="46" rx="7" ry="5" fill="white" />
+  <path d="M5 52 Q40 5 75 52" fill="none" stroke="#FF1744" stroke-width="5.5" stroke-linecap="round" />
+  <path d="M8.5 52 Q40 11 71.5 52" fill="none" stroke="#FF9100" stroke-width="5.5" stroke-linecap="round" />
+  <path d="M12 52 Q40 17 68 52" fill="none" stroke="#FFE234" stroke-width="5.5" stroke-linecap="round" />
+  <path d="M15.5 52 Q40 23 64.5 52" fill="none" stroke="#00E676" stroke-width="5.5" stroke-linecap="round" />
+  <path d="M19 52 Q40 29 61 52" fill="none" stroke="#2196F3" stroke-width="5.5" stroke-linecap="round" />
+  <path d="M22.5 52 Q40 35 57.5 52" fill="none" stroke="#9C27B0" stroke-width="5" stroke-linecap="round" />
+  <circle cx="40" cy="10" r="3" fill="white" opacity="0.85" />
+  <circle cx="56" cy="17" r="2" fill="white" opacity="0.7" />
+  <circle cx="24" cy="17" r="2" fill="white" opacity="0.7" />
+</svg>
+''';
+
+const _targetSvg = r'''
+<svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="targetOuter" x1="28" y1="6" x2="28" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF8FAB" />
+      <stop offset="100%" stop-color="#E91E63" />
+    </linearGradient>
+    <linearGradient id="targetMid" x1="28" y1="12" x2="28" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFE082" />
+      <stop offset="100%" stop-color="#FFB300" />
+    </linearGradient>
+    <linearGradient id="targetInner" x1="28" y1="19" x2="28" y2="37" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#80D8FF" />
+      <stop offset="100%" stop-color="#0288D1" />
+    </linearGradient>
+  </defs>
+  <ellipse cx="28" cy="52" rx="15" ry="3" fill="rgba(0,0,0,0.08)" />
+  <circle cx="28" cy="28" r="19" fill="url(#targetOuter)" stroke="#C2185B" stroke-width="2.4" />
+  <circle cx="28" cy="28" r="13" fill="white" stroke="#F8BBD9" stroke-width="2" />
+  <circle cx="28" cy="28" r="8.5" fill="url(#targetMid)" stroke="#F57F17" stroke-width="2" />
+  <circle cx="28" cy="28" r="4.5" fill="url(#targetInner)" stroke="#0277BD" stroke-width="1.8" />
+  <path d="M38 18 L47 9" stroke="#7B3FC4" stroke-width="3" stroke-linecap="round" />
+  <path d="M45.5 10.5 L49 7" stroke="#7B3FC4" stroke-width="3" stroke-linecap="round" />
+  <path d="M47.5 5.5 L50.8 8.8 L48 11.6 L44.7 8.3 Z" fill="#B56CF5" stroke="#7B3FC4" stroke-width="1.4" stroke-linejoin="round" />
+  <path d="M40.8 15.2 L44.6 19 L38 21.8 Z" fill="#FFD54F" stroke="#C85000" stroke-width="1.2" stroke-linejoin="round" />
+  <ellipse cx="23" cy="18" rx="4.3" ry="2.2" fill="rgba(255,255,255,0.4)" transform="rotate(-25 23 18)" />
 </svg>
 ''';
 

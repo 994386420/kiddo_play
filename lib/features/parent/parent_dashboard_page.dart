@@ -8,6 +8,8 @@ import '../../app/route_args.dart';
 import '../../app/router.dart';
 import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
+import '../../core/progress_insights.dart';
+import '../../core/widgets/kid_badges.dart';
 import '../../core/widgets/kid_motion.dart';
 
 enum _ParentTab { overview, progress, settings }
@@ -37,6 +39,29 @@ class ParentDashboardPage extends ConsumerStatefulWidget {
 
 class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
   _ParentTab _activeTab = _ParentTab.overview;
+
+  void _showBadgeWall() {
+    final progress = ref.read(gameProgressProvider);
+    final parentData = ref.read(parentDataProvider);
+    final unlockedAchievements = deriveUnlockedAchievements(
+      totalStars: progress.totalStars,
+      unlockedGames: progress.unlockedGames,
+      gameStats: parentData.gameStats,
+      activityLog: parentData.activityLog,
+    );
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return KidBadgeWallSheet(
+          unlockedAchievements: unlockedAchievements,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +93,7 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
               child: Row(
                 children: [
                   _HeaderCircleButton(
-                    onTap: () => Navigator.pushReplacementNamed(
-                      context,
-                      AppRoutes.home,
-                    ),
+                    onTap: () => AppRouter.showHome(context),
                     child: const Icon(
                       Icons.chevron_left_rounded,
                       color: Colors.white,
@@ -161,8 +183,9 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
                     );
                   },
                   child: switch (_activeTab) {
-                    _ParentTab.overview => const _OverviewTab(
+                    _ParentTab.overview => _OverviewTab(
                         key: ValueKey('overview'),
+                        onShowBadges: _showBadgeWall,
                       ),
                     _ParentTab.progress => const _ProgressTab(
                         key: ValueKey('progress'),
@@ -182,13 +205,26 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
 }
 
 class _OverviewTab extends ConsumerWidget {
-  const _OverviewTab({super.key});
+  const _OverviewTab({
+    required this.onShowBadges,
+    super.key,
+  });
+
+  final VoidCallback onShowBadges;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final progress = ref.watch(gameProgressProvider);
     final parentData = ref.watch(parentDataProvider);
+    final streak = computeCurrentStreak(parentData.activityLog);
+    final weekDays = lastSevenPlayDays(parentData.activityLog);
+    final unlockedAchievements = deriveUnlockedAchievements(
+      totalStars: progress.totalStars,
+      unlockedGames: progress.unlockedGames,
+      gameStats: parentData.gameStats,
+      activityLog: parentData.activityLog,
+    );
 
     final statsCards = [
       (
@@ -275,18 +311,44 @@ class _OverviewTab extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Row(
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
                         children: [
-                          const Text('⭐', style: TextStyle(fontSize: 16)),
-                          const SizedBox(width: 4),
-                          Text(
-                            l10n.parentOverviewTotalStars(progress.totalStars),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFFFD93D),
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('⭐', style: TextStyle(fontSize: 16)),
+                              const SizedBox(width: 4),
+                              Text(
+                                l10n.parentOverviewTotalStars(
+                                  progress.totalStars,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFFFD93D),
+                                ),
+                              ),
+                            ],
                           ),
+                          if (streak > 0)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('🔥',
+                                    style: TextStyle(fontSize: 15)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _streakText(context, streak),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFFFD93D),
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ],
@@ -294,6 +356,14 @@ class _OverviewTab extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        KidDelayedReveal(
+          delay: const Duration(milliseconds: 60),
+          child: _WeeklyHeatmapCard(
+            weekDays: weekDays,
+            streak: streak,
           ),
         ),
         const SizedBox(height: 16),
@@ -347,6 +417,20 @@ class _OverviewTab extends ConsumerWidget {
               ),
             );
           },
+        ),
+        const SizedBox(height: 18),
+        KidDelayedReveal(
+          delay: const Duration(milliseconds: 160),
+          child: KidBadgeSummaryCard(
+            unlockedAchievements: unlockedAchievements,
+            onTap: onShowBadges,
+            title: _text(
+              context,
+              zh: '成就徽章',
+              en: 'Achievement Badges',
+              ko: '성취 배지',
+            ),
+          ),
         ),
         const SizedBox(height: 18),
         Text(
@@ -739,16 +823,138 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
             const SizedBox(height: 16),
             _SettingsSection(
               title: l10n.parentSettingsAppSection,
-              child: _ToggleRow(
-                icon: parentData.soundEnabled ? '🔊' : '🔇',
-                label: l10n.parentSettingsSoundTitle,
-                subtitle: parentData.soundEnabled
-                    ? l10n.parentSettingsSoundOn
-                    : l10n.parentSettingsSoundOff,
-                value: parentData.soundEnabled,
-                onTap: () => ref
-                    .read(parentDataProvider)
-                    .setSoundEnabled(!parentData.soundEnabled),
+              child: Column(
+                children: [
+                  _ToggleRow(
+                    icon: Icon(
+                      parentData.soundEnabled
+                          ? Icons.volume_up_rounded
+                          : Icons.volume_off_rounded,
+                      color: parentData.soundEnabled
+                          ? const Color(0xFF1565C0)
+                          : const Color(0xFF9E9E9E),
+                    ),
+                    label: l10n.parentSettingsSoundTitle,
+                    subtitle: parentData.soundEnabled
+                        ? l10n.parentSettingsSoundOn
+                        : l10n.parentSettingsSoundOff,
+                    value: parentData.soundEnabled,
+                    onTap: () => ref
+                        .read(parentDataProvider)
+                        .setSoundEnabled(!parentData.soundEnabled),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0xFFF5F5F5)),
+                  const SizedBox(height: 12),
+                  _ToggleRow(
+                    icon: Icon(
+                      parentData.voiceGuideEnabled
+                          ? Icons.mic_rounded
+                          : Icons.mic_off_rounded,
+                      color: parentData.voiceGuideEnabled
+                          ? const Color(0xFF1565C0)
+                          : const Color(0xFF9E9E9E),
+                    ),
+                    label: _text(
+                      context,
+                      zh: '语音引导',
+                      en: 'Voice Guide',
+                      ko: '음성 안내',
+                    ),
+                    subtitle: parentData.voiceGuideEnabled
+                        ? _text(
+                            context,
+                            zh: '自动朗读题目',
+                            en: 'Reads prompts automatically',
+                            ko: '문제를 자동으로 읽어줘요',
+                          )
+                        : _text(
+                            context,
+                            zh: '已关闭',
+                            en: 'Disabled',
+                            ko: '꺼짐',
+                          ),
+                    value: parentData.voiceGuideEnabled,
+                    onTap: () => ref
+                        .read(parentDataProvider)
+                        .setVoiceGuideEnabled(!parentData.voiceGuideEnabled),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _SettingsSection(
+              title: _text(
+                context,
+                zh: '⏱️ 游戏时间管理',
+                en: '⏱️ Play Time Limits',
+                ko: '⏱️ 놀이 시간 관리',
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _TimeLimitGroup(
+                    title: _text(
+                      context,
+                      zh: '单次游戏时长',
+                      en: 'Session time',
+                      ko: '한 번 놀이 시간',
+                    ),
+                    values: const [0, 15, 20, 30],
+                    selectedValue: parentData.sessionTimeLimitMinutes,
+                    onSelected: (value) => ref
+                        .read(parentDataProvider)
+                        .setSessionTimeLimitMinutes(value),
+                  ),
+                  if (parentData.sessionTimeLimitMinutes > 0) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _text(
+                        context,
+                        zh: '超时后会温和提示宝宝休息，可选择继续或回首页',
+                        en: 'A gentle reminder appears when time is up.',
+                        ko: '시간이 되면 쉬라는 안내가 나와요.',
+                      ),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF78909C),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  const Divider(height: 1, color: Color(0xFFF5F5F5)),
+                  const SizedBox(height: 14),
+                  _TimeLimitGroup(
+                    title: _text(
+                      context,
+                      zh: '每日游戏总时长',
+                      en: 'Daily total time',
+                      ko: '하루 총 놀이 시간',
+                    ),
+                    values: const [0, 30, 45, 60, 90],
+                    selectedValue: parentData.dailyTimeLimitMinutes,
+                    onSelected: (value) => ref
+                        .read(parentDataProvider)
+                        .setDailyTimeLimitMinutes(value),
+                  ),
+                  if (parentData.dailyTimeLimitMinutes > 0) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _text(
+                        context,
+                        zh: '超过每日上限后会提示宝宝今天的游戏时间结束了',
+                        en: 'The app reminds kids when today’s play time is over.',
+                        ko: '하루 한도를 넘기면 오늘 놀이가 끝났다고 알려줘요.',
+                      ),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF78909C),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -1412,7 +1618,7 @@ class _ToggleRow extends StatelessWidget {
     required this.onTap,
   });
 
-  final String icon;
+  final Widget icon;
   final String label;
   final String subtitle;
   final bool value;
@@ -1430,7 +1636,7 @@ class _ToggleRow extends StatelessWidget {
             color: const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text(icon, style: const TextStyle(fontSize: 18)),
+          child: icon,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1487,6 +1693,288 @@ class _ToggleRow extends StatelessWidget {
       ],
     );
   }
+}
+
+class _WeeklyHeatmapCard extends StatelessWidget {
+  const _WeeklyHeatmapCard({
+    required this.weekDays,
+    required this.streak,
+  });
+
+  final List<PlayDayStatus> weekDays;
+  final int streak;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFEDE7F6), width: 2),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _text(
+                    context,
+                    zh: '📅 本周学习记录',
+                    en: '📅 Weekly Learning',
+                    ko: '📅 이번 주 학습 기록',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF4A148C),
+                  ),
+                ),
+              ),
+              if (streak > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8C42), Color(0xFFE64A19)],
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '🔥 ${_streakText(context, streak)}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              for (var index = 0; index < weekDays.length; index++) ...[
+                Expanded(
+                  child: _WeekDayBubble(
+                    status: weekDays[index],
+                    isToday: index == weekDays.length - 1,
+                    delay: Duration(milliseconds: 45 * index),
+                  ),
+                ),
+                if (index != weekDays.length - 1) const SizedBox(width: 4),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekDayBubble extends StatelessWidget {
+  const _WeekDayBubble({
+    required this.status,
+    required this.isToday,
+    required this.delay,
+  });
+
+  final PlayDayStatus status;
+  final bool isToday;
+  final Duration delay;
+
+  @override
+  Widget build(BuildContext context) {
+    return KidDelayedReveal(
+      delay: delay,
+      beginOffset: const Offset(0, 0.08),
+      child: Column(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: status.played
+                  ? const LinearGradient(
+                      colors: [Color(0xFFFF8C42), Color(0xFFE64A19)],
+                    )
+                  : null,
+              color: status.played
+                  ? null
+                  : isToday
+                      ? const Color(0xFFF3E5F5)
+                      : const Color(0xFFF5F5F5),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isToday
+                    ? const Color(0xFFCE93D8)
+                    : status.played
+                        ? const Color(0xFFBF360C)
+                        : const Color(0xFFE0E0E0),
+                width: isToday || status.played ? 2.5 : 2,
+              ),
+            ),
+            child: status.played
+                ? const Text('🔥', style: TextStyle(fontSize: 16))
+                : Text(
+                    '○',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isToday
+                          ? const Color(0xFF7B1FA2)
+                          : const Color(0xFFBDBDBD),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _weekdayLabel(context, status.date, isToday),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+              color:
+                  isToday ? const Color(0xFF7B1FA2) : const Color(0xFF9E9E9E),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeLimitGroup extends StatelessWidget {
+  const _TimeLimitGroup({
+    required this.title,
+    required this.values,
+    required this.selectedValue,
+    required this.onSelected,
+  });
+
+  final String title;
+  final List<int> values;
+  final int selectedValue;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF311B92),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final value in values)
+              Material(
+                color: selectedValue == value
+                    ? const Color(0xFF7B1FA2)
+                    : const Color(0xFFF3E5F5),
+                borderRadius: BorderRadius.circular(18),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => onSelected(value),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: selectedValue == value
+                            ? const Color(0xFF4A148C)
+                            : const Color(0xFFCE93D8),
+                        width: 2,
+                      ),
+                    ),
+                    child: Text(
+                      _minutesLabel(context, value),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: selectedValue == value
+                            ? Colors.white
+                            : const Color(0xFF7B1FA2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+String _text(
+  BuildContext context, {
+  required String zh,
+  required String en,
+  required String ko,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => zh,
+    'ko' => ko,
+    _ => en,
+  };
+}
+
+String _streakText(BuildContext context, int days) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '连续 $days 天',
+    'ko' => '$days일 연속',
+    _ => '$days day streak',
+  };
+}
+
+String _minutesLabel(BuildContext context, int value) {
+  if (value == 0) {
+    return _text(
+      context,
+      zh: '无限制',
+      en: 'Unlimited',
+      ko: '제한 없음',
+    );
+  }
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '$value 分钟',
+    'ko' => '$value분',
+    _ => '$value min',
+  };
+}
+
+String _weekdayLabel(BuildContext context, DateTime date, bool isToday) {
+  if (isToday) {
+    return _text(
+      context,
+      zh: '今',
+      en: 'Today',
+      ko: '오늘',
+    );
+  }
+
+  const zh = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const ko = ['월', '화', '수', '목', '금', '토', '일'];
+  final index = (date.weekday - 1).clamp(0, 6);
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => zh[index],
+    'ko' => ko[index],
+    _ => en[index],
+  };
 }
 
 String _formatTimestamp(BuildContext context, DateTime timestamp) {
