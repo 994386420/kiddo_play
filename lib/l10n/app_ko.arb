@@ -59,6 +59,12 @@
   "gameAnimalDescription": "소리를 잘 듣고 동물을 맞혀봐요!",
   "gamePuzzleTitle": "간단 퍼즐",
   "gamePuzzleDescription": "조각을 제자리에 놓아 그림을 완성해요!",
+  "gameFindDifferentTitle": "다른 그림 찾기",
+  "gameFindDifferentDescription": "다른 하나를 찾아보며 관찰력을 키워요!",
+  "gameWhackMoleTitle": "두더지 잡기",
+  "gameWhackMoleDescription": "쏙 올라오는 두더지를 빠르게 눌러봐요!",
+  "gameMemoryCardTitle": "메모리 카드",
+  "gameMemoryCardDescription": "카드 위치를 기억하고 같은 짝을 찾아요!",
   "roundCounter": "{round} / {total} 라운드",
   "@roundCounter": {
     "placeholders": {
@@ -82,6 +88,15 @@
     }
   },
   "colorMatchPrompt": "이 색을 찾아볼 수 있나요?",
+  "findDifferentPrompt": "다른 하나를 찾아봐요",
+  "memoryCardPrompt": "같은 카드 두 장을 뒤집어봐요",
+  "memoryCardPairsLabel": "짝",
+  "memoryCardFlipsLabel": "뒤집기",
+  "memoryCardPreviewHint": "카드 위치를 먼저 기억해봐요. 곧 시작해요!",
+  "whackMolePrompt": "올라오는 두더지를 바로 눌러봐요",
+  "whackMoleHitsLabel": "성공",
+  "whackMoleMissesLabel": "놓침",
+  "whackMoleGoalLabel": "목표",
   "feedbackCorrect": "대단해요! 맞혔어요!",
   "feedbackTryAgain": "다시 해봐요, 할 수 있어요!",
   "pauseStatus": "게임이 일시정지되었어요",

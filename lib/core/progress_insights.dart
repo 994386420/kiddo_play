@@ -8,6 +8,9 @@ enum KidAchievementId {
   firstPerfect,
   stars50,
   stars100,
+  findDifferentStarter,
+  whackMoleStarter,
+  memoryCardStarter,
   allGamesPlayed,
   allUnlocked,
   hardPerfect,
@@ -32,7 +35,7 @@ class KidAchievement {
   final int background;
 }
 
-const kidAchievements = <KidAchievement>[
+final kidAchievements = <KidAchievement>[
   KidAchievement(
     id: KidAchievementId.firstGame,
     emoji: '🎮',
@@ -66,10 +69,34 @@ const kidAchievements = <KidAchievement>[
     background: 0xFFF3E5F5,
   ),
   KidAchievement(
+    id: KidAchievementId.findDifferentStarter,
+    emoji: '🔍',
+    name: '火眼金睛',
+    description: '完成一局找不同',
+    color: 0xFF0F9B8E,
+    background: 0xFFE4FBF7,
+  ),
+  KidAchievement(
+    id: KidAchievementId.whackMoleStarter,
+    emoji: '🔨',
+    name: '反应小快手',
+    description: '完成一局打地鼠',
+    color: 0xFFF97316,
+    background: 0xFFFFF1E7,
+  ),
+  KidAchievement(
+    id: KidAchievementId.memoryCardStarter,
+    emoji: '🃏',
+    name: '记忆小达人',
+    description: '完成一局记忆卡片',
+    color: 0xFFE84AA5,
+    background: 0xFFFFEEF7,
+  ),
+  KidAchievement(
     id: KidAchievementId.allGamesPlayed,
     emoji: '🌈',
     name: '游戏达人',
-    description: '体验全部 5 个不同游戏',
+    description: '体验全部 ${orderedGameIds.length} 个不同游戏',
     color: 0xFFE64A19,
     background: 0xFFFBE9E7,
   ),
@@ -77,7 +104,7 @@ const kidAchievements = <KidAchievement>[
     id: KidAchievementId.allUnlocked,
     emoji: '🏆',
     name: '全部解锁',
-    description: '解锁全部 5 个游戏',
+    description: '解锁全部 ${orderedGameIds.length} 个游戏',
     color: 0xFFF4A200,
     background: 0xFFFFF8E1,
   ),
@@ -121,13 +148,24 @@ Set<KidAchievementId> deriveUnlockedAchievements({
 }) {
   final unlocked = <KidAchievementId>{};
   final entries = activityLog.toList();
-  final playedGames = entries.map((entry) => entry.gameId).toSet();
+  final playedGames = {
+    ...entries.map((entry) => entry.gameId),
+    ...gameStats.entries
+        .where((entry) => entry.value.played > 0)
+        .map((entry) => entry.key),
+  };
 
-  if (entries.isNotEmpty) {
+  if (playedGames.isNotEmpty) {
     unlocked.add(KidAchievementId.firstGame);
   }
 
-  if (entries.any((entry) => entry.stars == entry.total && entry.total > 0)) {
+  final hasPerfectRound =
+      entries.any((entry) => entry.stars == entry.total && entry.total > 0) ||
+          gameStats.values.any(
+            (stats) =>
+                stats.bestStars == stats.bestTotal && stats.bestTotal > 0,
+          );
+  if (hasPerfectRound) {
     unlocked.add(KidAchievementId.firstPerfect);
   }
 
@@ -136,6 +174,18 @@ Set<KidAchievementId> deriveUnlockedAchievements({
   }
   if (totalStars >= 100) {
     unlocked.add(KidAchievementId.stars100);
+  }
+
+  if (playedGames.contains(GameId.findDifferent)) {
+    unlocked.add(KidAchievementId.findDifferentStarter);
+  }
+
+  if (playedGames.contains(GameId.whackMole)) {
+    unlocked.add(KidAchievementId.whackMoleStarter);
+  }
+
+  if (playedGames.contains(GameId.memoryCard)) {
+    unlocked.add(KidAchievementId.memoryCardStarter);
   }
 
   if (playedGames.length == orderedGameIds.length) {
@@ -160,7 +210,6 @@ Set<KidAchievementId> deriveUnlockedAchievements({
     unlocked.add(KidAchievementId.streak7);
   }
 
-  // Preserve badges for migrated users who only have stats.
   if (gameStats.values.any(
     (stats) =>
         stats.highestCompletedDifficulty == GameDifficulty.hard &&
@@ -208,7 +257,8 @@ int computeCurrentStreak(Iterable<ActivityEntry> activityLog) {
 UnmodifiableListView<PlayDayStatus> lastSevenPlayDays(
   Iterable<ActivityEntry> activityLog,
 ) {
-  final playedDays = activityLog.map((entry) => _dayKey(entry.timestamp)).toSet();
+  final playedDays =
+      activityLog.map((entry) => _dayKey(entry.timestamp)).toSet();
   final today = DateTime.now();
 
   final values = List<PlayDayStatus>.generate(7, (index) {

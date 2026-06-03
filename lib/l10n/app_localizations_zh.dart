@@ -148,6 +148,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gamePuzzleDescription => '把拼图碎片放到正确位置，还原图案！';
 
   @override
+  String get gameFindDifferentTitle => '找不同';
+
+  @override
+  String get gameFindDifferentDescription => '找出不一样的那个，练练观察力！';
+
+  @override
+  String get gameWhackMoleTitle => '打地鼠';
+
+  @override
+  String get gameWhackMoleDescription => '盯紧冒出来的小地鼠，快速点中它！';
+
+  @override
+  String get gameMemoryCardTitle => '记忆卡片';
+
+  @override
+  String get gameMemoryCardDescription => '记住卡片位置，翻出相同的一对！';
+
+  @override
   String roundCounter(int round, int total) {
     return '第 $round / $total 题';
   }
@@ -159,6 +177,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get colorMatchPrompt => '请找到这个颜色';
+
+  @override
+  String get findDifferentPrompt => '找出不一样的那个';
+
+  @override
+  String get memoryCardPrompt => '翻出两张一样的卡片';
+
+  @override
+  String get memoryCardPairsLabel => '配对';
+
+  @override
+  String get memoryCardFlipsLabel => '翻牌';
+
+  @override
+  String get memoryCardPreviewHint => '先记住卡片位置，马上开始！';
+
+  @override
+  String get whackMolePrompt => '快点中冒出来的小地鼠';
+
+  @override
+  String get whackMoleHitsLabel => '击中';
+
+  @override
+  String get whackMoleMissesLabel => '漏掉';
+
+  @override
+  String get whackMoleGoalLabel => '目标';
 
   @override
   String get feedbackCorrect => '太棒了！答对啦！';

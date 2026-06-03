@@ -370,6 +370,42 @@ abstract class AppLocalizations {
   /// **'Place the pieces in the right spot to finish the picture!'**
   String get gamePuzzleDescription;
 
+  /// No description provided for @gameFindDifferentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Different'**
+  String get gameFindDifferentTitle;
+
+  /// No description provided for @gameFindDifferentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spot the one that looks different and train your eyes!'**
+  String get gameFindDifferentDescription;
+
+  /// No description provided for @gameWhackMoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whack-a-Mole'**
+  String get gameWhackMoleTitle;
+
+  /// No description provided for @gameWhackMoleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch closely and tap the popping mole fast!'**
+  String get gameWhackMoleDescription;
+
+  /// No description provided for @gameMemoryCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory Cards'**
+  String get gameMemoryCardTitle;
+
+  /// No description provided for @gameMemoryCardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember the cards and flip the matching pair!'**
+  String get gameMemoryCardDescription;
+
   /// No description provided for @roundCounter.
   ///
   /// In en, this message translates to:
@@ -387,6 +423,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Can you find this color?'**
   String get colorMatchPrompt;
+
+  /// No description provided for @findDifferentPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the one that is different'**
+  String get findDifferentPrompt;
+
+  /// No description provided for @memoryCardPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip two matching cards'**
+  String get memoryCardPrompt;
+
+  /// No description provided for @memoryCardPairsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairs'**
+  String get memoryCardPairsLabel;
+
+  /// No description provided for @memoryCardFlipsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flips'**
+  String get memoryCardFlipsLabel;
+
+  /// No description provided for @memoryCardPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember the cards now. Matching starts in a moment!'**
+  String get memoryCardPreviewHint;
+
+  /// No description provided for @whackMolePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the mole as soon as it pops up'**
+  String get whackMolePrompt;
+
+  /// No description provided for @whackMoleHitsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hits'**
+  String get whackMoleHitsLabel;
+
+  /// No description provided for @whackMoleMissesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Misses'**
+  String get whackMoleMissesLabel;
+
+  /// No description provided for @whackMoleGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get whackMoleGoalLabel;
 
   /// No description provided for @feedbackCorrect.
   ///

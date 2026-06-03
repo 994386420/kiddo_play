@@ -59,6 +59,12 @@
   "gameAnimalDescription": "Listen carefully and guess the animal!",
   "gamePuzzleTitle": "Simple Puzzle",
   "gamePuzzleDescription": "Place the pieces in the right spot to finish the picture!",
+  "gameFindDifferentTitle": "Find Different",
+  "gameFindDifferentDescription": "Spot the one that looks different and train your eyes!",
+  "gameWhackMoleTitle": "Whack-a-Mole",
+  "gameWhackMoleDescription": "Watch closely and tap the popping mole fast!",
+  "gameMemoryCardTitle": "Memory Cards",
+  "gameMemoryCardDescription": "Remember the cards and flip the matching pair!",
   "roundCounter": "Round {round} / {total}",
   "@roundCounter": {
     "placeholders": {
@@ -82,6 +88,15 @@
     }
   },
   "colorMatchPrompt": "Can you find this color?",
+  "findDifferentPrompt": "Find the one that is different",
+  "memoryCardPrompt": "Flip two matching cards",
+  "memoryCardPairsLabel": "Pairs",
+  "memoryCardFlipsLabel": "Flips",
+  "memoryCardPreviewHint": "Remember the cards now. Matching starts in a moment!",
+  "whackMolePrompt": "Tap the mole as soon as it pops up",
+  "whackMoleHitsLabel": "Hits",
+  "whackMoleMissesLabel": "Misses",
+  "whackMoleGoalLabel": "Goal",
   "feedbackCorrect": "Amazing! You got it!",
   "feedbackTryAgain": "Try again, you can do it!",
   "pauseStatus": "Game paused",

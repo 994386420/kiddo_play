@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../game_models.dart';
 import '../progress_insights.dart';
 import 'figma_home_icons.dart';
 import 'kid_motion.dart';
@@ -552,6 +553,18 @@ Widget kidAchievementIcon(KidAchievementId id, double size) {
       ),
     KidAchievementId.stars100 => FigmaFloatIcon(
         type: FigmaFloatIconType.sparkle,
+        size: size,
+      ),
+    KidAchievementId.findDifferentStarter => FigmaGameIcon(
+        gameId: GameId.findDifferent,
+        size: size,
+      ),
+    KidAchievementId.whackMoleStarter => FigmaGameIcon(
+        gameId: GameId.whackMole,
+        size: size,
+      ),
+    KidAchievementId.memoryCardStarter => FigmaGameIcon(
+        gameId: GameId.memoryCard,
         size: size,
       ),
     KidAchievementId.allGamesPlayed => FigmaRainbowIcon(size: size),

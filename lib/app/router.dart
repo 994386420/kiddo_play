@@ -5,9 +5,12 @@ import '../features/difficulty_select/difficulty_select_page.dart';
 import '../features/game_select/game_select_page.dart';
 import '../features/games/animal_sound/animal_sound_page.dart';
 import '../features/games/color_match/color_match_page.dart';
+import '../features/games/find_different/find_different_page.dart';
+import '../features/games/memory_card/memory_card_page.dart';
 import '../features/games/number_game/number_game_page.dart';
 import '../features/games/shape_match/shape_match_page.dart';
 import '../features/games/simple_puzzle/simple_puzzle_page.dart';
+import '../features/games/whack_mole/whack_mole_page.dart';
 import '../features/home/home_page.dart';
 import '../features/parent/parent_dashboard_page.dart';
 import '../features/parent/parent_pin_page.dart';
@@ -29,6 +32,9 @@ abstract final class AppRoutes {
   static const shapeMatch = '/shape-match';
   static const animalSound = '/animal-sound';
   static const simplePuzzle = '/simple-puzzle';
+  static const findDifferent = '/find-different';
+  static const whackMole = '/whack-mole';
+  static const memoryCard = '/memory-card';
   static const reward = '/reward';
   static const parentPin = '/parent-pin';
   static const parentDashboard = '/parent';
@@ -126,6 +132,15 @@ abstract final class AppRouter {
       case AppRoutes.simplePuzzle:
         final args = _gameArgs(settings, GameId.simplePuzzle);
         return SimplePuzzlePage(args: args);
+      case AppRoutes.findDifferent:
+        final args = _gameArgs(settings, GameId.findDifferent);
+        return FindDifferentPage(args: args);
+      case AppRoutes.whackMole:
+        final args = _gameArgs(settings, GameId.whackMole);
+        return WhackMolePage(args: args);
+      case AppRoutes.memoryCard:
+        final args = _gameArgs(settings, GameId.memoryCard);
+        return MemoryCardPage(args: args);
       case AppRoutes.reward:
         final args = settings.arguments as RewardRouteArgs;
         return RewardPage(args: args);

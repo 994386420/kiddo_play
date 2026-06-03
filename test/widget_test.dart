@@ -100,6 +100,9 @@ void main() {
 
     expect(find.text('选择游戏'), findsWidgets);
     expect(find.text('颜色配对'), findsOneWidget);
+    expect(find.text('找不同'), findsOneWidget);
+    expect(find.text('打地鼠'), findsOneWidget);
+    expect(find.text('记忆卡片'), findsOneWidget);
   });
 
   testWidgets('medium and hard difficulties start locked', (tester) async {

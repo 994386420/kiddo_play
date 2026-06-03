@@ -9,6 +9,9 @@ enum GameId {
   shapeMatch,
   animalSound,
   simplePuzzle,
+  findDifferent,
+  whackMole,
+  memoryCard,
 }
 
 enum GameDifficulty {
@@ -41,6 +44,9 @@ const orderedGameIds = <GameId>[
   GameId.shapeMatch,
   GameId.animalSound,
   GameId.simplePuzzle,
+  GameId.findDifferent,
+  GameId.whackMole,
+  GameId.memoryCard,
 ];
 
 extension GameDifficultyX on GameDifficulty {
@@ -138,6 +144,12 @@ extension GameIdX on GameId {
         return 'animal-sound';
       case GameId.simplePuzzle:
         return 'simple-puzzle';
+      case GameId.findDifferent:
+        return 'find-different';
+      case GameId.whackMole:
+        return 'whack-mole';
+      case GameId.memoryCard:
+        return 'memory-card';
     }
   }
 
@@ -153,6 +165,12 @@ extension GameIdX on GameId {
         return AppRoutes.animalSound;
       case GameId.simplePuzzle:
         return AppRoutes.simplePuzzle;
+      case GameId.findDifferent:
+        return AppRoutes.findDifferent;
+      case GameId.whackMole:
+        return AppRoutes.whackMole;
+      case GameId.memoryCard:
+        return AppRoutes.memoryCard;
     }
   }
 
@@ -168,6 +186,12 @@ extension GameIdX on GameId {
         return '🐾';
       case GameId.simplePuzzle:
         return '🧩';
+      case GameId.findDifferent:
+        return '🔍';
+      case GameId.whackMole:
+        return '🔨';
+      case GameId.memoryCard:
+        return '🃏';
     }
   }
 
@@ -203,6 +227,24 @@ extension GameIdX on GameId {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );
+      case GameId.findDifferent:
+        return const LinearGradient(
+          colors: [Color(0xFF7AE7D2), Color(0xFF0F9B8E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case GameId.whackMole:
+        return const LinearGradient(
+          colors: [Color(0xFFFFC869), Color(0xFFF97316)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
+      case GameId.memoryCard:
+        return const LinearGradient(
+          colors: [Color(0xFFF8A3D0), Color(0xFFE84AA5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
     }
   }
 
@@ -218,6 +260,12 @@ extension GameIdX on GameId {
         return const Color(0xFFBF360C);
       case GameId.simplePuzzle:
         return const Color(0xFF4A148C);
+      case GameId.findDifferent:
+        return const Color(0xFF0B6B66);
+      case GameId.whackMole:
+        return const Color(0xFFB45309);
+      case GameId.memoryCard:
+        return const Color(0xFF9D174D);
     }
   }
 
@@ -233,6 +281,12 @@ extension GameIdX on GameId {
         return l10n.gameAnimalTitle;
       case GameId.simplePuzzle:
         return l10n.gamePuzzleTitle;
+      case GameId.findDifferent:
+        return l10n.gameFindDifferentTitle;
+      case GameId.whackMole:
+        return l10n.gameWhackMoleTitle;
+      case GameId.memoryCard:
+        return l10n.gameMemoryCardTitle;
     }
   }
 
@@ -248,6 +302,12 @@ extension GameIdX on GameId {
         return l10n.gameAnimalDescription;
       case GameId.simplePuzzle:
         return l10n.gamePuzzleDescription;
+      case GameId.findDifferent:
+        return l10n.gameFindDifferentDescription;
+      case GameId.whackMole:
+        return l10n.gameWhackMoleDescription;
+      case GameId.memoryCard:
+        return l10n.gameMemoryCardDescription;
     }
   }
 }

@@ -158,6 +158,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Place the pieces in the right spot to finish the picture!';
 
   @override
+  String get gameFindDifferentTitle => 'Find Different';
+
+  @override
+  String get gameFindDifferentDescription =>
+      'Spot the one that looks different and train your eyes!';
+
+  @override
+  String get gameWhackMoleTitle => 'Whack-a-Mole';
+
+  @override
+  String get gameWhackMoleDescription =>
+      'Watch closely and tap the popping mole fast!';
+
+  @override
+  String get gameMemoryCardTitle => 'Memory Cards';
+
+  @override
+  String get gameMemoryCardDescription =>
+      'Remember the cards and flip the matching pair!';
+
+  @override
   String roundCounter(int round, int total) {
     return 'Round $round / $total';
   }
@@ -169,6 +190,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorMatchPrompt => 'Can you find this color?';
+
+  @override
+  String get findDifferentPrompt => 'Find the one that is different';
+
+  @override
+  String get memoryCardPrompt => 'Flip two matching cards';
+
+  @override
+  String get memoryCardPairsLabel => 'Pairs';
+
+  @override
+  String get memoryCardFlipsLabel => 'Flips';
+
+  @override
+  String get memoryCardPreviewHint =>
+      'Remember the cards now. Matching starts in a moment!';
+
+  @override
+  String get whackMolePrompt => 'Tap the mole as soon as it pops up';
+
+  @override
+  String get whackMoleHitsLabel => 'Hits';
+
+  @override
+  String get whackMoleMissesLabel => 'Misses';
+
+  @override
+  String get whackMoleGoalLabel => 'Goal';
 
   @override
   String get feedbackCorrect => 'Amazing! You got it!';

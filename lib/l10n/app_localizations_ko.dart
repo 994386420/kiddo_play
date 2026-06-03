@@ -149,6 +149,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gamePuzzleDescription => '조각을 제자리에 놓아 그림을 완성해요!';
 
   @override
+  String get gameFindDifferentTitle => '다른 그림 찾기';
+
+  @override
+  String get gameFindDifferentDescription => '다른 하나를 찾아보며 관찰력을 키워요!';
+
+  @override
+  String get gameWhackMoleTitle => '두더지 잡기';
+
+  @override
+  String get gameWhackMoleDescription => '쏙 올라오는 두더지를 빠르게 눌러봐요!';
+
+  @override
+  String get gameMemoryCardTitle => '메모리 카드';
+
+  @override
+  String get gameMemoryCardDescription => '카드 위치를 기억하고 같은 짝을 찾아요!';
+
+  @override
   String roundCounter(int round, int total) {
     return '$round / $total 라운드';
   }
@@ -160,6 +178,33 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get colorMatchPrompt => '이 색을 찾아볼 수 있나요?';
+
+  @override
+  String get findDifferentPrompt => '다른 하나를 찾아봐요';
+
+  @override
+  String get memoryCardPrompt => '같은 카드 두 장을 뒤집어봐요';
+
+  @override
+  String get memoryCardPairsLabel => '짝';
+
+  @override
+  String get memoryCardFlipsLabel => '뒤집기';
+
+  @override
+  String get memoryCardPreviewHint => '카드 위치를 먼저 기억해봐요. 곧 시작해요!';
+
+  @override
+  String get whackMolePrompt => '올라오는 두더지를 바로 눌러봐요';
+
+  @override
+  String get whackMoleHitsLabel => '성공';
+
+  @override
+  String get whackMoleMissesLabel => '놓침';
+
+  @override
+  String get whackMoleGoalLabel => '목표';
 
   @override
   String get feedbackCorrect => '대단해요! 맞혔어요!';

@@ -213,6 +213,9 @@ class FigmaGameIcon extends StatelessWidget {
       GameId.shapeMatch => _shapeMatchSvg,
       GameId.animalSound => _animalSoundSvg,
       GameId.simplePuzzle => _puzzleSvg,
+      GameId.findDifferent => _findDifferentSvg,
+      GameId.whackMole => _whackMoleSvg,
+      GameId.memoryCard => _memoryCardSvg,
     };
     return FigmaSvgIcon(svg: svg, size: size);
   }
@@ -910,5 +913,39 @@ const _sparkleStarSvg = r'''
   <ellipse cx="16" cy="8" rx="3.5" ry="2" fill="rgba(255,255,255,0.65)" transform="rotate(-30 16 8)" />
   <circle cx="31" cy="7" r="2.2" fill="#FF9AD5" stroke="#C42070" stroke-width="1.2" />
   <circle cx="30.4" cy="6.4" r="0.8" fill="rgba(255,255,255,0.7)" />
+</svg>
+''';
+
+const _findDifferentSvg = r'''
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="8" width="40" height="32" rx="14" fill="#DFFFF8" stroke="#0F9B8E" stroke-width="3" />
+  <rect x="8.5" y="13" width="9" height="10" rx="4.5" fill="#63D4C2" />
+  <rect x="19.5" y="13" width="9" height="10" rx="4.5" fill="#63D4C2" />
+  <rect x="30.5" y="13" width="9" height="10" rx="4.5" fill="#FFCF5A" />
+  <rect x="8.5" y="25" width="9" height="10" rx="4.5" fill="#63D4C2" />
+  <rect x="19.5" y="25" width="9" height="10" rx="4.5" fill="#63D4C2" />
+  <rect x="30.5" y="25" width="9" height="10" rx="4.5" fill="#63D4C2" />
+  <circle cx="35" cy="18" r="2.2" fill="#FFFFFF" fill-opacity="0.55" />
+</svg>
+''';
+
+const _whackMoleSvg = r'''
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="24" cy="35" rx="15" ry="7" fill="#7C3F17" />
+  <path d="M17 25C17 20.5817 20.5817 17 25 17H27C31.4183 17 35 20.5817 35 25V29H17V25Z" fill="#B7774E" />
+  <circle cx="22" cy="26" r="2" fill="#2F1F18" />
+  <circle cx="30" cy="26" r="2" fill="#2F1F18" />
+  <path d="M22 31C24.6667 32.7778 27.3333 32.7778 30 31" stroke="#2F1F18" stroke-width="2.2" stroke-linecap="round" />
+  <path d="M14 12.5L22.5 20" stroke="#FFB13C" stroke-width="4.8" stroke-linecap="round" />
+  <rect x="9" y="8" width="8" height="8" rx="2.5" transform="rotate(-15 9 8)" fill="#FFD56C" stroke="#C97010" stroke-width="2" />
+</svg>
+''';
+
+const _memoryCardSvg = r'''
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="9" width="22" height="28" rx="8" fill="#FFE7F5" stroke="#E84AA5" stroke-width="3" />
+  <rect x="17" y="13" width="22" height="28" rx="8" fill="#FFF7FC" stroke="#E84AA5" stroke-width="3" />
+  <path d="M28 19.2C28.9 17.6 31.1 17.4 32.2 18.8C33.3 17.4 35.5 17.6 36.4 19.2C37.4 20.9 36.7 23 35.1 24.2L32.2 26.5L29.3 24.2C27.7 23 27 20.9 28 19.2Z" fill="#FF83BF" />
+  <path d="M24.4 30.5L25.7 28.2L27 30.5L29.4 31.1L27.7 32.9L27.9 35.4L25.7 34.3L23.5 35.4L23.8 32.9L22.1 31.1L24.4 30.5Z" fill="#FFD54F" />
 </svg>
 ''';

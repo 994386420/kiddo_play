@@ -59,6 +59,12 @@
   "gameAnimalDescription": "听声音猜动物，认识可爱的小动物！",
   "gamePuzzleTitle": "简单拼图",
   "gamePuzzleDescription": "把拼图碎片放到正确位置，还原图案！",
+  "gameFindDifferentTitle": "找不同",
+  "gameFindDifferentDescription": "找出不一样的那个，练练观察力！",
+  "gameWhackMoleTitle": "打地鼠",
+  "gameWhackMoleDescription": "盯紧冒出来的小地鼠，快速点中它！",
+  "gameMemoryCardTitle": "记忆卡片",
+  "gameMemoryCardDescription": "记住卡片位置，翻出相同的一对！",
   "roundCounter": "第 {round} / {total} 题",
   "@roundCounter": {
     "placeholders": {
@@ -82,6 +88,15 @@
     }
   },
   "colorMatchPrompt": "请找到这个颜色",
+  "findDifferentPrompt": "找出不一样的那个",
+  "memoryCardPrompt": "翻出两张一样的卡片",
+  "memoryCardPairsLabel": "配对",
+  "memoryCardFlipsLabel": "翻牌",
+  "memoryCardPreviewHint": "先记住卡片位置，马上开始！",
+  "whackMolePrompt": "快点中冒出来的小地鼠",
+  "whackMoleHitsLabel": "击中",
+  "whackMoleMissesLabel": "漏掉",
+  "whackMoleGoalLabel": "目标",
   "feedbackCorrect": "太棒了！答对啦！",
   "feedbackTryAgain": "再试试，你可以的！",
   "pauseStatus": "游戏暂停中",
