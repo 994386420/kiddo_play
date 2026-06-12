@@ -289,7 +289,11 @@ class NumberGameViewModel extends ChangeNotifier {
       GameDifficulty.hard => 1.0,
     };
     final shouldMix = _random.nextDouble() < mixedChance;
-    final displayItems = List<EmojiSet>.filled(targetCount, emojiSet);
+    final displayItems = List<EmojiSet>.filled(
+      targetCount,
+      emojiSet,
+      growable: true,
+    );
 
     if (shouldMix) {
       final distractorSets = _emojiSets

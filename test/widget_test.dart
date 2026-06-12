@@ -11,6 +11,7 @@ import 'package:kiddo_play/core/app_controllers.dart';
 import 'package:kiddo_play/core/game_models.dart';
 import 'package:kiddo_play/core/widgets/figma_home_icons.dart';
 import 'package:kiddo_play/features/difficulty_select/difficulty_select_page.dart';
+import 'package:kiddo_play/features/games/number_game/number_game_page.dart';
 import 'package:kiddo_play/features/home/home_page.dart';
 import 'package:kiddo_play/l10n/app_localizations.dart';
 
@@ -153,5 +154,45 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('第 1 / 5 题'), findsOneWidget);
+  });
+
+  testWidgets('number game advances after a correct answer', (tester) async {
+    final preferences = await SharedPreferences.getInstance();
+    const args = GameRouteArgs(
+      gameId: GameId.numberGame,
+      difficulty: GameDifficulty.easy,
+    );
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        preferences,
+        home: const NumberGamePage(args: args),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('第 1 / 3 题'), findsOneWidget);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(NumberGamePage)),
+    );
+    final correctAnswer =
+        container.read(numberGameViewModelProvider(args)).question.count;
+    final answerFinder = find.byWidgetPredicate((widget) {
+      return widget is Text &&
+          widget.data == '$correctAnswer' &&
+          widget.style?.fontSize == 50;
+    });
+    final answerCardFinder = find.ancestor(
+      of: answerFinder.first,
+      matching: find.byType(InkWell),
+    );
+
+    expect(answerCardFinder, findsOneWidget);
+    await tester.tap(answerCardFinder);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    expect(find.text('第 2 / 3 题'), findsOneWidget);
   });
 }

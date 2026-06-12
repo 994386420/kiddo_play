@@ -95,7 +95,10 @@ class VoiceGuideController {
     _speakCompleter = speakCompleter;
 
     try {
-      await _tts.speak(normalized);
+      await _tts.speak(
+        normalized,
+        focus: !kIsWeb && defaultTargetPlatform == TargetPlatform.android,
+      );
       await speakCompleter.future;
       return _isCurrentToken(token)
           ? VoiceGuideResult.completed
