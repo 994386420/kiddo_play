@@ -111,6 +111,48 @@ const _emojiSets = <EmojiSet>[
     labelEn: 'fish',
     background: Color(0xFFE0F7FA),
   ),
+  EmojiSet(
+    emoji: '🧸',
+    labelZh: '玩具熊',
+    labelKo: '곰 인형',
+    labelEn: 'teddy bears',
+    background: Color(0xFFFFF3E0),
+  ),
+  EmojiSet(
+    emoji: '🚗',
+    labelZh: '小汽车',
+    labelKo: '자동차',
+    labelEn: 'cars',
+    background: Color(0xFFE8EAF6),
+  ),
+  EmojiSet(
+    emoji: '🍓',
+    labelZh: '草莓',
+    labelKo: '딸기',
+    labelEn: 'strawberries',
+    background: Color(0xFFFFEBEE),
+  ),
+  EmojiSet(
+    emoji: '🦁',
+    labelZh: '小狮子',
+    labelKo: '사자',
+    labelEn: 'lions',
+    background: Color(0xFFFFF8E1),
+  ),
+  EmojiSet(
+    emoji: '🥁',
+    labelZh: '小鼓',
+    labelKo: '북',
+    labelEn: 'drums',
+    background: Color(0xFFF3E5F5),
+  ),
+  EmojiSet(
+    emoji: '🌙',
+    labelZh: '月亮',
+    labelKo: '달',
+    labelEn: 'moons',
+    background: Color(0xFFEDE7F6),
+  ),
 ];
 
 enum NumberAnswerState { idle, correct, wrong }
@@ -120,11 +162,17 @@ class NumberQuestion {
     required this.emojiSet,
     required this.count,
     required this.options,
+    required this.displayItems,
   });
 
   final EmojiSet emojiSet;
   final int count;
   final List<int> options;
+  final List<EmojiSet> displayItems;
+
+  String get sceneKey {
+    return displayItems.map((item) => item.emoji).join();
+  }
 }
 
 class NumberGameViewModel extends ChangeNotifier {
@@ -219,11 +267,47 @@ class NumberGameViewModel extends ChangeNotifier {
       options.add(_random.nextInt(maxCount) + 1);
     }
     final items = options.toList()..shuffle(_random);
+    final emojiSet = _emojiSets[_random.nextInt(_emojiSets.length)];
     return NumberQuestion(
-      emojiSet: _emojiSets[_random.nextInt(_emojiSets.length)],
+      emojiSet: emojiSet,
       count: count,
       options: items,
+      displayItems: _buildDisplayItems(
+        emojiSet: emojiSet,
+        targetCount: count,
+      ),
     );
+  }
+
+  List<EmojiSet> _buildDisplayItems({
+    required EmojiSet emojiSet,
+    required int targetCount,
+  }) {
+    final mixedChance = switch (args.difficulty) {
+      GameDifficulty.easy => 0.35,
+      GameDifficulty.medium => 0.72,
+      GameDifficulty.hard => 1.0,
+    };
+    final shouldMix = _random.nextDouble() < mixedChance;
+    final displayItems = List<EmojiSet>.filled(targetCount, emojiSet);
+
+    if (shouldMix) {
+      final distractorSets = _emojiSets
+          .where((candidate) => candidate.emoji != emojiSet.emoji)
+          .toList()
+        ..shuffle(_random);
+      final distractorCount = switch (args.difficulty) {
+        GameDifficulty.easy => 1,
+        GameDifficulty.medium => 1 + _random.nextInt(3),
+        GameDifficulty.hard => 2 + _random.nextInt(5),
+      };
+      for (var index = 0; index < distractorCount; index++) {
+        displayItems.add(distractorSets[index % distractorSets.length]);
+      }
+    }
+
+    displayItems.shuffle(_random);
+    return displayItems;
   }
 
   void reset() {
@@ -278,7 +362,7 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
     _questionVoiceSubscription = ref.listenManual<String>(
       numberGameViewModelProvider(args).select(
         (viewModel) =>
-            '${viewModel.round}-${viewModel.question.count}-${viewModel.question.emojiSet.emoji}',
+            '${viewModel.round}-${viewModel.question.count}-${viewModel.question.sceneKey}',
       ),
       (_, __) {
         if (!mounted || _isPaused) {
@@ -425,7 +509,7 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
         ),
         body: KidRoundSwitcher(
           switchKey:
-              '${viewModel.round}-${viewModel.question.count}-${viewModel.question.emojiSet.emoji}',
+              '${viewModel.round}-${viewModel.question.count}-${viewModel.question.sceneKey}',
           child: Column(
             children: [
               _NumberPromptCard(
@@ -510,11 +594,14 @@ class _NumberPromptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emojiSize = question.count > 9
-        ? 28.0
-        : question.count > 5
-            ? 34.0
-            : 40.0;
+    final displayCount = question.displayItems.length;
+    final emojiSize = displayCount > 14
+        ? 26.0
+        : displayCount > 9
+            ? 28.0
+            : displayCount > 5
+                ? 34.0
+                : 40.0;
     final promptText = '${_numberPromptText(context, question, prompt)} 🔢';
 
     return FigmaGamePanel(
@@ -547,14 +634,16 @@ class _NumberPromptCard extends StatelessWidget {
               spacing: 10,
               runSpacing: 10,
               children: List.generate(
-                question.count,
+                question.displayItems.length,
                 (index) => KidDelayedReveal(
-                  key: ValueKey('$round-${question.emojiSet.emoji}-$index'),
+                  key: ValueKey(
+                    '$round-${question.sceneKey}-$index',
+                  ),
                   delay: Duration(milliseconds: index * 45),
                   beginScale: 0.72,
                   beginOffset: const Offset(0, 0.12),
                   child: Text(
-                    question.emojiSet.emoji,
+                    question.displayItems[index].emoji,
                     style: TextStyle(fontSize: emojiSize),
                   ),
                 ),

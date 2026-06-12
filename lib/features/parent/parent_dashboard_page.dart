@@ -366,8 +366,9 @@ class _OverviewTab extends ConsumerWidget {
             streak: streak,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         GridView.builder(
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: statsCards.length,

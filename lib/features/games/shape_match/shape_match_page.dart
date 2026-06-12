@@ -112,6 +112,46 @@ const _allShapes = <ShapeChoice>[
     color: Color(0xFFA855F7),
     shadow: Color(0xFF6A0DAD),
   ),
+  ShapeChoice(
+    id: 'oval',
+    labelZh: '椭圆形',
+    labelKo: '타원형',
+    labelEn: 'Oval',
+    color: Color(0xFF26C6DA),
+    shadow: Color(0xFF00838F),
+  ),
+  ShapeChoice(
+    id: 'rectangle',
+    labelZh: '长方形',
+    labelKo: '직사각형',
+    labelEn: 'Rectangle',
+    color: Color(0xFFFF8A3D),
+    shadow: Color(0xFFE65100),
+  ),
+  ShapeChoice(
+    id: 'semicircle',
+    labelZh: '半圆形',
+    labelKo: '반원',
+    labelEn: 'Semicircle',
+    color: Color(0xFF7ED957),
+    shadow: Color(0xFF43A047),
+  ),
+  ShapeChoice(
+    id: 'hexagon',
+    labelZh: '六边形',
+    labelKo: '육각형',
+    labelEn: 'Hexagon',
+    color: Color(0xFF5C7CFA),
+    shadow: Color(0xFF304FFE),
+  ),
+  ShapeChoice(
+    id: 'moon',
+    labelZh: '月牙形',
+    labelKo: '초승달',
+    labelEn: 'Crescent',
+    color: Color(0xFFFFC857),
+    shadow: Color(0xFFFF9800),
+  ),
 ];
 
 enum ShapeAnswerState { idle, correct, wrong }
@@ -757,6 +797,38 @@ class _ShapePreview extends StatelessWidget {
             ),
           ),
         );
+      case 'oval':
+        return ConstrainedBox(
+          constraints: BoxConstraints.tight(Size(size, size * 0.68)),
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+        );
+      case 'rectangle':
+        return ConstrainedBox(
+          constraints: BoxConstraints.tight(Size(size, size * 0.64)),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(size * 0.16),
+            ),
+          ),
+        );
+      case 'semicircle':
+        return CustomPaint(
+          size: Size(size, size * 0.66),
+          painter: _SemicirclePainter(color),
+        );
+      case 'hexagon':
+        return CustomPaint(
+          size: Size.square(size),
+          painter: _PolygonPainter(color, sides: 6),
+        );
+      case 'moon':
+        return CustomPaint(
+          size: Size.square(size),
+          painter: _CrescentPainter(color),
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -833,6 +905,85 @@ class _HeartPainter extends CustomPainter {
           size.height * 0.6, size.width / 2, size.height * 0.92)
       ..close();
     canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _SemicirclePainter extends CustomPainter {
+  const _SemicirclePainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height * 2);
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..arcTo(rect, pi, pi, false)
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _PolygonPainter extends CustomPainter {
+  const _PolygonPainter(this.color, {required this.sides});
+
+  final Color color;
+  final int sides;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide / 2;
+    final path = Path();
+    for (var index = 0; index < sides; index++) {
+      final angle = -pi / 2 + index * 2 * pi / sides;
+      final point = Offset(
+        center.dx + cos(angle) * radius,
+        center.dy + sin(angle) * radius,
+      );
+      if (index == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CrescentPainter extends CustomPainter {
+  const _CrescentPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final cutPaint = Paint()..blendMode = BlendMode.clear;
+    final layer = Offset.zero & size;
+    canvas.saveLayer(layer, Paint());
+    canvas.drawCircle(
+      Offset(size.width * 0.48, size.height * 0.5),
+      size.shortestSide * 0.44,
+      paint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.63, size.height * 0.42),
+      size.shortestSide * 0.39,
+      cutPaint,
+    );
+    canvas.restore();
   }
 
   @override

@@ -49,6 +49,7 @@ class GameSelectPage extends ConsumerStatefulWidget {
 
 class _GameSelectPageState extends ConsumerState<GameSelectPage>
     with RouteAware {
+  static const _contentHorizontalInset = 30.0;
   static const _cardRotations = [-2.5, 2.0, -1.5, 2.5, -1.0];
   static const _cornerIcons = [
     FigmaFloatIconType.star,
@@ -130,7 +131,12 @@ class _GameSelectPageState extends ConsumerState<GameSelectPage>
                     bottom: bottomInset + 24,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(
+                      _contentHorizontalInset,
+                      0,
+                      _contentHorizontalInset,
+                      0,
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         const spacing = 20.0;
@@ -257,10 +263,14 @@ class _GameSelectPageState extends ConsumerState<GameSelectPage>
 class _GameSelectHeader extends StatelessWidget {
   const _GameSelectHeader({required this.onBack});
 
+  static const _baseHeight = 144.0;
+  static const _contentTopOffset = 42.0;
+  static const _horizontalInset = 30.0;
+
   final VoidCallback onBack;
 
   static double heightFor(BuildContext context) {
-    return 152 + MediaQuery.paddingOf(context).top;
+    return _baseHeight + MediaQuery.paddingOf(context).top;
   }
 
   @override
@@ -292,7 +302,12 @@ class _GameSelectHeader extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(20, statusBarTop + 48, 20, 0),
+            padding: EdgeInsets.fromLTRB(
+              _horizontalInset,
+              statusBarTop + _contentTopOffset,
+              _horizontalInset,
+              0,
+            ),
             child: Row(
               children: [
                 _RoundBackButton(onTap: onBack),

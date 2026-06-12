@@ -62,6 +62,7 @@ class DifficultySelectPage extends ConsumerStatefulWidget {
 
 class _DifficultySelectPageState extends ConsumerState<DifficultySelectPage>
     with RouteAware {
+  static const _contentHorizontalInset = 32.0;
   static const _replayCurve = Curves.easeOutBack;
   static const _cardBeginRotation = -3 * math.pi / 180;
   int _replayEpoch = 0;
@@ -135,7 +136,12 @@ class _DifficultySelectPageState extends ConsumerState<DifficultySelectPage>
                     bottom: bottomInset + 24,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    padding: const EdgeInsets.fromLTRB(
+                      _contentHorizontalInset,
+                      0,
+                      _contentHorizontalInset,
+                      0,
+                    ),
                     child: Column(
                       children: [
                         for (var index = 0;
@@ -252,8 +258,12 @@ class _DifficultyHeader extends StatelessWidget {
   final int replayEpoch;
   final bool isReplaying;
 
+  static const _baseHeight = 166.0;
+  static const _contentTopOffset = 42.0;
+  static const _horizontalInset = 32.0;
+
   static double heightFor(BuildContext context) {
-    return 176 + MediaQuery.paddingOf(context).top;
+    return _baseHeight + MediaQuery.paddingOf(context).top;
   }
 
   @override
@@ -285,7 +295,12 @@ class _DifficultyHeader extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(20, statusBarTop + 48, 20, 0),
+            padding: EdgeInsets.fromLTRB(
+              _horizontalInset,
+              statusBarTop + _contentTopOffset,
+              _horizontalInset,
+              0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

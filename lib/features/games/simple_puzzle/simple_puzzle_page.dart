@@ -389,10 +389,183 @@ const _puzzles = <PuzzleConfig>[
       ),
     ],
   ),
+  PuzzleConfig(
+    nameZh: '音乐派对',
+    nameKo: '음악 파티',
+    nameEn: 'Music Party',
+    pieces: [
+      PuzzlePiece(
+        id: 'drum',
+        emoji: '🥁',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '小鼓',
+        labelKo: '북',
+        labelEn: 'Drum',
+      ),
+      PuzzlePiece(
+        id: 'guitar',
+        emoji: '🎸',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '吉他',
+        labelKo: '기타',
+        labelEn: 'Guitar',
+      ),
+      PuzzlePiece(
+        id: 'trumpet',
+        emoji: '🎺',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '小号',
+        labelKo: '트럼펫',
+        labelEn: 'Trumpet',
+      ),
+      PuzzlePiece(
+        id: 'microphone',
+        emoji: '🎤',
+        background: Color(0xFFE1BEE7),
+        color: Color(0xFF6A1B9A),
+        labelZh: '麦克风',
+        labelKo: '마이크',
+        labelEn: 'Microphone',
+      ),
+    ],
+  ),
+  PuzzleConfig(
+    nameZh: '小小职业',
+    nameKo: '직업 놀이',
+    nameEn: 'Little Jobs',
+    pieces: [
+      PuzzlePiece(
+        id: 'doctor',
+        emoji: '🩺',
+        background: Color(0xFFE3F2FD),
+        color: Color(0xFF1565C0),
+        labelZh: '医生',
+        labelKo: '의사',
+        labelEn: 'Doctor',
+      ),
+      PuzzlePiece(
+        id: 'teacher',
+        emoji: '📚',
+        background: Color(0xFFE8F5E9),
+        color: Color(0xFF388E3C),
+        labelZh: '老师',
+        labelKo: '선생님',
+        labelEn: 'Teacher',
+      ),
+      PuzzlePiece(
+        id: 'chef',
+        emoji: '🍳',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '厨师',
+        labelKo: '요리사',
+        labelEn: 'Chef',
+      ),
+      PuzzlePiece(
+        id: 'firefighter',
+        emoji: '🚒',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '消防员',
+        labelKo: '소방관',
+        labelEn: 'Firefighter',
+      ),
+    ],
+  ),
+  PuzzleConfig(
+    nameZh: '颜色宝盒',
+    nameKo: '색깔 상자',
+    nameEn: 'Color Box',
+    pieces: [
+      PuzzlePiece(
+        id: 'red',
+        emoji: '🔴',
+        background: Color(0xFFFFCDD2),
+        color: Color(0xFFC62828),
+        labelZh: '红色',
+        labelKo: '빨강',
+        labelEn: 'Red',
+      ),
+      PuzzlePiece(
+        id: 'blue',
+        emoji: '🔵',
+        background: Color(0xFFBBDEFB),
+        color: Color(0xFF1565C0),
+        labelZh: '蓝色',
+        labelKo: '파랑',
+        labelEn: 'Blue',
+      ),
+      PuzzlePiece(
+        id: 'green',
+        emoji: '🟢',
+        background: Color(0xFFC8E6C9),
+        color: Color(0xFF388E3C),
+        labelZh: '绿色',
+        labelKo: '초록',
+        labelEn: 'Green',
+      ),
+      PuzzlePiece(
+        id: 'yellow',
+        emoji: '🟡',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '黄色',
+        labelKo: '노랑',
+        labelEn: 'Yellow',
+      ),
+    ],
+  ),
+  PuzzleConfig(
+    nameZh: '农场朋友',
+    nameKo: '농장 친구',
+    nameEn: 'Farm Friends',
+    pieces: [
+      PuzzlePiece(
+        id: 'cow',
+        emoji: '🐮',
+        background: Color(0xFFF5F5F5),
+        color: Color(0xFF616161),
+        labelZh: '奶牛',
+        labelKo: '소',
+        labelEn: 'Cow',
+      ),
+      PuzzlePiece(
+        id: 'chicken',
+        emoji: '🐔',
+        background: Color(0xFFFFF9C4),
+        color: Color(0xFFF9A825),
+        labelZh: '小鸡',
+        labelKo: '닭',
+        labelEn: 'Chicken',
+      ),
+      PuzzlePiece(
+        id: 'pig',
+        emoji: '🐷',
+        background: Color(0xFFF8BBD9),
+        color: Color(0xFFC2185B),
+        labelZh: '小猪',
+        labelKo: '돼지',
+        labelEn: 'Pig',
+      ),
+      PuzzlePiece(
+        id: 'horse',
+        emoji: '🐴',
+        background: Color(0xFFFFE0B2),
+        color: Color(0xFFE64A19),
+        labelZh: '小马',
+        labelKo: '말',
+        labelEn: 'Horse',
+      ),
+    ],
+  ),
 ];
 
 class SimplePuzzleViewModel extends ChangeNotifier {
   SimplePuzzleViewModel(this.args) {
+    _puzzleOrder = _buildPuzzleOrder();
     _trayOrder = _buildTrayOrder();
   }
 
@@ -405,13 +578,14 @@ class SimplePuzzleViewModel extends ChangeNotifier {
   bool hadWrong = false;
   bool puzzleSolved = false;
   List<String?> slots = [null, null, null, null];
+  late List<int> _puzzleOrder;
   late List<int> _trayOrder;
   String? selectedPieceId;
   int? shakingSlot;
   RewardRouteArgs? pendingRewardArgs;
 
   DifficultyConfig get config => args.difficulty.config;
-  PuzzleConfig get puzzle => _puzzles[round % totalPuzzleCount];
+  PuzzleConfig get puzzle => _puzzles[_puzzleOrder[round]];
 
   int get totalPuzzleCount {
     switch (args.difficulty) {
@@ -510,6 +684,12 @@ class SimplePuzzleViewModel extends ChangeNotifier {
     return order;
   }
 
+  List<int> _buildPuzzleOrder() {
+    final order = List<int>.generate(_puzzles.length, (index) => index)
+      ..shuffle(_random);
+    return order.take(totalPuzzleCount).toList();
+  }
+
   void reset() {
     _timer?.cancel();
     round = 0;
@@ -517,6 +697,7 @@ class SimplePuzzleViewModel extends ChangeNotifier {
     hadWrong = false;
     puzzleSolved = false;
     slots = [null, null, null, null];
+    _puzzleOrder = _buildPuzzleOrder();
     _trayOrder = _buildTrayOrder();
     selectedPieceId = null;
     shakingSlot = null;
