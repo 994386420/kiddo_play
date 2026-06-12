@@ -123,110 +123,110 @@ class _GameSelectPageState extends ConsumerState<GameSelectPage>
                   painter: _PolkaDotPainter(),
                 ),
               ),
-              SafeArea(
-                top: false,
-                bottom: false,
+              Positioned.fill(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: bottomInset + 24),
-                  child: Column(
-                    children: [
-                      _GameSelectHeader(
-                        onBack: _handleBack,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            const spacing = 20.0;
-                            final cardWidth =
-                                (constraints.maxWidth - spacing) / 2;
+                  padding: EdgeInsets.only(
+                    top: _GameSelectHeader.heightFor(context) + 24,
+                    bottom: bottomInset + 24,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const spacing = 20.0;
+                        final cardWidth = (constraints.maxWidth - spacing) / 2;
 
-                            return Wrap(
-                              spacing: spacing,
-                              runSpacing: 20,
-                              children: [
-                                for (var index = 0;
-                                    index < orderedGameIds.length;
-                                    index++)
-                                  SizedBox(
-                                    width: cardWidth,
-                                    child: KidDelayedReveal(
-                                      key: ValueKey(
-                                        'game-select-$_replayEpoch-${orderedGameIds[index].name}',
+                        return Wrap(
+                          spacing: spacing,
+                          runSpacing: 20,
+                          children: [
+                            for (var index = 0;
+                                index < orderedGameIds.length;
+                                index++)
+                              SizedBox(
+                                width: cardWidth,
+                                child: KidDelayedReveal(
+                                  key: ValueKey(
+                                    'game-select-$_replayEpoch-${orderedGameIds[index].name}',
+                                  ),
+                                  delay: _isReplaying
+                                      ? Duration(milliseconds: index * 80)
+                                      : Duration(milliseconds: index * 80),
+                                  duration: _isReplaying
+                                      ? const Duration(milliseconds: 420)
+                                      : const Duration(milliseconds: 440),
+                                  beginOffset: Offset.zero,
+                                  beginScale: _gameCardBeginScale(
+                                    _isReplaying,
+                                  ),
+                                  beginRotation: _gameCardBeginRotation(
+                                    rotationDegrees: _cardRotations[
+                                        index % _cardRotations.length],
+                                    unlocked: progress.isUnlocked(
+                                      orderedGameIds[index],
+                                    ),
+                                    replaying: _isReplaying,
+                                  ),
+                                  curve: _replayCurve,
+                                  child: _ShakingCard(
+                                    active: viewModel.lockedHintGameId ==
+                                        orderedGameIds[index],
+                                    child: _GameStickerCard(
+                                      gameId: orderedGameIds[index],
+                                      rotationDegrees: _cardRotations[
+                                          index % _cardRotations.length],
+                                      cornerIcon: _cornerIcons[
+                                          index % _cornerIcons.length],
+                                      unlocked: progress.isUnlocked(
+                                        orderedGameIds[index],
                                       ),
-                                      delay: _isReplaying
-                                          ? Duration(milliseconds: index * 80)
-                                          : Duration(milliseconds: index * 80),
-                                      duration: _isReplaying
-                                          ? const Duration(milliseconds: 420)
-                                          : const Duration(milliseconds: 440),
-                                      beginOffset: Offset.zero,
-                                      beginScale: _gameCardBeginScale(
-                                        _isReplaying,
-                                      ),
-                                      beginRotation: _gameCardBeginRotation(
-                                        rotationDegrees: _cardRotations[
-                                            index % _cardRotations.length],
-                                        unlocked: progress.isUnlocked(
-                                          orderedGameIds[index],
-                                        ),
-                                        replaying: _isReplaying,
-                                      ),
-                                      curve: _replayCurve,
-                                      child: _ShakingCard(
-                                        active: viewModel.lockedHintGameId ==
+                                      nextToUnlock: !progress.isUnlocked(
                                             orderedGameIds[index],
-                                        child: _GameStickerCard(
-                                          gameId: orderedGameIds[index],
-                                          rotationDegrees: _cardRotations[
-                                              index % _cardRotations.length],
-                                          cornerIcon: _cornerIcons[
-                                              index % _cornerIcons.length],
-                                          unlocked: progress.isUnlocked(
-                                            orderedGameIds[index],
+                                          ) &&
+                                          index > 0 &&
+                                          progress.isUnlocked(
+                                            orderedGameIds[index - 1],
                                           ),
-                                          nextToUnlock: !progress.isUnlocked(
-                                                orderedGameIds[index],
-                                              ) &&
-                                              index > 0 &&
-                                              progress.isUnlocked(
-                                                orderedGameIds[index - 1],
-                                              ),
-                                          showLockedHint:
-                                              viewModel.lockedHintGameId ==
-                                                  orderedGameIds[index],
-                                          onTap: () {
-                                            final gameId =
-                                                orderedGameIds[index];
-                                            if (progress.isUnlocked(gameId)) {
-                                              Navigator.pushNamed(
-                                                context,
-                                                AppRoutes.difficulty,
-                                                arguments: DifficultyRouteArgs(
-                                                  gameId: gameId,
-                                                ),
-                                              );
-                                            } else {
-                                              ref
-                                                  .read(
-                                                    gameSelectViewModelProvider,
-                                                  )
-                                                  .showLockedHint(gameId);
-                                            }
-                                          },
-                                          lockedHintText:
-                                              l10n.gameSelectLockedHint,
-                                        ),
-                                      ),
+                                      showLockedHint:
+                                          viewModel.lockedHintGameId ==
+                                              orderedGameIds[index],
+                                      onTap: () {
+                                        final gameId = orderedGameIds[index];
+                                        if (progress.isUnlocked(gameId)) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.difficulty,
+                                            arguments: DifficultyRouteArgs(
+                                              gameId: gameId,
+                                            ),
+                                          );
+                                        } else {
+                                          ref
+                                              .read(
+                                                gameSelectViewModelProvider,
+                                              )
+                                              .showLockedHint(gameId);
+                                        }
+                                      },
+                                      lockedHintText: l10n.gameSelectLockedHint,
                                     ),
                                   ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: _GameSelectHeader.heightFor(context),
+                child: _GameSelectHeader(
+                  onBack: _handleBack,
                 ),
               ),
             ],
@@ -259,11 +259,15 @@ class _GameSelectHeader extends StatelessWidget {
 
   final VoidCallback onBack;
 
+  static double heightFor(BuildContext context) {
+    return 152 + MediaQuery.paddingOf(context).top;
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusBarTop = MediaQuery.paddingOf(context).top;
     return SizedBox(
-      height: 152 + statusBarTop,
+      height: heightFor(context),
       child: Stack(
         children: [
           const Positioned.fill(

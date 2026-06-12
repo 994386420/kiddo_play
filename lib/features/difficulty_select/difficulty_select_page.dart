@@ -128,106 +128,107 @@ class _DifficultySelectPageState extends ConsumerState<DifficultySelectPage>
                   painter: _PolkaDotPainter(),
                 ),
               ),
-              SafeArea(
-                top: false,
-                bottom: false,
+              Positioned.fill(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: bottomInset + 24),
-                  child: Column(
-                    children: [
-                      _DifficultyHeader(
-                        gameId: gameId,
-                        onBack: _handleBack,
-                        replayEpoch: _replayEpoch,
-                        isReplaying: _isReplaying,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: Column(
-                          children: [
-                            for (var index = 0;
-                                index < GameDifficulty.values.length;
-                                index++) ...[
-                              Builder(
-                                builder: (context) {
-                                  final difficulty =
-                                      GameDifficulty.values[index];
-                                  final unlocked =
-                                      parentData.isDifficultyUnlocked(
-                                    gameId: gameId,
-                                    difficulty: difficulty,
-                                  );
-
-                                  return KidDelayedReveal(
-                                    key: ValueKey(
-                                      'difficulty-$_replayEpoch-${difficulty.name}',
-                                    ),
-                                    delay: _isReplaying
-                                        ? Duration(milliseconds: index * 100)
-                                        : Duration(milliseconds: index * 100),
-                                    duration: _isReplaying
-                                        ? const Duration(milliseconds: 420)
-                                        : const Duration(milliseconds: 460),
-                                    beginOffset: _isReplaying
-                                        ? const Offset(-0.11, 0)
-                                        : const Offset(-0.11, 0),
-                                    beginScale: 1,
-                                    beginRotation: _cardBeginRotation,
-                                    curve: _replayCurve,
-                                    child: _ShakingCard(
-                                      active: viewModel.lockedHintDifficulty ==
-                                          difficulty,
-                                      child: _DifficultyStickerCard(
-                                        difficulty: difficulty,
-                                        unlocked: unlocked,
-                                        onTap: () {
-                                          if (unlocked) {
-                                            Navigator.pushNamed(
-                                              context,
-                                              gameId.routeName,
-                                              arguments: viewModel.buildArgs(
-                                                difficulty,
-                                              ),
-                                            );
-                                          } else {
-                                            ref
-                                                .read(
-                                                  difficultySelectViewModelProvider(
-                                                    gameId,
-                                                  ),
-                                                )
-                                                .showLockedHint(difficulty);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              if (index != GameDifficulty.values.length - 1)
-                                const SizedBox(height: 16),
-                            ],
-                            const SizedBox(height: 18),
-                            KidDelayedReveal(
-                              key: ValueKey('difficulty-tip-$_replayEpoch'),
-                              delay: _isReplaying
-                                  ? const Duration(milliseconds: 280)
-                                  : const Duration(milliseconds: 520),
-                              duration: _isReplaying
-                                  ? const Duration(milliseconds: 360)
-                                  : const Duration(milliseconds: 400),
-                              beginOffset: Offset.zero,
-                              beginScale: 0.9,
-                              curve: _replayCurve,
-                              child: _DifficultyTipCard(
-                                text: context.l10n.difficultySelectHint,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  padding: EdgeInsets.only(
+                    top: _DifficultyHeader.heightFor(context) + 24,
+                    bottom: bottomInset + 24,
                   ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: Column(
+                      children: [
+                        for (var index = 0;
+                            index < GameDifficulty.values.length;
+                            index++) ...[
+                          Builder(
+                            builder: (context) {
+                              final difficulty = GameDifficulty.values[index];
+                              final unlocked = parentData.isDifficultyUnlocked(
+                                gameId: gameId,
+                                difficulty: difficulty,
+                              );
+
+                              return KidDelayedReveal(
+                                key: ValueKey(
+                                  'difficulty-$_replayEpoch-${difficulty.name}',
+                                ),
+                                delay: _isReplaying
+                                    ? Duration(milliseconds: index * 100)
+                                    : Duration(milliseconds: index * 100),
+                                duration: _isReplaying
+                                    ? const Duration(milliseconds: 420)
+                                    : const Duration(milliseconds: 460),
+                                beginOffset: _isReplaying
+                                    ? const Offset(-0.11, 0)
+                                    : const Offset(-0.11, 0),
+                                beginScale: 1,
+                                beginRotation: _cardBeginRotation,
+                                curve: _replayCurve,
+                                child: _ShakingCard(
+                                  active: viewModel.lockedHintDifficulty ==
+                                      difficulty,
+                                  child: _DifficultyStickerCard(
+                                    difficulty: difficulty,
+                                    unlocked: unlocked,
+                                    onTap: () {
+                                      if (unlocked) {
+                                        Navigator.pushNamed(
+                                          context,
+                                          gameId.routeName,
+                                          arguments: viewModel.buildArgs(
+                                            difficulty,
+                                          ),
+                                        );
+                                      } else {
+                                        ref
+                                            .read(
+                                              difficultySelectViewModelProvider(
+                                                gameId,
+                                              ),
+                                            )
+                                            .showLockedHint(difficulty);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          if (index != GameDifficulty.values.length - 1)
+                            const SizedBox(height: 16),
+                        ],
+                        const SizedBox(height: 18),
+                        KidDelayedReveal(
+                          key: ValueKey('difficulty-tip-$_replayEpoch'),
+                          delay: _isReplaying
+                              ? const Duration(milliseconds: 280)
+                              : const Duration(milliseconds: 520),
+                          duration: _isReplaying
+                              ? const Duration(milliseconds: 360)
+                              : const Duration(milliseconds: 400),
+                          beginOffset: Offset.zero,
+                          beginScale: 0.9,
+                          curve: _replayCurve,
+                          child: _DifficultyTipCard(
+                            text: context.l10n.difficultySelectHint,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: _DifficultyHeader.heightFor(context),
+                child: _DifficultyHeader(
+                  gameId: gameId,
+                  onBack: _handleBack,
+                  replayEpoch: _replayEpoch,
+                  isReplaying: _isReplaying,
                 ),
               ),
             ],
@@ -251,11 +252,15 @@ class _DifficultyHeader extends StatelessWidget {
   final int replayEpoch;
   final bool isReplaying;
 
+  static double heightFor(BuildContext context) {
+    return 176 + MediaQuery.paddingOf(context).top;
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusBarTop = MediaQuery.paddingOf(context).top;
     return SizedBox(
-      height: 176 + statusBarTop,
+      height: heightFor(context),
       child: Stack(
         children: [
           const Positioned.fill(
