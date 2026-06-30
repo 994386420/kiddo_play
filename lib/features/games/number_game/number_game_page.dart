@@ -155,7 +155,43 @@ const _emojiSets = <EmojiSet>[
   ),
 ];
 
+const _numberItemSurfaces = <Color>[
+  Color(0xFFFFF6D8),
+  Color(0xFFE5F7FF),
+  Color(0xFFFFE8F2),
+  Color(0xFFEFFFF0),
+  Color(0xFFF4EAFF),
+  Color(0xFFFFEEE0),
+];
+
 enum NumberAnswerState { idle, correct, wrong }
+
+enum NumberQuestionVariant { classic, mixed, highlighted, sizeShuffle }
+
+class NumberSceneItem {
+  const NumberSceneItem({
+    required this.emojiSet,
+    required this.isTarget,
+    required this.scale,
+    required this.rotation,
+    required this.background,
+    required this.highlighted,
+  });
+
+  final EmojiSet emojiSet;
+  final bool isTarget;
+  final double scale;
+  final double rotation;
+  final Color background;
+  final bool highlighted;
+
+  String get sceneKey {
+    final targetKey = isTarget ? 't' : 'd';
+    final highlightKey = highlighted ? 'h' : 'n';
+    return '${emojiSet.emoji}-$targetKey-$highlightKey-'
+        '${scale.toStringAsFixed(2)}-${rotation.toStringAsFixed(2)}';
+  }
+}
 
 class NumberQuestion {
   const NumberQuestion({
@@ -163,15 +199,17 @@ class NumberQuestion {
     required this.count,
     required this.options,
     required this.displayItems,
+    required this.variant,
   });
 
   final EmojiSet emojiSet;
   final int count;
   final List<int> options;
-  final List<EmojiSet> displayItems;
+  final List<NumberSceneItem> displayItems;
+  final NumberQuestionVariant variant;
 
   String get sceneKey {
-    return displayItems.map((item) => item.emoji).join();
+    return '${variant.name}:${displayItems.map((item) => item.sceneKey).join('|')}';
   }
 }
 
@@ -268,34 +306,52 @@ class NumberGameViewModel extends ChangeNotifier {
     }
     final items = options.toList()..shuffle(_random);
     final emojiSet = _emojiSets[_random.nextInt(_emojiSets.length)];
+    final variant = _pickVariant();
     return NumberQuestion(
       emojiSet: emojiSet,
       count: count,
       options: items,
+      variant: variant,
       displayItems: _buildDisplayItems(
         emojiSet: emojiSet,
         targetCount: count,
+        variant: variant,
       ),
     );
   }
 
-  List<EmojiSet> _buildDisplayItems({
+  NumberQuestionVariant _pickVariant() {
+    final variants = switch (args.difficulty) {
+      GameDifficulty.easy => const [
+          NumberQuestionVariant.classic,
+          NumberQuestionVariant.classic,
+          NumberQuestionVariant.mixed,
+        ],
+      GameDifficulty.medium => const [
+          NumberQuestionVariant.mixed,
+          NumberQuestionVariant.highlighted,
+          NumberQuestionVariant.sizeShuffle,
+        ],
+      GameDifficulty.hard => const [
+          NumberQuestionVariant.highlighted,
+          NumberQuestionVariant.sizeShuffle,
+          NumberQuestionVariant.mixed,
+        ],
+    };
+    return variants[_random.nextInt(variants.length)];
+  }
+
+  List<NumberSceneItem> _buildDisplayItems({
     required EmojiSet emojiSet,
     required int targetCount,
+    required NumberQuestionVariant variant,
   }) {
-    final mixedChance = switch (args.difficulty) {
-      GameDifficulty.easy => 0.35,
-      GameDifficulty.medium => 0.72,
-      GameDifficulty.hard => 1.0,
-    };
-    final shouldMix = _random.nextDouble() < mixedChance;
-    final displayItems = List<EmojiSet>.filled(
-      targetCount,
-      emojiSet,
-      growable: true,
-    );
+    final rawItems = <({EmojiSet set, bool isTarget})>[
+      for (var index = 0; index < targetCount; index++)
+        (set: emojiSet, isTarget: true),
+    ];
 
-    if (shouldMix) {
+    if (variant != NumberQuestionVariant.classic) {
       final distractorSets = _emojiSets
           .where((candidate) => candidate.emoji != emojiSet.emoji)
           .toList()
@@ -306,12 +362,69 @@ class NumberGameViewModel extends ChangeNotifier {
         GameDifficulty.hard => 2 + _random.nextInt(5),
       };
       for (var index = 0; index < distractorCount; index++) {
-        displayItems.add(distractorSets[index % distractorSets.length]);
+        rawItems.add((
+          set: distractorSets[index % distractorSets.length],
+          isTarget: false,
+        ));
       }
     }
 
-    displayItems.shuffle(_random);
-    return displayItems;
+    rawItems.shuffle(_random);
+    return [
+      for (final item in rawItems)
+        NumberSceneItem(
+          emojiSet: item.set,
+          isTarget: item.isTarget,
+          scale: _itemScale(variant),
+          rotation: _itemRotation(variant),
+          background: _itemBackground(
+            target: emojiSet,
+            item: item.set,
+            isTarget: item.isTarget,
+            variant: variant,
+          ),
+          highlighted:
+              variant == NumberQuestionVariant.highlighted && item.isTarget,
+        ),
+    ];
+  }
+
+  double _itemScale(NumberQuestionVariant variant) {
+    if (variant != NumberQuestionVariant.sizeShuffle &&
+        args.difficulty != GameDifficulty.hard) {
+      return 1;
+    }
+    final choices = args.difficulty == GameDifficulty.easy
+        ? const [0.96, 1.0, 1.04]
+        : const [0.84, 0.94, 1.0, 1.12, 1.22];
+    return choices[_random.nextInt(choices.length)];
+  }
+
+  double _itemRotation(NumberQuestionVariant variant) {
+    if (variant == NumberQuestionVariant.classic ||
+        args.difficulty == GameDifficulty.easy) {
+      return 0;
+    }
+    final max = args.difficulty == GameDifficulty.hard ? 0.16 : 0.09;
+    return (_random.nextDouble() * max * 2) - max;
+  }
+
+  Color _itemBackground({
+    required EmojiSet target,
+    required EmojiSet item,
+    required bool isTarget,
+    required NumberQuestionVariant variant,
+  }) {
+    if (variant == NumberQuestionVariant.classic) {
+      return target.background;
+    }
+    if (variant == NumberQuestionVariant.highlighted && isTarget) {
+      return const Color(0xFFFFF4BF);
+    }
+    if (variant == NumberQuestionVariant.mixed && !isTarget) {
+      return item.background;
+    }
+    return _numberItemSurfaces[_random.nextInt(_numberItemSurfaces.length)];
   }
 
   void reset() {
@@ -578,10 +691,62 @@ String _numberPromptText(
   NumberQuestion question,
   String prompt,
 ) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'zh' => '数一数，有几个${question.emojiSet.label(context)}？',
-    'ko' => '${question.emojiSet.label(context)}가 몇 개 있을까요?',
-    _ => '$prompt ${question.emojiSet.label(context)}?',
+  final label = question.emojiSet.label(context);
+  return switch (question.variant) {
+    NumberQuestionVariant.highlighted => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '数一数，黄色框里的$label有几个？',
+        'ko' => '노란 칸의 $label이 몇 개인지 세어봐요.',
+        _ => 'Count the highlighted $label.',
+      },
+    NumberQuestionVariant.mixed => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '只数$label，看看有几个？',
+        'ko' => '$label만 몇 개인지 세어봐요.',
+        _ => 'Only count the $label.',
+      },
+    NumberQuestionVariant.sizeShuffle => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '大的小的都算，$label有几个？',
+        'ko' => '크기가 달라도 $label을 모두 세어봐요.',
+        _ => 'Count every $label, big or small.',
+      },
+    NumberQuestionVariant.classic => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '数一数，有几个$label？',
+        'ko' => '$label가 몇 개 있을까요?',
+        _ => '$prompt $label?',
+      },
+  };
+}
+
+String _numberVariantHint(BuildContext context, NumberQuestion question) {
+  final label = question.emojiSet.label(context);
+  return switch (question.variant) {
+    NumberQuestionVariant.highlighted => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '只看黄色框',
+        'ko' => '노란 칸만',
+        _ => 'Yellow only',
+      },
+    NumberQuestionVariant.mixed => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '只数 $label',
+        'ko' => '$label만',
+        _ => '$label only',
+      },
+    NumberQuestionVariant.sizeShuffle => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '大小都算',
+        'ko' => '크기 달라도 OK',
+        _ => 'Any size',
+      },
+    NumberQuestionVariant.classic => switch (
+          Localizations.localeOf(context).languageCode) {
+        'zh' => '一起数一数',
+        'ko' => '함께 세어요',
+        _ => 'Count together',
+      },
   };
 }
 
@@ -621,6 +786,8 @@ class _NumberPromptCard extends StatelessWidget {
               color: Color(0xFF327940),
             ),
           ),
+          const SizedBox(height: 10),
+          _NumberTargetChip(question: question),
           const SizedBox(height: 18),
           Container(
             width: double.infinity,
@@ -639,22 +806,135 @@ class _NumberPromptCard extends StatelessWidget {
               runSpacing: 10,
               children: List.generate(
                 question.displayItems.length,
-                (index) => KidDelayedReveal(
-                  key: ValueKey(
-                    '$round-${question.sceneKey}-$index',
-                  ),
-                  delay: Duration(milliseconds: index * 45),
-                  beginScale: 0.72,
-                  beginOffset: const Offset(0, 0.12),
-                  child: Text(
-                    question.displayItems[index].emoji,
-                    style: TextStyle(fontSize: emojiSize),
-                  ),
-                ),
+                (index) {
+                  final item = question.displayItems[index];
+                  return KidDelayedReveal(
+                    key: ValueKey(
+                      '$round-${question.sceneKey}-$index',
+                    ),
+                    delay: Duration(milliseconds: index * 45),
+                    beginScale: 0.72,
+                    beginOffset: const Offset(0, 0.12),
+                    child: _NumberSceneItemBubble(
+                      item: item,
+                      emojiSize: emojiSize,
+                    ),
+                  );
+                },
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NumberTargetChip extends StatelessWidget {
+  const _NumberTargetChip({required this.question});
+
+  final NumberQuestion question;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: _numberGamePalette.progressBorder,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E8A42).withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(question.emojiSet.emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 8),
+          Text(
+            _numberVariantHint(context, question),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF327940),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NumberSceneItemBubble extends StatelessWidget {
+  const _NumberSceneItemBubble({
+    required this.item,
+    required this.emojiSize,
+  });
+
+  final NumberSceneItem item;
+  final double emojiSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = item.highlighted
+        ? const Color(0xFFFFC84A)
+        : item.isTarget
+            ? Colors.white
+            : const Color(0xFFB0BEC5).withValues(alpha: 0.55);
+    return Transform.rotate(
+      angle: item.rotation,
+      child: Transform.scale(
+        scale: item.scale,
+        child: Container(
+          width: emojiSize + 18,
+          height: emojiSize + 18,
+          decoration: BoxDecoration(
+            color: item.background,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: borderColor,
+              width: item.highlighted ? 3 : 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: (item.highlighted
+                        ? const Color(0xFFFFC84A)
+                        : const Color(0xFF2E8A42))
+                    .withValues(alpha: item.highlighted ? 0.24 : 0.08),
+                blurRadius: item.highlighted ? 14 : 8,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Center(
+                child: Text(
+                  item.emojiSet.emoji,
+                  style: TextStyle(fontSize: emojiSize),
+                ),
+              ),
+              if (item.highlighted)
+                const Positioned(
+                  right: -7,
+                  top: -9,
+                  child: Text(
+                    '✨',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

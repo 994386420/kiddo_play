@@ -238,6 +238,7 @@ class FigmaMascotAvatar extends StatelessWidget {
       '🐻' => _bearMascotSvg,
       '🐼' => _pandaMascotSvg,
       '🦊' => _foxMascotSvg,
+      '🐥' => _chickMascotSvg,
       '🐸' => _frogMascotSvg,
       _ => _lionMascotSvg,
     };

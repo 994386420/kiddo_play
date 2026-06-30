@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'app_controllers.dart';
 import 'game_models.dart';
+import 'growth_models.dart';
 
 enum KidAchievementId {
   firstGame,
@@ -15,6 +16,8 @@ enum KidAchievementId {
   allUnlocked,
   hardPerfect,
   streak7,
+  dailyComplete,
+  allMascots,
 }
 
 class KidAchievement {
@@ -124,6 +127,22 @@ final kidAchievements = <KidAchievement>[
     color: 0xFFE64A19,
     background: 0xFFFFF3E0,
   ),
+  KidAchievement(
+    id: KidAchievementId.dailyComplete,
+    emoji: '📋',
+    name: '今日英雄',
+    description: '完成全部今日任务',
+    color: 0xFF2E7D32,
+    background: 0xFFE8F5E9,
+  ),
+  KidAchievement(
+    id: KidAchievementId.allMascots,
+    emoji: '📖',
+    name: '动物图鉴',
+    description: '收集全部 ${mascotInfos.length} 种动物小伙伴',
+    color: 0xFF7B1FA2,
+    background: 0xFFF3E5F5,
+  ),
 ];
 
 class PlayDayStatus {
@@ -145,6 +164,8 @@ Set<KidAchievementId> deriveUnlockedAchievements({
   required Iterable<GameId> unlockedGames,
   required Map<GameId, ParentGameStats> gameStats,
   required Iterable<ActivityEntry> activityLog,
+  DailyTasksState? dailyTasks,
+  int collectedMascotCount = 0,
 }) {
   final unlocked = <KidAchievementId>{};
   final entries = activityLog.toList();
@@ -208,6 +229,14 @@ Set<KidAchievementId> deriveUnlockedAchievements({
 
   if (computeCurrentStreak(entries) >= 7) {
     unlocked.add(KidAchievementId.streak7);
+  }
+
+  if (dailyTasks?.allCompletedRewarded ?? false) {
+    unlocked.add(KidAchievementId.dailyComplete);
+  }
+
+  if (collectedMascotCount >= mascotInfos.length) {
+    unlocked.add(KidAchievementId.allMascots);
   }
 
   if (gameStats.values.any(

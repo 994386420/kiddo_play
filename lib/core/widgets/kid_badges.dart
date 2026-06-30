@@ -198,10 +198,8 @@ class KidBadgeWallSheet extends StatelessWidget {
                   stops: [0, 0.3, 1],
                 ),
                 borderRadius: BorderRadius.circular(32),
-                border: const Border(
-                  top: BorderSide(color: Color(0xFFFFD93D), width: 3),
-                  left: BorderSide(color: Color(0xFFFFD93D), width: 3),
-                  right: BorderSide(color: Color(0xFFFFD93D), width: 3),
+                border: const Border.fromBorderSide(
+                  BorderSide(color: Color(0xFFFFD93D), width: 3),
                 ),
               ),
               child: Padding(
@@ -574,6 +572,8 @@ Widget kidAchievementIcon(KidAchievementId id, double size) {
         type: FigmaFloatIconType.fire,
         size: size,
       ),
+    KidAchievementId.dailyComplete => FigmaSparkleStarIcon(size: size),
+    KidAchievementId.allMascots => FigmaRainbowIcon(size: size),
   };
 }
 

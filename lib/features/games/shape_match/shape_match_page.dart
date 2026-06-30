@@ -154,16 +154,50 @@ const _allShapes = <ShapeChoice>[
   ),
 ];
 
+const _shapeVariantColors = <Color>[
+  Color(0xFFFF4B4B),
+  Color(0xFF4B9FFF),
+  Color(0xFF4BC96A),
+  Color(0xFFFFD93D),
+  Color(0xFFFF70A6),
+  Color(0xFFA855F7),
+  Color(0xFF26C6DA),
+  Color(0xFFFF8A3D),
+];
+
 enum ShapeAnswerState { idle, correct, wrong }
+
+enum ShapeQuestionVariant { classic, colorNoise, sizeNoise, rotateNoise }
+
+class ShapeVisual {
+  const ShapeVisual({
+    required this.color,
+    required this.rotation,
+    required this.scale,
+  });
+
+  final Color color;
+  final double rotation;
+  final double scale;
+
+  String get key =>
+      '${color.toARGB32()}-${rotation.toStringAsFixed(2)}-${scale.toStringAsFixed(2)}';
+}
 
 class ShapeQuestion {
   const ShapeQuestion({
     required this.target,
     required this.options,
+    required this.variant,
+    required this.targetVisual,
+    required this.optionVisuals,
   });
 
   final ShapeChoice target;
   final List<ShapeChoice> options;
+  final ShapeQuestionVariant variant;
+  final ShapeVisual targetVisual;
+  final Map<String, ShapeVisual> optionVisuals;
 }
 
 class ShapeMatchViewModel extends ChangeNotifier {
@@ -192,6 +226,10 @@ class ShapeMatchViewModel extends ChangeNotifier {
       : _allShapes;
 
   bool get hideNameInQuestion => args.difficulty == GameDifficulty.hard;
+
+  bool get showShapeNames =>
+      args.difficulty == GameDifficulty.easy &&
+      _question.variant == ShapeQuestionVariant.classic;
 
   ShapeQuestion get question => _question;
 
@@ -252,7 +290,75 @@ class ShapeMatchViewModel extends ChangeNotifier {
     distractors.shuffle(_random);
     final options = [target, ...distractors.take(config.optionCount - 1)]
       ..shuffle(_random);
-    return ShapeQuestion(target: target, options: options);
+    final variant = _pickVariant();
+    return ShapeQuestion(
+      target: target,
+      options: options,
+      variant: variant,
+      targetVisual: _visualFor(target, variant: variant, isTarget: true),
+      optionVisuals: {
+        for (final option in options)
+          option.id: _visualFor(
+            option,
+            variant: variant,
+            isTarget: option.id == target.id,
+          ),
+      },
+    );
+  }
+
+  ShapeQuestionVariant _pickVariant() {
+    final variants = switch (args.difficulty) {
+      GameDifficulty.easy => const [
+          ShapeQuestionVariant.classic,
+          ShapeQuestionVariant.classic,
+          ShapeQuestionVariant.colorNoise,
+        ],
+      GameDifficulty.medium => const [
+          ShapeQuestionVariant.colorNoise,
+          ShapeQuestionVariant.sizeNoise,
+          ShapeQuestionVariant.rotateNoise,
+        ],
+      GameDifficulty.hard => const [
+          ShapeQuestionVariant.colorNoise,
+          ShapeQuestionVariant.rotateNoise,
+          ShapeQuestionVariant.sizeNoise,
+        ],
+    };
+    return variants[_random.nextInt(variants.length)];
+  }
+
+  ShapeVisual _visualFor(
+    ShapeChoice shape, {
+    required ShapeQuestionVariant variant,
+    required bool isTarget,
+  }) {
+    final color = switch (variant) {
+      ShapeQuestionVariant.colorNoise =>
+        _shapeVariantColors[_random.nextInt(_shapeVariantColors.length)],
+      _ => shape.color,
+    };
+    final rotation = switch (variant) {
+      ShapeQuestionVariant.rotateNoise => (_random.nextDouble() * 0.56) - 0.28,
+      ShapeQuestionVariant.sizeNoise
+          when args.difficulty == GameDifficulty.hard =>
+        isTarget ? 0.08 : ((_random.nextDouble() * 0.28) - 0.14),
+      _ => 0.0,
+    };
+    final scale = switch (variant) {
+      ShapeQuestionVariant.sizeNoise =>
+        isTarget ? 1.04 : 0.84 + _random.nextDouble() * 0.36,
+      ShapeQuestionVariant.rotateNoise
+          when args.difficulty == GameDifficulty.hard =>
+        0.92 + _random.nextDouble() * 0.2,
+      _ => 1.0,
+    };
+
+    return ShapeVisual(
+      color: color,
+      rotation: rotation,
+      scale: scale,
+    );
   }
 
   void reset() {
@@ -306,7 +412,9 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
     _voiceGuideController = ref.read(voiceGuideControllerProvider);
     _questionVoiceSubscription = ref.listenManual<String>(
       shapeMatchViewModelProvider(args).select(
-          (viewModel) => '${viewModel.round}-${viewModel.question.target.id}'),
+        (viewModel) => '${viewModel.round}-${viewModel.question.target.id}-'
+            '${viewModel.question.variant.name}-${viewModel.question.targetVisual.key}',
+      ),
       (_, __) {
         if (!mounted || _isPaused) {
           return;
@@ -451,14 +559,15 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
           onQuit: () => _handleBack(context),
         ),
         body: KidRoundSwitcher(
-          switchKey: '${viewModel.round}-${viewModel.question.target.id}',
+          switchKey: '${viewModel.round}-${viewModel.question.target.id}-'
+              '${viewModel.question.variant.name}-${viewModel.question.targetVisual.key}',
           child: Column(
             children: [
               _ShapePromptCard(
                 prompt: viewModel.hideNameInQuestion
                     ? l10n.shapePromptHard
                     : l10n.shapePrompt,
-                target: viewModel.question.target,
+                question: viewModel.question,
                 hideName: viewModel.hideNameInQuestion,
               ),
               const SizedBox(height: 16),
@@ -476,6 +585,13 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
                   final option = viewModel.question.options[index];
                   return _ShapeOptionTile(
                     option: option,
+                    visual: viewModel.question.optionVisuals[option.id] ??
+                        ShapeVisual(
+                          color: option.color,
+                          rotation: 0,
+                          scale: 1,
+                        ),
+                    showName: viewModel.showShapeNames,
                     correct: viewModel.correctOptionId == option.id,
                     wrong: viewModel.wrongOptionId == option.id,
                     onTap: () => ref
@@ -535,16 +651,17 @@ String _shapeVoicePrompt(
 class _ShapePromptCard extends StatelessWidget {
   const _ShapePromptCard({
     required this.prompt,
-    required this.target,
+    required this.question,
     required this.hideName,
   });
 
   final String prompt;
-  final ShapeChoice target;
+  final ShapeQuestion question;
   final bool hideName;
 
   @override
   Widget build(BuildContext context) {
+    final target = question.target;
     return FigmaGamePanel(
       palette: _shapeMatchPalette,
       child: Column(
@@ -558,6 +675,8 @@ class _ShapePromptCard extends StatelessWidget {
               color: Color(0xFF805600),
             ),
           ),
+          const SizedBox(height: 10),
+          _ShapeRuleChip(question: question),
           const SizedBox(height: 18),
           Container(
             width: double.infinity,
@@ -580,8 +699,10 @@ class _ShapePromptCard extends StatelessWidget {
                   },
                   child: _ShapePreview(
                     shapeId: target.id,
-                    color: target.color,
+                    color: question.targetVisual.color,
                     size: 130,
+                    rotation: question.targetVisual.rotation,
+                    scale: question.targetVisual.scale,
                   ),
                 ),
                 if (!hideName) ...[
@@ -619,15 +740,74 @@ class _ShapePromptCard extends StatelessWidget {
   }
 }
 
+class _ShapeRuleChip extends StatelessWidget {
+  const _ShapeRuleChip({required this.question});
+
+  final ShapeQuestion question;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (question.variant) {
+      ShapeQuestionVariant.classic => switch (
+            Localizations.localeOf(context).languageCode) {
+          'zh' => '看形状',
+          'ko' => '모양 보기',
+          _ => 'Match shape',
+        },
+      ShapeQuestionVariant.colorNoise => switch (
+            Localizations.localeOf(context).languageCode) {
+          'zh' => '颜色会变，只看形状',
+          'ko' => '색은 달라도 모양을 봐요',
+          _ => 'Ignore colors',
+        },
+      ShapeQuestionVariant.sizeNoise => switch (
+            Localizations.localeOf(context).languageCode) {
+          'zh' => '大小会变，只看形状',
+          'ko' => '크기는 달라도 모양을 봐요',
+          _ => 'Ignore size',
+        },
+      ShapeQuestionVariant.rotateNoise => switch (
+            Localizations.localeOf(context).languageCode) {
+          'zh' => '方向会变，只看形状',
+          'ko' => '방향은 달라도 모양을 봐요',
+          _ => 'Ignore rotation',
+        },
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFFFFD46B),
+          width: 2,
+        ),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w900,
+          color: Color(0xFF805600),
+        ),
+      ),
+    );
+  }
+}
+
 class _ShapeOptionTile extends StatelessWidget {
   const _ShapeOptionTile({
     required this.option,
+    required this.visual,
+    required this.showName,
     required this.correct,
     required this.wrong,
     required this.onTap,
   });
 
   final ShapeChoice option;
+  final ShapeVisual visual;
+  final bool showName;
   final bool correct;
   final bool wrong;
   final VoidCallback onTap;
@@ -654,7 +834,7 @@ class _ShapeOptionTile extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               color: correct
-                  ? option.color
+                  ? visual.color
                   : wrong
                       ? const Color(0xFFFFD9D9)
                       : Colors.white,
@@ -664,7 +844,7 @@ class _ShapeOptionTile extends StatelessWidget {
                     ? const Color(0xFFFFD700)
                     : wrong
                         ? const Color(0xFFF44336)
-                        : option.color.withValues(alpha: 0.62),
+                        : visual.color.withValues(alpha: 0.62),
                 width: correct || wrong ? 5 : 4,
               ),
               boxShadow: [
@@ -695,18 +875,22 @@ class _ShapeOptionTile extends StatelessWidget {
                   children: [
                     _ShapePreview(
                       shapeId: option.id,
-                      color: correct ? Colors.white : option.color,
+                      color: correct ? Colors.white : visual.color,
                       size: 58,
+                      rotation: visual.rotation,
+                      scale: visual.scale,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      option.label(context),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: correct ? Colors.white : option.color,
+                    if (showName) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        option.label(context),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: correct ? Colors.white : visual.color,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 AnimatedOpacity(
@@ -747,26 +931,28 @@ class _ShapePreview extends StatelessWidget {
     required this.shapeId,
     required this.color,
     required this.size,
+    this.rotation = 0,
+    this.scale = 1,
   });
 
   final String shapeId;
   final Color color;
   final double size;
+  final double rotation;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
     final box = BoxConstraints.tight(Size.square(size));
 
-    switch (shapeId) {
-      case 'circle':
-        return ConstrainedBox(
+    final Widget shape = switch (shapeId) {
+      'circle' => ConstrainedBox(
           constraints: box,
           child: DecoratedBox(
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        );
-      case 'square':
-        return ConstrainedBox(
+        ),
+      'square' => ConstrainedBox(
           constraints: box,
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -774,18 +960,14 @@ class _ShapePreview extends StatelessWidget {
               borderRadius: BorderRadius.circular(size * 0.18),
             ),
           ),
-        );
-      case 'triangle':
-        return CustomPaint(
-            size: Size.square(size), painter: _TrianglePainter(color));
-      case 'star':
-        return CustomPaint(
-            size: Size.square(size), painter: _StarPainter(color));
-      case 'heart':
-        return CustomPaint(
-            size: Size.square(size), painter: _HeartPainter(color));
-      case 'diamond':
-        return Transform.rotate(
+        ),
+      'triangle' =>
+        CustomPaint(size: Size.square(size), painter: _TrianglePainter(color)),
+      'star' =>
+        CustomPaint(size: Size.square(size), painter: _StarPainter(color)),
+      'heart' =>
+        CustomPaint(size: Size.square(size), painter: _HeartPainter(color)),
+      'diamond' => Transform.rotate(
           angle: pi / 4,
           child: ConstrainedBox(
             constraints: BoxConstraints.tight(Size.square(size * 0.72)),
@@ -796,16 +978,14 @@ class _ShapePreview extends StatelessWidget {
               ),
             ),
           ),
-        );
-      case 'oval':
-        return ConstrainedBox(
+        ),
+      'oval' => ConstrainedBox(
           constraints: BoxConstraints.tight(Size(size, size * 0.68)),
           child: DecoratedBox(
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        );
-      case 'rectangle':
-        return ConstrainedBox(
+        ),
+      'rectangle' => ConstrainedBox(
           constraints: BoxConstraints.tight(Size(size, size * 0.64)),
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -813,25 +993,29 @@ class _ShapePreview extends StatelessWidget {
               borderRadius: BorderRadius.circular(size * 0.16),
             ),
           ),
-        );
-      case 'semicircle':
-        return CustomPaint(
+        ),
+      'semicircle' => CustomPaint(
           size: Size(size, size * 0.66),
           painter: _SemicirclePainter(color),
-        );
-      case 'hexagon':
-        return CustomPaint(
+        ),
+      'hexagon' => CustomPaint(
           size: Size.square(size),
           painter: _PolygonPainter(color, sides: 6),
-        );
-      case 'moon':
-        return CustomPaint(
+        ),
+      'moon' => CustomPaint(
           size: Size.square(size),
           painter: _CrescentPainter(color),
-        );
-      default:
-        return const SizedBox.shrink();
-    }
+        ),
+      _ => const SizedBox.shrink(),
+    };
+
+    return Transform.rotate(
+      angle: rotation,
+      child: Transform.scale(
+        scale: scale,
+        child: Center(child: shape),
+      ),
+    );
   }
 }
 

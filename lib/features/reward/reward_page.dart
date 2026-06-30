@@ -9,10 +9,12 @@ import '../../app/route_args.dart';
 import '../../app/router.dart';
 import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
+import '../../core/growth_models.dart';
 import '../../core/progress_insights.dart';
 import '../../core/sound/game_sound_controller.dart';
 import '../../core/widgets/figma_game_icons.dart';
 import '../../core/widgets/figma_home_icons.dart';
+import '../../core/widgets/kid_growth_sheets.dart';
 import '../../core/widgets/figma_playground_background.dart';
 import '../../core/widgets/kid_badges.dart';
 import '../../core/widgets/kid_motion.dart';
@@ -70,7 +72,7 @@ class _RewardPageState extends ConsumerState<RewardPage>
     _encouragement =
         '${widget.args.gameId.index}${widget.args.difficulty.index}${Random().nextInt(999)}';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) {
         return;
       }
@@ -84,6 +86,8 @@ class _RewardPageState extends ConsumerState<RewardPage>
         unlockedGames: progressController.unlockedGames,
         gameStats: parentDataController.gameStats,
         activityLog: parentDataController.activityLog,
+        dailyTasks: parentDataController.dailyTasks,
+        collectedMascotCount: parentDataController.collectedMascotCount,
       );
 
       final newlyUnlockedGame = progressController.completeGame(
@@ -91,11 +95,23 @@ class _RewardPageState extends ConsumerState<RewardPage>
         earnedStars: widget.args.earnedStars,
       );
 
-      parentDataController.recordGameCompletion(
+      await parentDataController.recordGameCompletion(
         gameId: widget.args.gameId,
         stars: widget.args.earnedStars,
         totalRounds: widget.args.totalRounds,
         difficulty: widget.args.difficulty,
+      );
+
+      final taskResult =
+          await parentDataController.checkDailyTasksForCompletion(
+        gameId: widget.args.gameId,
+        stars: widget.args.earnedStars,
+        totalRounds: widget.args.totalRounds,
+        difficulty: widget.args.difficulty,
+      );
+
+      final collectedMascots = await parentDataController.collectMascots(
+        _mascotsForCompletedGame(widget.args.gameId),
       );
 
       if (!mounted) {
@@ -107,6 +123,8 @@ class _RewardPageState extends ConsumerState<RewardPage>
         unlockedGames: progressController.unlockedGames,
         gameStats: parentDataController.gameStats,
         activityLog: parentDataController.activityLog,
+        dailyTasks: parentDataController.dailyTasks,
+        collectedMascotCount: parentDataController.collectedMascotCount,
       );
       final newlyUnlockedBadges =
           currentBadges.difference(previousBadges).toList();
@@ -134,6 +152,40 @@ class _RewardPageState extends ConsumerState<RewardPage>
           },
         );
         _toastTimers.add(timer);
+      }
+
+      var taskDelay = 2600 + newlyUnlockedBadges.length * 800;
+      for (final task in taskResult.newlyCompleted) {
+        final timer = Timer(Duration(milliseconds: taskDelay), () {
+          if (!mounted) {
+            return;
+          }
+          _enqueueToast(_RewardToastItem.dailyTask(task: task));
+        });
+        _toastTimers.add(timer);
+        taskDelay += 700;
+      }
+
+      if (taskResult.allDoneFirstTime) {
+        final timer = Timer(Duration(milliseconds: taskDelay), () {
+          if (!mounted) {
+            return;
+          }
+          _enqueueToast(_RewardToastItem.dailyAllDone());
+        });
+        _toastTimers.add(timer);
+        taskDelay += 700;
+      }
+
+      for (final mascotId in collectedMascots) {
+        final timer = Timer(Duration(milliseconds: taskDelay), () {
+          if (!mounted) {
+            return;
+          }
+          _enqueueToast(_RewardToastItem.collection(mascotId: mascotId));
+        });
+        _toastTimers.add(timer);
+        taskDelay += 650;
       }
     });
   }
@@ -522,6 +574,9 @@ class _RewardToastItem {
     required this.id,
     this.gameId,
     this.badgeId,
+    this.dailyTask,
+    this.dailyAllDone = false,
+    this.mascotId,
   });
 
   factory _RewardToastItem.unlock({required GameId gameId}) {
@@ -538,9 +593,33 @@ class _RewardToastItem {
     );
   }
 
+  factory _RewardToastItem.dailyTask({required DailyTask task}) {
+    return _RewardToastItem._(
+      id: 'daily-${task.id}-${DateTime.now().microsecondsSinceEpoch}',
+      dailyTask: task,
+    );
+  }
+
+  factory _RewardToastItem.dailyAllDone() {
+    return _RewardToastItem._(
+      id: 'daily-all-done-${DateTime.now().microsecondsSinceEpoch}',
+      dailyAllDone: true,
+    );
+  }
+
+  factory _RewardToastItem.collection({required MascotId mascotId}) {
+    return _RewardToastItem._(
+      id: 'collection-${mascotId.name}-${DateTime.now().microsecondsSinceEpoch}',
+      mascotId: mascotId,
+    );
+  }
+
   final String id;
   final GameId? gameId;
   final KidAchievementId? badgeId;
+  final DailyTask? dailyTask;
+  final bool dailyAllDone;
+  final MascotId? mascotId;
 }
 
 class _RewardHeroSection extends StatelessWidget {
@@ -1134,6 +1213,8 @@ class _RewardToastCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final unlockGameId = item.gameId;
     final badgeId = item.badgeId;
+    final dailyTask = item.dailyTask;
+    final mascotId = item.mascotId;
     late final Gradient gradient;
     late final Color borderColor;
     late final String title;
@@ -1151,6 +1232,60 @@ class _RewardToastCard extends StatelessWidget {
       title = '新游戏解锁啦！';
       subtitle = unlockGameId.title(context.l10n);
       icon = const FigmaSparkleStarIcon(size: 26);
+    } else if (dailyTask != null) {
+      gradient = const LinearGradient(
+        colors: [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
+      );
+      borderColor = const Color(0xFF2E7D32);
+      title = _rewardToastText(
+        context,
+        zh: '任务完成！',
+        en: 'Task complete!',
+        ko: '미션 완료!',
+      );
+      subtitle = dailyTaskDescription(dailyTask, context.l10n);
+      icon = const Icon(
+        Icons.check_circle_rounded,
+        size: 26,
+        color: Color(0xFF2E7D32),
+      );
+    } else if (item.dailyAllDone) {
+      gradient = const LinearGradient(
+        colors: [Color(0xFFF1F8E9), Color(0xFFC8E6C9)],
+      );
+      borderColor = const Color(0xFF33691E);
+      title = _rewardToastText(
+        context,
+        zh: '今日任务全清！',
+        en: 'Daily tasks done!',
+        ko: '오늘 미션 완료!',
+      );
+      subtitle = _rewardToastText(
+        context,
+        zh: '今天真的超棒！',
+        en: 'Amazing work today!',
+        ko: '오늘 정말 멋져요!',
+      );
+      icon = const FigmaSparkleStarIcon(size: 26);
+    } else if (mascotId != null) {
+      final info = mascotInfoById(mascotId);
+      gradient = LinearGradient(
+        colors: [
+          info.background,
+          info.background.withValues(alpha: 0.88),
+        ],
+      );
+      borderColor = info.color;
+      title = _rewardToastText(
+        context,
+        zh: '图鉴收集！',
+        en: 'New animal!',
+        ko: '새 동물 수집!',
+      );
+      subtitle = Localizations.localeOf(context).languageCode == 'zh'
+          ? info.nameZh
+          : info.nameEn;
+      icon = KidMascotIcon(mascotId: mascotId, size: 26);
     } else {
       final achievement = achievementById(badgeId!);
       gradient = LinearGradient(
@@ -1486,4 +1621,37 @@ Path _drawStarParticle(double size) {
 
   path.close();
   return path;
+}
+
+List<MascotId> _mascotsForCompletedGame(GameId gameId) {
+  switch (gameId) {
+    case GameId.findDifferent:
+      return const [MascotId.lion, MascotId.fox];
+    case GameId.memoryCard:
+      return const [MascotId.bear, MascotId.panda];
+    case GameId.whackMole:
+      return const [MascotId.chick, MascotId.frog];
+    case GameId.animalSound:
+      return const [MascotId.chick, MascotId.frog];
+    case GameId.simplePuzzle:
+      return const [MascotId.frog];
+    case GameId.numberGame:
+      return const [MascotId.bear, MascotId.lion];
+    case GameId.colorMatch:
+    case GameId.shapeMatch:
+      return const [];
+  }
+}
+
+String _rewardToastText(
+  BuildContext context, {
+  required String zh,
+  required String en,
+  required String ko,
+}) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => zh,
+    'ko' => ko,
+    _ => en,
+  };
 }

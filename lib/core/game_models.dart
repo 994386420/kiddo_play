@@ -45,8 +45,8 @@ const orderedGameIds = <GameId>[
   GameId.animalSound,
   GameId.simplePuzzle,
   GameId.findDifferent,
-  GameId.whackMole,
   GameId.memoryCard,
+  GameId.whackMole,
 ];
 
 extension GameDifficultyX on GameDifficulty {

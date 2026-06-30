@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'game_models.dart';
+import 'growth_models.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('SharedPreferences must be overridden.'),
@@ -254,7 +255,9 @@ class ParentDataController extends ChangeNotifier {
         _dailyTimeLimitMinutes =
             _preferences.getInt(_dailyTimeLimitMinutesKey) ?? 0,
         _gameStats = _readGameStats(_preferences),
-        _activityLog = _readActivityLog(_preferences) {
+        _activityLog = _readActivityLog(_preferences),
+        _dailyTasks = _readDailyTasks(_preferences),
+        _collection = _readCollection(_preferences) {
     _mergeDifficultyProgressFromActivityLog();
   }
 
@@ -269,6 +272,8 @@ class ParentDataController extends ChangeNotifier {
   static const _dailyTimeLimitMinutesKey = 'kidapp_daily_time_limit_minutes';
   static const _gameStatsKey = 'kidapp_game_stats';
   static const _activityLogKey = 'kidapp_activity_log';
+  static const _dailyTasksKey = 'kidapp_daily_tasks';
+  static const _collectionKey = 'kidapp_collection';
 
   final SharedPreferences _preferences;
 
@@ -280,6 +285,8 @@ class ParentDataController extends ChangeNotifier {
   int _dailyTimeLimitMinutes;
   Map<GameId, ParentGameStats> _gameStats;
   List<ActivityEntry> _activityLog;
+  DailyTasksState _dailyTasks;
+  Map<MascotId, DateTime> _collection;
 
   String get childName => _childName;
   String get childAvatar => _childAvatar;
@@ -294,6 +301,16 @@ class ParentDataController extends ChangeNotifier {
 
   UnmodifiableListView<ActivityEntry> get activityLog =>
       UnmodifiableListView(_activityLog);
+
+  DailyTasksState get dailyTasks {
+    _ensureDailyTasksCurrent();
+    return _dailyTasks;
+  }
+
+  UnmodifiableMapView<MascotId, DateTime> get collection =>
+      UnmodifiableMapView(_collection);
+
+  int get collectedMascotCount => _collection.length;
 
   int get totalPlayed =>
       _gameStats.values.fold(0, (sum, stats) => sum + stats.played);
@@ -393,11 +410,88 @@ class ParentDataController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<DailyTaskResult> checkDailyTasksForCompletion({
+    required GameId gameId,
+    required int stars,
+    required int totalRounds,
+    required GameDifficulty difficulty,
+  }) async {
+    _ensureDailyTasksCurrent();
+    final nextGamesPlayedToday = _dailyTasks.gamesPlayedToday + 1;
+    final newlyCompleted = <DailyTask>[];
+    final updatedTasks = _dailyTasks.tasks.map((task) {
+      if (task.completed) {
+        return task;
+      }
+
+      final completed = switch (task.kind) {
+        DailyTaskKind.playAny => true,
+        DailyTaskKind.playGame => task.gameId == gameId,
+        DailyTaskKind.stars3 => stars >= 3 || stars == totalRounds,
+        DailyTaskKind.playHard => difficulty == GameDifficulty.hard,
+        DailyTaskKind.playEasy => difficulty == GameDifficulty.easy,
+        DailyTaskKind.playTwoGames => nextGamesPlayedToday >= 2,
+      };
+
+      if (!completed) {
+        return task;
+      }
+
+      final updated = task.copyWith(completed: true);
+      newlyCompleted.add(updated);
+      return updated;
+    }).toList();
+
+    final allDone = updatedTasks.every((task) => task.completed);
+    final allDoneFirstTime = allDone && !_dailyTasks.allCompletedRewarded;
+    _dailyTasks = _dailyTasks.copyWith(
+      tasks: updatedTasks,
+      gamesPlayedToday: nextGamesPlayedToday,
+      allCompletedRewarded:
+          _dailyTasks.allCompletedRewarded || allDoneFirstTime,
+    );
+
+    await _saveDailyTasks();
+    notifyListeners();
+    return DailyTaskResult(
+      newlyCompleted: newlyCompleted,
+      allDoneFirstTime: allDoneFirstTime,
+    );
+  }
+
+  Future<List<MascotId>> collectMascots(Iterable<MascotId> mascotIds) async {
+    final newlyCollected = <MascotId>[];
+    final now = DateTime.now();
+
+    for (final mascotId in mascotIds) {
+      if (_collection.containsKey(mascotId)) {
+        continue;
+      }
+      _collection = {
+        ..._collection,
+        mascotId: now,
+      };
+      newlyCollected.add(mascotId);
+    }
+
+    if (newlyCollected.isEmpty) {
+      return newlyCollected;
+    }
+
+    await _saveCollection();
+    notifyListeners();
+    return newlyCollected;
+  }
+
   Future<void> resetLearningData() async {
     _gameStats = {};
     _activityLog = [];
+    _dailyTasks = _freshDailyTasks();
+    _collection = {};
     await _preferences.remove(_gameStatsKey);
     await _preferences.remove(_activityLogKey);
+    await _preferences.remove(_dailyTasksKey);
+    await _preferences.remove(_collectionKey);
     notifyListeners();
   }
 
@@ -454,6 +548,23 @@ class ParentDataController extends ChangeNotifier {
     await _preferences.setString(_activityLogKey, jsonString);
   }
 
+  Future<void> _saveDailyTasks() async {
+    await _preferences.setString(
+      _dailyTasksKey,
+      jsonEncode(_dailyTasks.toJson()),
+    );
+  }
+
+  Future<void> _saveCollection() async {
+    await _preferences.setString(
+      _collectionKey,
+      jsonEncode({
+        for (final entry in _collection.entries)
+          entry.key.name: entry.value.toIso8601String(),
+      }),
+    );
+  }
+
   static Map<GameId, ParentGameStats> _readGameStats(
     SharedPreferences preferences,
   ) {
@@ -494,6 +605,62 @@ class ParentDataController extends ChangeNotifier {
     } catch (_) {
       return const [];
     }
+  }
+
+  static DailyTasksState _readDailyTasks(SharedPreferences preferences) {
+    final raw = preferences.getString(_dailyTasksKey);
+    if (raw == null || raw.isEmpty) {
+      return _freshDailyTasks();
+    }
+
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final state = DailyTasksState.fromJson(decoded);
+      if (state.dateKey == todayKey() && state.tasks.isNotEmpty) {
+        return state;
+      }
+    } catch (_) {}
+
+    return _freshDailyTasks();
+  }
+
+  static Map<MascotId, DateTime> _readCollection(
+    SharedPreferences preferences,
+  ) {
+    final raw = preferences.getString(_collectionKey);
+    if (raw == null || raw.isEmpty) {
+      return {};
+    }
+
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      return {
+        for (final entry in decoded.entries)
+          if (mascotIdFromStorage(entry.key) != null)
+            mascotIdFromStorage(entry.key)!:
+                DateTime.tryParse(entry.value as String? ?? '') ??
+                    DateTime.now(),
+      };
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static DailyTasksState _freshDailyTasks() {
+    final dateKey = todayKey();
+    return DailyTasksState(
+      dateKey: dateKey,
+      tasks: generateDailyTasks(dateKey: dateKey),
+      gamesPlayedToday: 0,
+      allCompletedRewarded: false,
+    );
+  }
+
+  void _ensureDailyTasksCurrent() {
+    if (_dailyTasks.dateKey == todayKey() && _dailyTasks.tasks.isNotEmpty) {
+      return;
+    }
+    _dailyTasks = _freshDailyTasks();
   }
 
   void _mergeDifficultyProgressFromActivityLog() {

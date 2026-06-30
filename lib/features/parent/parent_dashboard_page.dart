@@ -8,8 +8,10 @@ import '../../app/route_args.dart';
 import '../../app/router.dart';
 import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
+import '../../core/growth_models.dart';
 import '../../core/progress_insights.dart';
 import '../../core/widgets/kid_badges.dart';
+import '../../core/widgets/kid_growth_sheets.dart';
 import '../../core/widgets/kid_motion.dart';
 
 enum _ParentTab { overview, progress, settings }
@@ -48,6 +50,8 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
       unlockedGames: progress.unlockedGames,
       gameStats: parentData.gameStats,
       activityLog: parentData.activityLog,
+      dailyTasks: parentData.dailyTasks,
+      collectedMascotCount: parentData.collectedMascotCount,
     );
 
     showModalBottomSheet<void>(
@@ -224,6 +228,8 @@ class _OverviewTab extends ConsumerWidget {
       unlockedGames: progress.unlockedGames,
       gameStats: parentData.gameStats,
       activityLog: parentData.activityLog,
+      dailyTasks: parentData.dailyTasks,
+      collectedMascotCount: parentData.collectedMascotCount,
     );
 
     final statsCards = [
@@ -418,6 +424,44 @@ class _OverviewTab extends ConsumerWidget {
               ),
             );
           },
+        ),
+        const SizedBox(height: 18),
+        Row(
+          children: [
+            Expanded(
+              child: _GrowthSummaryCard(
+                icon: '📋',
+                title: _text(
+                  context,
+                  zh: '今日任务',
+                  en: 'Daily Tasks',
+                  ko: '오늘의 미션',
+                ),
+                value:
+                    '${parentData.dailyTasks.completedCount}/${parentData.dailyTasks.tasks.length}',
+                background: const Color(0xFFFFF8DC),
+                color: const Color(0xFFB45309),
+                onTap: () => _showDailyTasksSheet(context, parentData),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _GrowthSummaryCard(
+                icon: '📖',
+                title: _text(
+                  context,
+                  zh: '动物图鉴',
+                  en: 'Animal Album',
+                  ko: '동물 도감',
+                ),
+                value:
+                    '${parentData.collectedMascotCount}/${mascotInfos.length}',
+                background: const Color(0xFFF3E5F5),
+                color: const Color(0xFF7B1FA2),
+                onTap: () => _showCollectionSheet(context, parentData),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 18),
         KidDelayedReveal(
@@ -1371,6 +1415,76 @@ class _ActivityCard extends StatelessWidget {
   }
 }
 
+class _GrowthSummaryCard extends StatelessWidget {
+  const _GrowthSummaryCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.background,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String icon;
+  final String title;
+  final String value;
+  final Color background;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: color.withValues(alpha: 0.28), width: 2),
+          ),
+          child: Row(
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: color.withValues(alpha: 0.78),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: color, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ProgressCard extends StatelessWidget {
   const _ProgressCard({
     required this.gameId,
@@ -1931,6 +2045,32 @@ String _text(
     'ko' => ko,
     _ => en,
   };
+}
+
+void _showDailyTasksSheet(
+  BuildContext context,
+  ParentDataController parentData,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.5),
+    builder: (_) => KidDailyTasksSheet(dailyTasks: parentData.dailyTasks),
+  );
+}
+
+void _showCollectionSheet(
+  BuildContext context,
+  ParentDataController parentData,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.5),
+    builder: (_) => KidCollectionSheet(collection: parentData.collection),
+  );
 }
 
 String _streakText(BuildContext context, int days) {

@@ -15,6 +15,8 @@ import '../../../core/widgets/floating_sound_toggle.dart';
 import '../../../core/widgets/figma_game_icons.dart';
 import '../../../core/widgets/figma_game_shell.dart';
 import '../../../core/widgets/figma_home_icons.dart';
+import '../../../core/widgets/kid_motion.dart';
+import '../../../core/widgets/level_complete_overlay.dart';
 import '../../../core/widgets/pause_dialog.dart';
 
 const _memoryCardPalette = FigmaGamePalette(
@@ -62,6 +64,16 @@ class MemoryCardEntry {
 
 enum MemoryCardFeedbackState { idle, correct, wrong }
 
+class MemoryLevelDef {
+  const MemoryLevelDef({
+    required this.pairs,
+    required this.cols,
+  });
+
+  final int pairs;
+  final int cols;
+}
+
 const _memoryCardFaces = <MemoryCardFace>[
   MemoryCardFace(
     id: 'star',
@@ -103,46 +115,63 @@ const _memoryCardFaces = <MemoryCardFace>[
 
 class MemoryCardViewModel extends ChangeNotifier {
   MemoryCardViewModel(this.args) {
-    _setupDeck();
+    _setupLevel();
   }
-
-  static const _pairGoal = 6;
 
   final GameRouteArgs args;
   final math.Random _random = math.Random();
-  Timer? _previewTimer;
   Timer? _resolveTimer;
 
   List<MemoryCardEntry> cards = const [];
   List<int> revealedIndices = const [];
   Set<int> matchedIndices = const {};
-  bool previewing = false;
   bool locked = false;
-  int stars = 0;
-  int flips = 0;
+  bool showLevelComplete = false;
+  int levelIndex = 0;
+  int attempts = 0;
   int matchedPairs = 0;
+  int totalAttempts = 0;
+  int totalPairs = 0;
+  int starsEarned = 0;
+  List<int> shakingCards = const [];
   MemoryCardFeedbackState feedbackState = MemoryCardFeedbackState.idle;
   RewardRouteArgs? pendingRewardArgs;
 
-  int get pairGoal => _pairGoal;
+  List<MemoryLevelDef> get levels => switch (args.difficulty) {
+        GameDifficulty.easy => const [
+            MemoryLevelDef(pairs: 2, cols: 2),
+            MemoryLevelDef(pairs: 3, cols: 3),
+          ],
+        GameDifficulty.medium => const [
+            MemoryLevelDef(pairs: 4, cols: 4),
+            MemoryLevelDef(pairs: 6, cols: 4),
+          ],
+        GameDifficulty.hard => const [
+            MemoryLevelDef(pairs: 4, cols: 4),
+            MemoryLevelDef(pairs: 6, cols: 4),
+            MemoryLevelDef(pairs: 8, cols: 4),
+          ],
+      };
+
+  MemoryLevelDef get currentLevel => levels[levelIndex];
+  int get pairGoal => currentLevel.pairs;
+  int get totalLevels => levels.length;
+  int get totalRoundStars => levels.fold(0, (sum, level) => sum + level.pairs);
 
   Set<int> get visibleIndices => {
         ...matchedIndices,
         ...revealedIndices,
-        if (previewing)
-          for (var index = 0; index < cards.length; index++) index,
       };
 
   void tapCard(int index) {
-    if (previewing ||
-        locked ||
+    if (locked ||
+        showLevelComplete ||
         pendingRewardArgs != null ||
         matchedIndices.contains(index) ||
         revealedIndices.contains(index)) {
       return;
     }
 
-    flips += 1;
     revealedIndices = [...revealedIndices, index];
     notifyListeners();
 
@@ -150,6 +179,7 @@ class MemoryCardViewModel extends ChangeNotifier {
       return;
     }
 
+    attempts += 1;
     locked = true;
     final left = cards[revealedIndices[0]];
     final right = cards[revealedIndices[1]];
@@ -160,75 +190,117 @@ class MemoryCardViewModel extends ChangeNotifier {
     notifyListeners();
 
     _resolveTimer?.cancel();
-    _resolveTimer = Timer(
-      Duration(milliseconds: isMatch ? 520 : 760),
-      () {
-        if (isMatch) {
-          matchedIndices = {...matchedIndices, ...revealedIndices};
-          matchedPairs += 1;
-          stars += 1;
-          if (matchedPairs >= pairGoal) {
-            pendingRewardArgs = RewardRouteArgs(
-              gameId: args.gameId,
-              difficulty: args.difficulty,
-              earnedStars: stars,
-              totalRounds: pairGoal,
-            );
-          }
+    if (isMatch) {
+      _resolveTimer = Timer(const Duration(milliseconds: 600), () {
+        matchedIndices = {...matchedIndices, ...revealedIndices};
+        matchedPairs += 1;
+
+        if (matchedPairs >= pairGoal) {
+          _completeLevel();
         }
 
         revealedIndices = const [];
         feedbackState = MemoryCardFeedbackState.idle;
         locked = false;
         notifyListeners();
+      });
+      return;
+    }
+
+    if (args.difficulty == GameDifficulty.hard) {
+      shakingCards = revealedIndices;
+      _resolveTimer = Timer(const Duration(milliseconds: 500), () {
+        shakingCards = const [];
+        notifyListeners();
+      });
+    }
+
+    _resolveTimer = Timer(
+      Duration(
+          milliseconds: args.difficulty == GameDifficulty.hard ? 1300 : 1100),
+      () {
+        revealedIndices = const [];
+        feedbackState = MemoryCardFeedbackState.idle;
+        locked = false;
+        shakingCards = const [];
+        notifyListeners();
       },
     );
   }
 
   void reset() {
-    _previewTimer?.cancel();
     _resolveTimer?.cancel();
-    _setupDeck();
+    levelIndex = 0;
+    totalAttempts = 0;
+    totalPairs = 0;
+    starsEarned = 0;
+    showLevelComplete = false;
+    _setupLevel();
     notifyListeners();
   }
 
-  void _setupDeck() {
-    stars = 0;
-    flips = 0;
+  void continueLevel() {
+    if (!showLevelComplete) {
+      return;
+    }
+    showLevelComplete = false;
+    levelIndex += 1;
+    _setupLevel();
+    notifyListeners();
+  }
+
+  void _completeLevel() {
+    final levelAttempts = attempts;
+    final levelStars = math.max(
+      1,
+      math.min(pairGoal, pairGoal - (levelAttempts - pairGoal)),
+    );
+    totalAttempts += levelAttempts;
+    totalPairs += pairGoal;
+    starsEarned += levelStars;
+
+    if (levelIndex + 1 >= levels.length) {
+      final finalStars = math.max(
+        1,
+        math.min(3, 3 - ((totalAttempts - totalPairs) ~/ 3)),
+      );
+      _resolveTimer = Timer(const Duration(milliseconds: 900), () {
+        pendingRewardArgs = RewardRouteArgs(
+          gameId: args.gameId,
+          difficulty: args.difficulty,
+          earnedStars: finalStars,
+          totalRounds: 3,
+        );
+        notifyListeners();
+      });
+    } else {
+      showLevelComplete = true;
+    }
+  }
+
+  void _setupLevel() {
+    attempts = 0;
     matchedPairs = 0;
     feedbackState = MemoryCardFeedbackState.idle;
     pendingRewardArgs = null;
     matchedIndices = const {};
     revealedIndices = const [];
+    shakingCards = const [];
     locked = false;
 
     final deck = <MemoryCardEntry>[];
     var instanceId = 0;
-    for (final face in _memoryCardFaces) {
+    final faces = [..._memoryCardFaces]..shuffle(_random);
+    for (final face in faces.take(pairGoal)) {
       deck.add(MemoryCardEntry(instanceId: instanceId++, face: face));
       deck.add(MemoryCardEntry(instanceId: instanceId++, face: face));
     }
     deck.shuffle(_random);
     cards = deck;
-
-    previewing = args.difficulty != GameDifficulty.hard;
-    if (previewing) {
-      _previewTimer = Timer(_previewDuration, () {
-        previewing = false;
-        notifyListeners();
-      });
-    }
   }
-
-  Duration get _previewDuration => switch (args.difficulty) {
-        GameDifficulty.easy => const Duration(milliseconds: 2200),
-        GameDifficulty.medium => const Duration(milliseconds: 1400),
-        GameDifficulty.hard => Duration.zero,
-      };
 
   @override
   void dispose() {
-    _previewTimer?.cancel();
     _resolveTimer?.cancel();
     super.dispose();
   }
@@ -260,7 +332,7 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
     _questionVoiceSubscription = ref.listenManual<String>(
       memoryCardViewModelProvider(args).select(
         (viewModel) =>
-            '${viewModel.previewing}-${viewModel.matchedPairs}-${viewModel.revealedIndices.length}',
+            '${viewModel.levelIndex}-${viewModel.matchedPairs}-${viewModel.revealedIndices.length}',
       ),
       (_, __) {
         if (!mounted || _isPaused) {
@@ -367,6 +439,11 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
 
     final l10n = context.l10n;
     final viewModel = ref.watch(memoryCardViewModelProvider(args));
+    final cardSize = switch (viewModel.currentLevel.cols) {
+      2 => 112.0,
+      3 => 96.0,
+      _ => 74.0,
+    };
 
     return PopScope<void>(
       canPop: false,
@@ -384,18 +461,14 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
       child: FigmaGameScaffold(
         palette: _memoryCardPalette,
         roundLabel:
-            '${viewModel.matchedPairs} / ${viewModel.pairGoal} ${l10n.memoryCardPairsLabel}',
+            '第${viewModel.levelIndex + 1}关 · ${viewModel.matchedPairs}/${viewModel.pairGoal}对',
         difficulty: args.difficulty,
-        stars: viewModel.stars,
+        stars: viewModel.starsEarned,
         progress: viewModel.matchedPairs / viewModel.pairGoal,
         onPause: _openPause,
         backgroundColor: const Color(0xFFFFF8FC),
         showDots: true,
         pauseIcon: const FigmaPauseIcon(size: 18, color: Color(0xFFE84AA5)),
-        floatingAction: const FloatingSoundToggle(
-          accentColor: Color(0xFFF7A5D6),
-          borderColor: Color(0xFFE84AA5),
-        ),
         pauseDialog: PauseDialog(
           isOpen: _isPaused,
           gameName: args.gameId.title(l10n),
@@ -404,75 +477,38 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
           onRestart: _restartGame,
           onQuit: () => _handleBack(context),
         ),
+        floatingAction: Stack(
+          children: [
+            const FloatingSoundToggle(
+              accentColor: Color(0xFFF7A5D6),
+              borderColor: Color(0xFFE84AA5),
+            ),
+            if (viewModel.showLevelComplete)
+              LevelCompleteOverlay(
+                level: viewModel.levelIndex + 1,
+                totalLevels: viewModel.totalLevels,
+                stars: viewModel.starsEarned,
+                totalRounds: viewModel.totalRoundStars,
+                accentColor: const Color(0xFFC2185B),
+                borderColor: const Color(0xFF880E4F),
+                onContinue: () {
+                  ref.read(memoryCardViewModelProvider(args)).continueLevel();
+                },
+              ),
+          ],
+        ),
         body: Column(
           children: [
-            FigmaGamePanel(
-              palette: _memoryCardPalette,
-              radius: 30,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-              child: Column(
-                children: [
-                  Text(
-                    l10n.memoryCardPrompt,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF8E3A68),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FigmaGameInfoPill(
-                          palette: _memoryCardPalette,
-                          label:
-                              '${viewModel.matchedPairs} / ${viewModel.pairGoal} ${l10n.memoryCardPairsLabel}',
-                          textColor: const Color(0xFFBE185D),
-                          borderColor: const Color(0xFFF7A5D6),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FigmaGameInfoPill(
-                          palette: _memoryCardPalette,
-                          label:
-                              '${l10n.memoryCardFlipsLabel} ${viewModel.flips}',
-                          textColor: const Color(0xFF9D174D),
-                          borderColor: const Color(0xFFF7A5D6),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  FigmaGameFeedbackBanner(
-                    visible: viewModel.previewing ||
-                        viewModel.feedbackState != MemoryCardFeedbackState.idle,
-                    text: viewModel.previewing
-                        ? l10n.memoryCardPreviewHint
-                        : viewModel.feedbackState ==
-                                MemoryCardFeedbackState.correct
-                            ? l10n.feedbackCorrect
-                            : l10n.feedbackTryAgain,
-                    isPositive: viewModel.previewing ||
-                        viewModel.feedbackState ==
-                            MemoryCardFeedbackState.correct,
-                    palette: _memoryCardPalette,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
             GridView.builder(
+              key: ValueKey('level-${viewModel.levelIndex}'),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: viewModel.cards.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: viewModel.currentLevel.cols,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                mainAxisExtent: 104,
+                mainAxisExtent: cardSize,
               ),
               itemBuilder: (context, index) {
                 final card = viewModel.cards[index];
@@ -480,11 +516,27 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
                   entry: card,
                   faceUp: viewModel.visibleIndices.contains(index),
                   matched: viewModel.matchedIndices.contains(index),
+                  shaking: viewModel.shakingCards.contains(index),
+                  size: cardSize,
                   onTap: () => ref
                       .read(memoryCardViewModelProvider(args))
                       .tapCard(index),
                 );
               },
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              child: viewModel.matchedPairs == viewModel.pairGoal
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 22),
+                      child: FigmaGameFeedbackBanner(
+                        visible: true,
+                        text: '全部找到啦！',
+                        isPositive: true,
+                        palette: _memoryCardPalette,
+                      ),
+                    )
+                  : const SizedBox(height: 22),
             ),
           ],
         ),
@@ -497,21 +549,18 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
       return;
     }
 
-    final viewModel = ref.read(memoryCardViewModelProvider(args));
     await _voiceGuideController.speak(
-      _memoryCardVoicePrompt(context, previewing: viewModel.previewing),
+      _memoryCardVoicePrompt(context),
       locale: Localizations.localeOf(context),
     );
   }
 }
 
-String _memoryCardVoicePrompt(BuildContext context,
-    {required bool previewing}) {
+String _memoryCardVoicePrompt(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'zh' => previewing ? '先记住卡片位置哦。' : '翻出两张一样的卡片吧。',
-    'ko' => previewing ? '카드 위치를 먼저 기억해봐요.' : '같은 카드 두 장을 찾아봐요.',
-    _ =>
-      previewing ? 'Remember where the cards are.' : 'Find two matching cards.',
+    'zh' => '找到一样的图案，让它们配对！',
+    'ko' => '같은 그림을 찾아 짝을 맞춰봐요.',
+    _ => 'Find matching pictures and pair them.',
   };
 }
 
@@ -520,12 +569,16 @@ class _MemoryCardTile extends StatelessWidget {
     required this.entry,
     required this.faceUp,
     required this.matched,
+    required this.shaking,
+    required this.size,
     required this.onTap,
   });
 
   final MemoryCardEntry entry;
   final bool faceUp;
   final bool matched;
+  final bool shaking;
+  final double size;
   final VoidCallback onTap;
 
   @override
@@ -536,31 +589,46 @@ class _MemoryCardTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
         child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(end: faceUp ? 1 : 0),
-          duration: const Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            final showFront = value >= 0.5;
-            final angle = value * math.pi;
-            return Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateY(angle),
-              child: Transform(
-                alignment: Alignment.center,
-                transform: showFront
-                    ? (Matrix4.identity()..rotateY(math.pi))
-                    : Matrix4.identity(),
-                child: AnimatedScale(
-                  scale: matched ? 0.96 : 1,
-                  duration: const Duration(milliseconds: 220),
-                  child:
-                      showFront ? _CardFront(entry: entry) : const _CardBack(),
-                ),
-              ),
+          tween: Tween<double>(end: shaking ? 1 : 0),
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOut,
+          builder: (context, shakeValue, child) {
+            final dx = shaking ? shakeOffset(shakeValue) * 0.55 : 0.0;
+            final rotate =
+                shaking ? math.sin(shakeValue * math.pi * 8) * 0.04 : 0.0;
+            return Transform.translate(
+              offset: Offset(dx, 0),
+              child: Transform.rotate(angle: rotate, child: child),
             );
           },
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: faceUp ? 1 : 0),
+            duration: const Duration(milliseconds: 450),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              final showFront = value >= 0.5;
+              final angle = value * math.pi;
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(angle),
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: showFront
+                      ? (Matrix4.identity()..rotateY(math.pi))
+                      : Matrix4.identity(),
+                  child: AnimatedScale(
+                    scale: matched ? 0.96 : 1,
+                    duration: const Duration(milliseconds: 220),
+                    child: showFront
+                        ? _CardFront(entry: entry, size: size)
+                        : _CardBack(size: size),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -568,9 +636,13 @@ class _MemoryCardTile extends StatelessWidget {
 }
 
 class _CardFront extends StatelessWidget {
-  const _CardFront({required this.entry});
+  const _CardFront({
+    required this.entry,
+    required this.size,
+  });
 
   final MemoryCardEntry entry;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -606,7 +678,9 @@ class _CardFront extends StatelessWidget {
 }
 
 class _CardBack extends StatelessWidget {
-  const _CardBack();
+  const _CardBack({required this.size});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -644,11 +718,15 @@ class _CardBack extends StatelessWidget {
               ),
             ),
           ),
-          const Align(
+          Align(
             alignment: Alignment.center,
             child: FigmaFloatIcon(
               type: FigmaFloatIconType.heart,
-              size: 28,
+              size: size > 100
+                  ? 44
+                  : size > 90
+                      ? 36
+                      : 28,
             ),
           ),
           Positioned(

@@ -10,9 +10,11 @@ import '../../app/route_args.dart';
 import '../../app/router.dart';
 import '../../core/app_controllers.dart';
 import '../../core/game_models.dart';
+import '../../core/growth_models.dart';
 import '../../core/progress_insights.dart';
 import '../../core/widgets/figma_home_icons.dart';
 import '../../core/widgets/kid_badges.dart';
+import '../../core/widgets/kid_growth_sheets.dart';
 import '../../core/widgets/kid_motion.dart';
 
 final homeViewModelProvider = Provider<HomeViewModel>((ref) {
@@ -30,6 +32,8 @@ final homeViewModelProvider = Provider<HomeViewModel>((ref) {
     unlockedGames: progress.unlockedGames,
     gameStats: parentData.gameStats,
     activityLog: parentData.activityLog,
+    dailyTasks: parentData.dailyTasks,
+    collectedMascotCount: parentData.collectedMascotCount,
   );
 
   return HomeViewModel(
@@ -42,6 +46,9 @@ final homeViewModelProvider = Provider<HomeViewModel>((ref) {
     streak: computeCurrentStreak(parentData.activityLog),
     unlockedBadgeCount: unlockedAchievements.length,
     unlockedAchievements: unlockedAchievements,
+    dailyTasks: parentData.dailyTasks,
+    collectedMascotCount: parentData.collectedMascotCount,
+    mascotCollection: parentData.collection,
   );
 });
 
@@ -55,6 +62,9 @@ class HomeViewModel {
     required this.streak,
     required this.unlockedBadgeCount,
     required this.unlockedAchievements,
+    required this.dailyTasks,
+    required this.collectedMascotCount,
+    required this.mascotCollection,
   });
 
   final int totalStars;
@@ -65,6 +75,9 @@ class HomeViewModel {
   final int streak;
   final int unlockedBadgeCount;
   final Set<KidAchievementId> unlockedAchievements;
+  final DailyTasksState dailyTasks;
+  final int collectedMascotCount;
+  final Map<MascotId, DateTime> mascotCollection;
 }
 
 class HomePage extends ConsumerStatefulWidget {
@@ -446,206 +459,171 @@ class _HomePageState extends ConsumerState<HomePage>
                                         const SizedBox(height: 16),
                                         KidDelayedReveal(
                                           key: ValueKey(
+                                            'home-daily-$_replayEpoch',
+                                          ),
+                                          delay: _isReplaying
+                                              ? const Duration(
+                                                  milliseconds: 230,
+                                                )
+                                              : const Duration(
+                                                  milliseconds: 520,
+                                                ),
+                                          duration: const Duration(
+                                            milliseconds: 420,
+                                          ),
+                                          beginOffset: const Offset(0, 0.2),
+                                          beginScale: 1,
+                                          curve: _replayCurve,
+                                          child: _DailyTasksPill(
+                                            dailyTasks: viewModel.dailyTasks,
+                                            onTap: () => _showDailyTasksDialog(
+                                              context,
+                                              viewModel,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        KidDelayedReveal(
+                                          key: ValueKey(
                                             'home-bottom-$_replayEpoch',
                                           ),
                                           delay: _isReplaying
                                               ? const Duration(
-                                                  milliseconds: 240,
+                                                  milliseconds: 300,
                                                 )
                                               : const Duration(
-                                                  milliseconds: 550,
+                                                  milliseconds: 580,
                                                 ),
-                                          duration: _isReplaying
-                                              ? const Duration(
-                                                  milliseconds: 420,
-                                                )
-                                              : const Duration(
-                                                  milliseconds: 440,
-                                                ),
+                                          duration: const Duration(
+                                            milliseconds: 420,
+                                          ),
                                           beginOffset: const Offset(0, 0.24),
                                           beginScale: 1,
                                           curve: _replayCurve,
-                                          child: IntrinsicHeight(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.stretch,
-                                              children: [
-                                                Expanded(
-                                                  child: _PressableCard(
-                                                    radius: 24,
-                                                    gradient:
-                                                        const LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: [
-                                                        Color(0xFFFFF8E1),
-                                                        Color(0xFFFFD54F),
-                                                      ],
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: _HomeMiniCard(
+                                                  icon: _LoopTransform(
+                                                    animation: _loopController,
+                                                    phase: 0.28,
+                                                    scaleDelta: 0.08,
+                                                    rotationAngle: 0.16,
+                                                    child:
+                                                        const FigmaTrophyIcon(
+                                                      size: 44,
                                                     ),
-                                                    borderColor: const Color(
-                                                      0xFFE6A800,
-                                                    ),
-                                                    shadowColor: const Color(
-                                                      0xFFE6A800,
-                                                    ),
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 20,
-                                                    ),
-                                                    shadowOffset:
-                                                        const Offset(5, 5),
-                                                    pressedScale: 0.92,
-                                                    pressedOffsetY: 4,
-                                                    onTap: () {
+                                                  ),
+                                                  title: _badgesLabel(context),
+                                                  meta:
+                                                      '${viewModel.unlockedBadgeCount} / ${kidAchievements.length}',
+                                                  gradient:
+                                                      const LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      Color(0xFFFFF8E1),
+                                                      Color(0xFFFFD54F),
+                                                    ],
+                                                  ),
+                                                  borderColor: const Color(
+                                                    0xFFE6A800,
+                                                  ),
+                                                  titleColor: const Color(
+                                                    0xFF6D4C00,
+                                                  ),
+                                                  metaColor: const Color(
+                                                    0xFFA07000,
+                                                  ),
+                                                  onTap: () =>
                                                       _showBadgesDialog(
-                                                        context,
-                                                        viewModel,
-                                                      );
-                                                    },
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        _LoopTransform(
-                                                          animation:
-                                                              _loopController,
-                                                          phase: 0.28,
-                                                          scaleDelta: 0.08,
-                                                          rotationAngle: 0.16,
-                                                          child:
-                                                              const FigmaTrophyIcon(
-                                                            size: 50,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 8,
-                                                        ),
-                                                        Text(
-                                                          _badgesLabel(
-                                                            context,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style:
-                                                              _miniCardTitleStyle(
-                                                            color: const Color(
-                                                              0xFF6D4C00,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 2,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            const FigmaSparkleStarIcon(
-                                                              size: 16,
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Text(
-                                                              '${viewModel.unlockedBadgeCount} / ${kidAchievements.length}',
-                                                              style:
-                                                                  _miniCardMetaStyle(
-                                                                color:
-                                                                    const Color(
-                                                                  0xFFA07000,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
+                                                    context,
+                                                    viewModel,
                                                   ),
                                                 ),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                  child: _PressableCard(
-                                                    radius: 24,
-                                                    gradient:
-                                                        const LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: [
-                                                        Color(0xFFF3E5F5),
-                                                        Color(0xFFCE93D8),
-                                                      ],
-                                                    ),
-                                                    borderColor: const Color(
-                                                      0xFF7B1FA2,
-                                                    ),
-                                                    shadowColor: const Color(
-                                                      0xFF7B1FA2,
-                                                    ),
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 20,
-                                                    ),
-                                                    shadowOffset:
-                                                        const Offset(5, 5),
-                                                    pressedScale: 0.92,
-                                                    pressedOffsetY: 4,
-                                                    onTap: () {
-                                                      Navigator.pushNamed(
-                                                        context,
-                                                        AppRoutes.parentPin,
-                                                      );
-                                                    },
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        _LoopTransform(
-                                                          animation:
-                                                              _loopController,
-                                                          phase: 0.46,
-                                                          translateY: 3,
-                                                          child:
-                                                              const FigmaHomeIcon(
-                                                            size: 50,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 8,
-                                                        ),
-                                                        Text(
-                                                          l10n.homeParentEntry,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style:
-                                                              _miniCardTitleStyle(
-                                                            color: const Color(
-                                                              0xFF4A148C,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 2,
-                                                        ),
-                                                        Text(
-                                                          l10n.homeParentProtected,
-                                                          style:
-                                                              _miniCardMetaStyle(
-                                                            color: const Color(
-                                                              0xFF7B1FA2,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: _HomeMiniCard(
+                                                  icon: _LoopTransform(
+                                                    animation: _loopController,
+                                                    phase: 0.42,
+                                                    rotationAngle: 0.12,
+                                                    child:
+                                                        const _CollectionGlyph(
+                                                      size: 44,
                                                     ),
                                                   ),
+                                                  title:
+                                                      _collectionLabel(context),
+                                                  meta:
+                                                      '${viewModel.collectedMascotCount} / ${mascotInfos.length}',
+                                                  gradient:
+                                                      const LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      Color(0xFFF3E5F5),
+                                                      Color(0xFFCE93D8),
+                                                    ],
+                                                  ),
+                                                  borderColor: const Color(
+                                                    0xFF7B1FA2,
+                                                  ),
+                                                  titleColor: const Color(
+                                                    0xFF4A148C,
+                                                  ),
+                                                  metaColor: const Color(
+                                                    0xFF7B1FA2,
+                                                  ),
+                                                  onTap: () =>
+                                                      _showCollectionDialog(
+                                                    context,
+                                                    viewModel,
+                                                  ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: _HomeMiniCard(
+                                                  icon: _LoopTransform(
+                                                    animation: _loopController,
+                                                    phase: 0.56,
+                                                    translateY: 3,
+                                                    child: const FigmaHomeIcon(
+                                                      size: 44,
+                                                    ),
+                                                  ),
+                                                  title: l10n.homeParentEntry,
+                                                  meta:
+                                                      l10n.homeParentProtected,
+                                                  gradient:
+                                                      const LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      Color(0xFFE3F2FD),
+                                                      Color(0xFF90CAF9),
+                                                    ],
+                                                  ),
+                                                  borderColor: const Color(
+                                                    0xFF1565C0,
+                                                  ),
+                                                  titleColor: const Color(
+                                                    0xFF0D47A1,
+                                                  ),
+                                                  metaColor: const Color(
+                                                    0xFF1565C0,
+                                                  ),
+                                                  onTap: () {
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      AppRoutes.parentPin,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
@@ -676,6 +654,283 @@ class _HomePageState extends ConsumerState<HomePage>
       barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (sheetContext) => KidBadgeWallSheet(
         unlockedAchievements: viewModel.unlockedAchievements,
+      ),
+    );
+  }
+
+  void _showDailyTasksDialog(BuildContext context, HomeViewModel viewModel) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (sheetContext) => KidDailyTasksSheet(
+        dailyTasks: viewModel.dailyTasks,
+      ),
+    );
+  }
+
+  void _showCollectionDialog(BuildContext context, HomeViewModel viewModel) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (sheetContext) => KidCollectionSheet(
+        collection: viewModel.mascotCollection,
+      ),
+    );
+  }
+}
+
+class _DailyTasksPill extends StatelessWidget {
+  const _DailyTasksPill({
+    required this.dailyTasks,
+    required this.onTap,
+  });
+
+  final DailyTasksState dailyTasks;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final completed = dailyTasks.completedCount;
+    final total = dailyTasks.tasks.length;
+    final allDone = dailyTasks.allDone;
+    final progress = total == 0 ? 0.0 : completed / total;
+    final borderColor =
+        allDone ? const Color(0xFF2E7D32) : const Color(0xFFE6A800);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 58,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: allDone
+              ? const LinearGradient(
+                  colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFFFFF8DC), Color(0xFFFFF3C4)],
+                ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: borderColor,
+              offset: const Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const _DailyTaskGlyph(size: 28),
+            const SizedBox(width: 12),
+            Text(
+              _dailyTasksLabel(context),
+              style: _miniCardTitleStyle(
+                color:
+                    allDone ? const Color(0xFF1B5E20) : const Color(0xFF6D4C00),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                height: 8,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: progress.clamp(0.0, 1.0),
+                  ),
+                  duration: const Duration(milliseconds: 850),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, animatedProgress, child) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: FractionallySizedBox(
+                        widthFactor: animatedProgress,
+                        heightFactor: 1,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: allDone
+                          ? const LinearGradient(
+                              colors: [
+                                Color(0xFF4CAF50),
+                                Color(0xFF81C784),
+                              ],
+                            )
+                          : const LinearGradient(
+                              colors: [
+                                Color(0xFFFFD54F),
+                                Color(0xFFFF8C42),
+                              ],
+                            ),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color:
+                    allDone ? const Color(0xFF4CAF50) : const Color(0xFFFFD54F),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: allDone
+                      ? const Color(0xFF1B5E20)
+                      : const Color(0xFFC85000),
+                  width: 2,
+                ),
+              ),
+              child: Text(
+                '$completed/$total',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: allDone ? Colors.white : const Color(0xFF854D0E),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeMiniCard extends StatelessWidget {
+  const _HomeMiniCard({
+    required this.icon,
+    required this.title,
+    required this.meta,
+    required this.gradient,
+    required this.borderColor,
+    required this.titleColor,
+    required this.metaColor,
+    required this.onTap,
+  });
+
+  final Widget icon;
+  final String title;
+  final String meta;
+  final Gradient gradient;
+  final Color borderColor;
+  final Color titleColor;
+  final Color metaColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PressableCard(
+      radius: 24,
+      gradient: gradient,
+      borderColor: borderColor,
+      shadowColor: borderColor,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      shadowOffset: const Offset(5, 5),
+      pressedScale: 0.92,
+      pressedOffsetY: 4,
+      onTap: onTap,
+      child: SizedBox(
+        height: 98,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _miniCardTitleStyle(color: titleColor, size: 13.5),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              meta,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _miniCardMetaStyle(color: metaColor, size: 10.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyTaskGlyph extends StatelessWidget {
+  const _DailyTaskGlyph({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF176), Color(0xFFFFB300)],
+        ),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: const Color(0xFFC85000), width: 2),
+      ),
+      child: Icon(
+        Icons.checklist_rounded,
+        color: Colors.white,
+        size: size * 0.68,
+      ),
+    );
+  }
+}
+
+class _CollectionGlyph extends StatelessWidget {
+  const _CollectionGlyph({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF3E5F5), Color(0xFFCE93D8)],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF7B1FA2), width: 2.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0xFF7B1FA2),
+            offset: Offset(3, 3),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.auto_stories_rounded,
+        size: size * 0.62,
+        color: const Color(0xFF4A148C),
       ),
     );
   }
@@ -1448,6 +1703,22 @@ String _badgesLabel(BuildContext context) {
     'zh' => '我的徽章',
     'ko' => '내 배지',
     _ => 'My Badges',
+  };
+}
+
+String _dailyTasksLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '今日任务',
+    'ko' => '오늘의 미션',
+    _ => 'Daily Tasks',
+  };
+}
+
+String _collectionLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'zh' => '动物图鉴',
+    'ko' => '동물 도감',
+    _ => 'Animal Album',
   };
 }
 
