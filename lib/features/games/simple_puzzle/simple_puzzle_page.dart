@@ -796,7 +796,6 @@ class _SimplePuzzlePageState extends ConsumerState<SimplePuzzlePage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

@@ -488,7 +488,6 @@ class _AnimalSoundPageState extends ConsumerState<AnimalSoundPage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

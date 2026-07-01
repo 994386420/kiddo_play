@@ -331,8 +331,7 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
     _voiceGuideController = ref.read(voiceGuideControllerProvider);
     _questionVoiceSubscription = ref.listenManual<String>(
       memoryCardViewModelProvider(args).select(
-        (viewModel) =>
-            '${viewModel.levelIndex}-${viewModel.matchedPairs}-${viewModel.revealedIndices.length}',
+        (viewModel) => 'level-${viewModel.levelIndex}',
       ),
       (_, __) {
         if (!mounted || _isPaused) {
@@ -392,7 +391,6 @@ class _MemoryCardPageState extends ConsumerState<MemoryCardPage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

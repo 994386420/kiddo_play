@@ -488,8 +488,8 @@ class _WhackMolePageState extends ConsumerState<WhackMolePage> {
     _soundController = ref.read(gameSoundControllerProvider);
     _voiceGuideController = ref.read(voiceGuideControllerProvider);
     _questionVoiceSubscription = ref.listenManual<String>(
-      whackMoleViewModelProvider(args).select((viewModel) =>
-          '${viewModel.targetKind.id}-${viewModel.targetJustChanged}-${viewModel.outcome}'),
+      whackMoleViewModelProvider(args)
+          .select((viewModel) => viewModel.targetKind.id),
       (_, __) {
         if (!mounted || _isPaused) {
           return;
@@ -551,7 +551,6 @@ class _WhackMolePageState extends ConsumerState<WhackMolePage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

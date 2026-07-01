@@ -468,7 +468,6 @@ class _ShapeMatchPageState extends ConsumerState<ShapeMatchPage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

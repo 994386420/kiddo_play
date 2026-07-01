@@ -466,7 +466,6 @@ class _FindDifferentPageState extends ConsumerState<FindDifferentPage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

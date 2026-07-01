@@ -390,7 +390,6 @@ class _ColorMatchPageState extends ConsumerState<ColorMatchPage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {

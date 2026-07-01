@@ -49,6 +49,9 @@ class VoiceGuideController {
   bool _baseConfigured = false;
   int _speakToken = 0;
   String? _languageTag;
+  String? _lastPromptKey;
+  DateTime? _lastPromptStartedAt;
+  DateTime? _lastPromptEndedAt;
 
   Future<void> setEnabled(bool value) async {
     _enabled = value;
@@ -61,14 +64,32 @@ class VoiceGuideController {
     String text, {
     required Locale locale,
     Duration delay = Duration.zero,
+    Duration minInterval = const Duration(milliseconds: 900),
+    Duration duplicateWindow = const Duration(milliseconds: 1800),
+    bool interrupt = false,
   }) async {
     final normalized = text.replaceAll(RegExp(r'\s+'), ' ').trim();
     if (!_enabled || _disposed || normalized.isEmpty) {
       return VoiceGuideResult.skipped;
     }
 
+    final now = DateTime.now();
+    if (_speakCompleter != null && !interrupt) {
+      return VoiceGuideResult.skipped;
+    }
+    if (_shouldSkipForCadence(
+      promptKey: normalized,
+      now: now,
+      minInterval: minInterval,
+      duplicateWindow: duplicateWindow,
+    )) {
+      return VoiceGuideResult.skipped;
+    }
+
     final token = ++_speakToken;
-    await _stopInternal();
+    if (interrupt) {
+      await _stopInternal();
+    }
 
     if (delay > Duration.zero) {
       await Future<void>.delayed(delay);
@@ -93,6 +114,8 @@ class VoiceGuideController {
 
     final speakCompleter = Completer<void>();
     _speakCompleter = speakCompleter;
+    _lastPromptKey = normalized;
+    _lastPromptStartedAt = DateTime.now();
 
     try {
       await _tts.speak(
@@ -223,10 +246,36 @@ class VoiceGuideController {
   }
 
   void _completeSpeakIfNeeded() {
-    if (_speakCompleter?.isCompleted == false) {
+    final shouldComplete = _speakCompleter?.isCompleted == false;
+    if (shouldComplete) {
       _speakCompleter?.complete();
+      _lastPromptEndedAt = DateTime.now();
     }
     _speakCompleter = null;
+  }
+
+  bool _shouldSkipForCadence({
+    required String promptKey,
+    required DateTime now,
+    required Duration minInterval,
+    required Duration duplicateWindow,
+  }) {
+    final lastStartedAt = _lastPromptStartedAt;
+    if (duplicateWindow > Duration.zero &&
+        _lastPromptKey == promptKey &&
+        lastStartedAt != null &&
+        now.difference(lastStartedAt) < duplicateWindow) {
+      return true;
+    }
+
+    final lastEndedAt = _lastPromptEndedAt;
+    if (minInterval > Duration.zero &&
+        lastEndedAt != null &&
+        now.difference(lastEndedAt) < minInterval) {
+      return true;
+    }
+
+    return false;
   }
 
   bool _isCurrentToken(int token) {

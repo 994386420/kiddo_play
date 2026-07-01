@@ -534,7 +534,6 @@ class _NumberGamePageState extends ConsumerState<NumberGamePage> {
     setState(() {
       _isPaused = false;
     });
-    unawaited(_speakCurrentPrompt());
   }
 
   void _restartGame() {
