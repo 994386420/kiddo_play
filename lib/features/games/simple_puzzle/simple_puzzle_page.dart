@@ -1574,7 +1574,6 @@ class _PuzzleMessage extends StatelessWidget {
     );
   }
 }
-
 String _slotLabel(BuildContext context, int index) {
   return switch (Localizations.localeOf(context).languageCode) {
     'zh' => const ['左上', '右上', '左下', '右下'][index],
